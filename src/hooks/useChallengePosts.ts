@@ -103,6 +103,52 @@ export const useCreatePost = () => {
   });
 };
 
+// ── Update post ──
+export const useUpdatePost = () => {
+  const { user } = useAuth();
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ postId, caption, challengeId }: { postId: string; caption: string; challengeId: string }) => {
+      if (!user) throw new Error("Não autenticado");
+      const { error } = await supabase
+        .from("challenge_posts")
+        .update({ caption } as any)
+        .eq("id", postId)
+        .eq("user_id", user.id);
+      if (error) throw error;
+    },
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: ["challenge-posts", vars.challengeId] });
+      toast.success("Post atualizado!");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+};
+
+// ── Delete post ──
+export const useDeletePost = () => {
+  const { user } = useAuth();
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ postId, challengeId }: { postId: string; challengeId: string }) => {
+      if (!user) throw new Error("Não autenticado");
+      const { error } = await supabase
+        .from("challenge_posts")
+        .delete()
+        .eq("id", postId)
+        .eq("user_id", user.id);
+      if (error) throw error;
+    },
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: ["challenge-posts", vars.challengeId] });
+      toast.success("Post excluído");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+};
+
 // ── Comments ──
 export const usePostComments = (postId: string | null) => {
   return useQuery({

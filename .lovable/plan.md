@@ -1,77 +1,28 @@
 
 
-## Plano: Reestruturar hierarquia visual da tela de Desafio
+## Problema
 
-### Resumo
+A barra de status (topo) aparece com fundo diferente (verde ou branco) e a barra de navegação (inferior) também não combina com o fundo escuro do app. Isso acontece porque faltam meta tags de controle de cor no `index.html` e o viewport não está configurado para cobrir a área segura (notch/barra inferior).
 
-Reorganizar a aba "Geral" para melhorar hierarquia visual, compactar cards, embutir o feed na rolagem principal, e adicionar funcionalidade de edição/exclusão de posts. Também adicionar fotos no ranking.
+## Solução
 
-### Alterações
+Ajustar `index.html` para que o navegador/PWA pinte as barras do sistema com a mesma cor de fundo do app (`#0B1220`).
 
-**1. Header do desafio compacto** (`ChallengeGeneralTab.tsx`)
-- Remover ícone Trophy grande do header
-- Layout compacto: título + subtexto ("2 membros · Desafio ativo") + datas + barra de progresso h-[6px]
-- Reduzir padding de `p-5` para `p-4`, espaçamento interno de `space-y-3` para `space-y-2`
+### Alterações em `index.html`
 
-**2. Convite compacto** (`ChallengeGeneralTab.tsx`)
-- Layout horizontal em uma única linha: `Código: XXXXXXXX [copiar] [compartilhar]`
-- Reduzir altura do código de `py-3 text-[18px]` para `py-1.5 text-[14px]`
-- Botões de `h-12 w-12` para `h-9 w-9`
-- Padding do card de `p-4` para `p-3`
+1. Adicionar `viewport-fit=cover` na meta viewport para permitir que o conteúdo se estenda até as bordas
+2. Adicionar `<meta name="theme-color" content="#0B1220">` para pintar a barra de status com a cor do fundo do app
+3. Adicionar `<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">` para iOS
 
-**3. Ranking** (`ChallengeGeneralTab.tsx`)
-- Reduzir padding dos items de `p-4` para `p-3`
-- Adicionar avatar/foto nos items do ranking (já existe parcialmente, garantir que apareça)
-- Manter estrutura visual atual
+### Alterações em `src/index.css`
 
-**4. Estatísticas mini** (`StatCard.tsx`)
-- Reduzir `min-h-[110px]` para `min-h-[70px]`
-- Reduzir padding de `p-4` para `p-2.5`
-- Ícone de `h-5 w-5 mb-2` para `h-4 w-4 mb-1`
-- Número de `text-[22px]` para `text-[18px]`
+4. Adicionar `padding` com `env(safe-area-inset-*)` no `body` para que o conteúdo não fique sob o notch ou barra de gestos
 
-**5. Feed embutido na aba Geral** (`ChallengeGeneralTab.tsx`)
-- Após as estatísticas, adicionar seção "Atualizações" com os últimos posts do feed
-- Importar e usar `useChallengePosts`, `useUserLikes`, `useToggleLike` do hook existente
-- Renderizar posts usando `PostCard` existente
-- Botão "Carregar mais" com paginação
+### Alterações em `vite.config.ts`
 
-**6. Edição e exclusão de posts** (`PostCard.tsx` + `useChallengePosts.ts`)
-- Adicionar menu de 3 pontos (MoreVertical) visível apenas para o autor
-- Opções: Editar / Excluir
-- Editar: abre dialog com textarea preenchida, salva via mutation
-- Excluir: confirma e deleta
-- Criar mutation `useUpdatePost` e `useDeletePost` no hook
-- Necessita política UPDATE na tabela `challenge_posts` (migração SQL)
+5. Atualizar `theme_color` no manifest PWA de `#16a34a` (verde) para `#0B1220` (fundo escuro) — essa é a causa da barra verde que aparece
 
-**7. FAB menor** (`GroupDetails.tsx`)
-- Reduzir de `h-14 w-14` para `h-12 w-12`
-- Reduzir shadow de `shadow-lg shadow-primary/30` para `shadow-md shadow-primary/20`
+### Resultado
 
-**8. Reordenar seções** na aba Geral:
-1. Header (compacto)
-2. Convite (compacto)
-3. Ranking
-4. Estatísticas (mini)
-5. Feed ("Atualizações")
-6. Botão sair
-
-### Migração de banco de dados
-
-Adicionar política UPDATE para posts do próprio autor:
-```sql
-CREATE POLICY "Users can update own posts"
-ON public.challenge_posts
-FOR UPDATE
-USING (auth.uid() = user_id)
-WITH CHECK (auth.uid() = user_id);
-```
-
-### Arquivos alterados
-- `src/components/challenge/ChallengeGeneralTab.tsx` — compactar + embutir feed
-- `src/components/ds/StatCard.tsx` — mini cards
-- `src/components/challenge/PostCard.tsx` — menu editar/excluir
-- `src/hooks/useChallengePosts.ts` — mutations update/delete
-- `src/pages/GroupDetails.tsx` — FAB menor
-- Migração SQL para UPDATE policy
+As barras superior e inferior do celular ficarão com a mesma cor escura do app, criando uma experiência visual contínua e imersiva.
 

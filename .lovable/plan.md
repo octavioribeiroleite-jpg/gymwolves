@@ -1,63 +1,24 @@
 
 
-## Plano: Remover barra inferior e centralizar navegação no menu lateral
+## Plano: Ajustar FAB e melhorar Mini Ranking no Dashboard
 
-### Problema
-- Existem duas formas de navegação simultâneas (barra inferior + menu lateral).
-- As 3 primeiras opções da seção "Desafio" no menu lateral (Detalhes, Classificações, Bate-papo) aparecem de forma confusa — "Bate-papo" aponta para "/ranking" (bug), e a seção toda só aparece quando há grupo ativo, sem explicação clara.
+### 1. Reposicionar o FAB (botão verde "+")
 
-### O que será feito
+O FAB está com `bottom-[88px]` (posição pensada para a barra inferior que foi removida). Sem a barra, ele fica flutuando muito acima.
 
-**1. Remover BottomNav de todas as telas**
-- Remover `<BottomNav />` de `Dashboard.tsx`, `InviteScreen.tsx`, e `AppScaffold.tsx`
-- Remover `pb-24` (padding inferior que compensava a barra) dessas telas
-- O arquivo `BottomNav.tsx` pode ser mantido mas não será mais usado
+- Alterar posição para `bottom-6` (24px do fundo da tela)
+- Ajustar o menu de ações de `bottom-[140px]` para `bottom-24`
 
-**2. Reestruturar o menu lateral (SidebarMenu)**
+### 2. Melhorar o Mini Ranking no Dashboard
 
-Nova estrutura:
+Inspirado na imagem de referência (Gym Rats), o ranking atual é funcional mas pode ser mais visual. Melhorias:
 
-```text
-┌─────────────────────────┐
-│ [Avatar] Nome            │
-│          email           │
-├─────────────────────────┤
-│ NAVEGAÇÃO               │
-│  🏠 Início        →     │
-│  ⚔️ Grupos         →     │
-│  📅 Histórico      →     │
-│  🏆 Ranking        →     │
-│  👤 Perfil         →     │
-├─────────────────────────┤
-│ DESAFIO (se ativo)      │
-│  📄 Detalhes       →     │
-│  🏅 Classificações →     │
-│  💬 Bate-papo      →     │
-├─────────────────────────┤
-│ GERAL                   │
-│  ➕ Criar grupo     →     │
-│  🔗 Entrar em grupo →    │
-│  ✅ Desafios concluídos→  │
-│  📱 Meus dispositivos →  │
-│  ⚙️ Configurações   →    │
-│  ❓ Ajuda & feedback →   │
-│  ℹ️ Sobre           →    │
-├─────────────────────────┤
-│  🚪 Sair da conta        │
-└─────────────────────────┘
-```
-
-- Adicionar seção "Navegação" com as 5 rotas principais (Início, Grupos, Histórico, Ranking, Perfil)
-- Corrigir Bate-papo que apontava para "/ranking" (bug)
-- Remover item duplicado do nome do grupo (já existe na seção Desafio)
-
-**3. Ajustar padding das telas**
-- Remover `pb-24` que existia para compensar a barra inferior
+- **Pódio visual para top 3**: Em vez de uma lista simples, exibir os 3 primeiros em formato de pódio horizontal (1o no centro mais alto, 2o à esquerda, 3o à direita) com avatares circulares e medalhas
+- **Barra de progresso por membro**: Mostrar uma barra fina indicando o progresso relativo ao líder
+- **Destaque do usuário atual**: Se o usuário não está no top 3, mostrar sua posição separadamente abaixo do pódio com destaque verde
+- **Unidade de score visível**: Mostrar "X dias" ao lado do score para clareza
 
 ### Arquivos afetados
-- `src/components/SidebarMenu.tsx` — reestruturar itens
-- `src/pages/Dashboard.tsx` — remover BottomNav e pb-24
-- `src/pages/InviteScreen.tsx` — remover BottomNav
-- `src/components/ds/AppScaffold.tsx` — remover BottomNav
-- `src/hooks/useNavContext.ts` — pode ser removido (não será mais usado)
+- `src/components/dashboard/DashboardFAB.tsx` — ajustar posições bottom
+- `src/components/dashboard/MiniRanking.tsx` — redesign com pódio visual e barras de progresso
 

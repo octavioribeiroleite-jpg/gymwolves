@@ -1,21 +1,22 @@
 
 
-## Plano: Compartilhar o app e link do desafio (destaque)
+## Correção: Upload de imagem no CreatePostDialog
 
-### O que será feito
+### Problema
+O caminho de upload `posts/${challengeId}/...` viola a política RLS do storage que exige `auth.uid()` como primeiro diretório.
 
-1. **Perfil (`src/pages/Profile.tsx`)** — Adicionar "Compartilhar o app" como **primeiro item** do menu, com ícone `Share2` e cor primária destacada. Ao clicar, usa `navigator.share()` (mobile) ou copia o link `https://gymwolves.lovable.app` com toast de confirmação. Não navega para outra rota, executa a ação direto.
+### Correção em `src/components/challenge/CreatePostDialog.tsx`
 
-2. **Detalhes do grupo (`src/pages/GroupDetails.tsx`)** — Melhorar a função `shareCode` para incluir o link do app na mensagem:
+1. Importar `useAuth` do AuthContext
+2. Obter `user` via `useAuth()`
+3. Alterar o caminho de upload de:
+   ```ts
+   const path = `posts/${challengeId}/${Date.now()}.${ext}`;
    ```
-   Entre no desafio "Nome"! Código: XXXX
-   Baixe o app: https://gymwolves.lovable.app
+   Para:
+   ```ts
+   const path = `${user.id}/${challengeId}_${Date.now()}.${ext}`;
    ```
 
-3. **Menu lateral (`src/components/SidebarMenu.tsx`)** — Adicionar "Compartilhar o app" como **primeiro item** da seção "Geral" com ícone `Share2` e cor primária (ao invés de `text-muted-foreground`), para destacar visualmente.
-
-### Detalhes técnicos
-
-- A ação de compartilhar usa `navigator.share()` quando disponível (mobile/PWA) e fallback para `navigator.clipboard.writeText()` + toast.
-- Nenhuma alteração de banco de dados necessária.
+Apenas 3 linhas alteradas em 1 arquivo.
 

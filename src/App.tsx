@@ -13,6 +13,7 @@ import History from "./pages/History";
 import Ranking from "./pages/Ranking";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
+import PwaInstallPrompt from "./components/PwaInstallPrompt";
 
 const queryClient = new QueryClient();
 
@@ -21,6 +22,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <PwaInstallPrompt />
       <BrowserRouter>
         <AuthProvider>
           <Routes>

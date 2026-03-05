@@ -1,10 +1,23 @@
 
 
-## Remover linha persistente no header do GroupDetails
+## Padronização Visual — Topo Limpo e Imersivo
 
-O problema está na página `GroupDetails.tsx`. O `<header>` na linha 94 tem `border-b border-subtle`, e dentro dele o container das tabs (linha 107) também tem `border-b border-subtle`. Isso cria uma linha visível extra abaixo da barra de status/header.
+Após análise de todos os headers e scaffolds do app, identifiquei os pontos que ainda criam linhas visuais indesejadas.
 
-### Alteração
+### Alterações por arquivo
 
-**`src/pages/GroupDetails.tsx`** — Remover `border-b border-subtle` do elemento `<header>` (linha 94), mantendo apenas o `border-b` do container das tabs que é necessário para o indicador ativo.
+**1. `src/pages/InviteScreen.tsx`**
+- Linha 59: remover `border-b border-subtle` do `<header>`
+- Linha 78: remover `border-b border-subtle` do container de tabs (manter apenas o `border-b-2` individual de cada tab ativa)
+
+**2. `src/pages/GroupDetails.tsx`**
+- Linha 107: remover `border-b border-subtle` do container das tabs (manter apenas o indicador `h-[2px] bg-primary` da tab ativa)
+
+**3. Headers com transparência → fundo sólido**
+Todos os headers usam `bg-background/95` com `backdrop-blur-xl`, o que pode criar uma sutil separação visual. Trocar para `bg-background` sólido nos seguintes arquivos:
+- `src/components/dashboard/DashboardHeader.tsx` (linha 11)
+- `src/components/ds/AppScaffold.tsx` (linha 23)
+- `src/pages/GroupDetails.tsx` (linha 94)
+
+Nenhuma alteração de funcionalidade, navegação ou estrutura.
 

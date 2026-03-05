@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { Copy, Share2, Users, Loader2, Check, Plus, Settings, CalendarDays, Trophy } from "lucide-react";
 import { format, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import BottomNav from "@/components/BottomNav";
+
 import CheckinDialog from "@/components/CheckinDialog";
 import FloatingActionButton from "@/components/FloatingActionButton";
 
@@ -54,7 +54,7 @@ const InviteScreen = () => {
     .slice(0, 2);
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background">
       {/* Header with avatar and days remaining */}
       <header className="border-b border-subtle bg-background px-5 py-4">
         <div className="mx-auto max-w-md">
@@ -205,7 +205,7 @@ const InviteScreen = () => {
           alreadyCheckedIn={false}
         />
       )}
-      <BottomNav />
+      
     </div>
   );
 };

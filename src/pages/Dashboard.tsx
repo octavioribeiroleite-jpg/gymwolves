@@ -5,8 +5,9 @@ import { useWorkoutLogs, useToggleWorkout, computeStreaks } from "@/hooks/useWor
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle2, Circle, Flame, Trophy, Loader2, Dumbbell, Target } from "lucide-react";
+import { CheckCircle2, Circle, Flame, Trophy, Loader2, Target } from "lucide-react";
 import { format } from "date-fns";
+import logo from "@/assets/logo.png";
 import { ptBR } from "date-fns/locale";
 import { Link } from "react-router-dom";
 import BottomNav from "@/components/BottomNav";
@@ -56,9 +57,7 @@ const Dashboard = () => {
   if (!group) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-background p-6 text-center">
-        <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-primary/10">
-          <Dumbbell className="h-10 w-10 text-primary" />
-        </div>
+        <img src={logo} alt="Ratos de Academia" className="h-20 w-20 object-contain" />
         <div>
           <h1 className="font-display text-2xl font-bold">Bem-vindo ao Ratos de Academia!</h1>
           <p className="mt-2 text-muted-foreground">
@@ -96,9 +95,10 @@ const Dashboard = () => {
       {/* Header */}
       <header className="sticky top-0 z-40 border-b border-border/50 bg-background/95 px-4 py-4 backdrop-blur-xl">
         <div className="mx-auto max-w-md">
-          <p className="text-xs font-medium uppercase tracking-wider text-primary">
-            🐀 Ratos de Academia
-          </p>
+          <div className="flex items-center gap-2">
+            <img src={logo} alt="Ratos de Academia" className="h-8 w-8 object-contain" />
+            <span className="text-xs font-medium uppercase tracking-wider text-primary">Ratos de Academia</span>
+          </div>
           <h1 className="font-display text-xl font-bold">{challenge.name}</h1>
           <p className="text-xs text-muted-foreground">
             {format(new Date(challenge.start_date), "dd MMM", { locale: ptBR })} — {format(new Date(challenge.end_date), "dd MMM yyyy", { locale: ptBR })}

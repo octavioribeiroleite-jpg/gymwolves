@@ -11,7 +11,7 @@ const WorkoutStatusCard = ({ todayDone, onCheckin }: WorkoutStatusCardProps) => 
   return (
     <button
       onClick={onCheckin}
-      className={`flex w-full items-center gap-4 rounded-[18px] p-4 transition-all duration-300 border ${
+      className={`flex w-full items-center gap-4 rounded-2xl p-4 transition-all duration-200 border card-shadow ${
         todayDone
           ? "gradient-primary glow-primary border-transparent"
           : "surface-1 border-subtle hover:border-primary/20"

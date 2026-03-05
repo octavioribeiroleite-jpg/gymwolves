@@ -20,7 +20,7 @@ const AppScaffold = ({ children, title, subtitle, showBack, headerRight, hideNav
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-40 border-b border-subtle bg-background/95 px-5 py-4 backdrop-blur-xl">
+      <header className="sticky top-0 z-40 border-b border-subtle bg-background/95 px-4 backdrop-blur-xl h-16 flex items-center">
         <div className="mx-auto max-w-md">
           {showLogo && (
             <div className="flex items-center gap-2 mb-1">

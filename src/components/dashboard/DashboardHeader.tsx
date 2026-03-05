@@ -9,7 +9,7 @@ const DashboardHeader = ({ userName }: DashboardHeaderProps) => {
   const firstName = userName.split(" ")[0];
   return (
     <header className="sticky top-0 z-40 border-b border-subtle bg-background/95 backdrop-blur-xl">
-      <div className="mx-auto flex h-14 max-w-md items-center justify-between px-4">
+      <div className="mx-auto flex h-16 max-w-md items-center justify-between px-4">
         <SidebarMenu />
         <h1 className="text-[15px] font-bold truncate max-w-[200px]">
           Olá, {firstName} 👋

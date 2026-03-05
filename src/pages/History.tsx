@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useUserGroups, useGroupMembers } from "@/hooks/useGroup";
-import { useGroupChallenges } from "@/hooks/useChallenge";
+import { useActiveChallenge } from "@/contexts/ActiveChallengeContext";
+import { useChallengeDetail, useChallengeParticipants } from "@/hooks/useChallengeData";
 import { useWorkoutLogs } from "@/hooks/useWorkoutLogs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,17 +13,15 @@ import BottomNav from "@/components/BottomNav";
 
 const History = () => {
   const { user } = useAuth();
-  const { data: groups } = useUserGroups();
-  const group = groups?.[0];
-  const { data: members } = useGroupMembers(group?.id);
-  const { data: challenges } = useGroupChallenges(group?.id);
-  const challenge = challenges?.[0];
-  const { data: logs, isLoading } = useWorkoutLogs(challenge?.id);
+  const { activeChallengeId } = useActiveChallenge();
+  const { data: challenge } = useChallengeDetail(activeChallengeId || undefined);
+  const { data: participants } = useChallengeParticipants(activeChallengeId || undefined);
+  const { data: logs, isLoading } = useWorkoutLogs(activeChallengeId || undefined);
 
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
-  const activeUserId = selectedUserId || user?.id || members?.[0]?.user_id;
+  const activeUserId = selectedUserId || user?.id || participants?.[0]?.user_id;
 
   const userDates = useMemo(() => {
     if (!logs || !activeUserId) return new Set<string>();
@@ -61,27 +59,28 @@ const History = () => {
       <header className="sticky top-0 z-40 border-b border-border/50 bg-background/95 px-4 py-4 backdrop-blur-xl">
         <div className="mx-auto max-w-md">
           <h1 className="font-display text-xl font-bold">Histórico</h1>
+          <p className="text-xs text-muted-foreground">{challenge?.name || "Nenhum desafio ativo"}</p>
         </div>
       </header>
 
       <div className="mx-auto max-w-md space-y-4 p-4">
         {/* Member selector */}
-        {members && members.length > 1 && (
-          <div className="flex gap-2">
-            {members.map((m) => {
-              const p = m.profiles as any;
+        {participants && participants.length > 1 && (
+          <div className="flex gap-2 overflow-x-auto">
+            {participants.map((p) => {
+              const profile = p.profiles as any;
               return (
                 <button
-                  key={m.user_id}
-                  onClick={() => setSelectedUserId(m.user_id)}
+                  key={p.user_id}
+                  onClick={() => setSelectedUserId(p.user_id)}
                   className={cn(
-                    "rounded-xl px-4 py-2 text-sm font-medium transition-all",
-                    activeUserId === m.user_id
+                    "shrink-0 rounded-xl px-4 py-2 text-sm font-medium transition-all",
+                    activeUserId === p.user_id
                       ? "bg-primary text-primary-foreground glow-primary"
                       : "bg-card text-muted-foreground hover:bg-secondary"
                   )}
                 >
-                  {p?.display_name || "Sem nome"}
+                  {profile?.display_name || "Sem nome"}
                 </button>
               );
             })}
@@ -91,7 +90,6 @@ const History = () => {
         {/* Calendar */}
         <Card className="border-0">
           <CardContent className="p-5">
-            {/* Month navigation */}
             <div className="mb-4 flex items-center justify-between">
               <Button variant="ghost" size="icon" className="h-8 w-8 rounded-xl" onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}>
                 <ChevronLeft className="h-4 w-4" />
@@ -104,12 +102,9 @@ const History = () => {
               </Button>
             </div>
 
-            {/* Week days header */}
             <div className="grid grid-cols-7 gap-1 text-center">
               {weekDays.map((d, i) => (
-                <div key={i} className="py-1 text-[11px] font-medium text-muted-foreground">
-                  {d}
-                </div>
+                <div key={i} className="py-1 text-[11px] font-medium text-muted-foreground">{d}</div>
               ))}
               {Array.from({ length: startDayOffset }).map((_, i) => (
                 <div key={`empty-${i}`} />
@@ -136,7 +131,6 @@ const History = () => {
               })}
             </div>
 
-            {/* Stats */}
             <div className="mt-4 flex items-center justify-between rounded-xl bg-secondary/50 px-4 py-3">
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <div className="h-3 w-3 rounded-sm bg-primary" />

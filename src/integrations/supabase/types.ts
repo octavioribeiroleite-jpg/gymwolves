@@ -14,16 +14,94 @@ export type Database = {
   }
   public: {
     Tables: {
+      challenge_invites: {
+        Row: {
+          challenge_id: string
+          code: string
+          created_at: string
+          created_by: string
+          expires_at: string | null
+          id: string
+          max_uses: number | null
+          uses_count: number
+        }
+        Insert: {
+          challenge_id: string
+          code?: string
+          created_at?: string
+          created_by: string
+          expires_at?: string | null
+          id?: string
+          max_uses?: number | null
+          uses_count?: number
+        }
+        Update: {
+          challenge_id?: string
+          code?: string
+          created_at?: string
+          created_by?: string
+          expires_at?: string | null
+          id?: string
+          max_uses?: number | null
+          uses_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_invites_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      challenge_participants: {
+        Row: {
+          challenge_id: string
+          id: string
+          joined_at: string
+          role: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          challenge_id: string
+          id?: string
+          joined_at?: string
+          role?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          challenge_id?: string
+          id?: string
+          joined_at?: string
+          role?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_participants_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       challenges: {
         Row: {
           created_at: string
           created_by: string
           end_date: string
           goal_days_per_user: number
-          group_id: string
+          group_id: string | null
           id: string
+          invite_code: string
           name: string
           start_date: string
+          status: string
           updated_at: string
         }
         Insert: {
@@ -31,10 +109,12 @@ export type Database = {
           created_by: string
           end_date: string
           goal_days_per_user: number
-          group_id: string
+          group_id?: string | null
           id?: string
+          invite_code?: string
           name: string
           start_date: string
+          status?: string
           updated_at?: string
         }
         Update: {
@@ -42,10 +122,12 @@ export type Database = {
           created_by?: string
           end_date?: string
           goal_days_per_user?: number
-          group_id?: string
+          group_id?: string | null
           id?: string
+          invite_code?: string
           name?: string
           start_date?: string
+          status?: string
           updated_at?: string
         }
         Relationships: [
@@ -178,6 +260,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      find_challenge_by_code: {
+        Args: { _code: string }
+        Returns: {
+          id: string
+          name: string
+        }[]
+      }
       find_group_by_invite_code: {
         Args: { _code: string }
         Returns: {
@@ -186,6 +275,14 @@ export type Database = {
         }[]
       }
       is_challenge_member: {
+        Args: { _challenge_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_challenge_owner: {
+        Args: { _challenge_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_challenge_participant: {
         Args: { _challenge_id: string; _user_id: string }
         Returns: boolean
       }

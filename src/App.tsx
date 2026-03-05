@@ -5,12 +5,16 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ActiveChallengeProvider } from "@/contexts/ActiveChallengeContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import SplashScreen from "./components/SplashScreen";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
-import Group from "./pages/Group";
-import Challenge from "./pages/Challenge";
+import ChallengeList from "./pages/ChallengeList";
+import CreateChallenge from "./pages/CreateChallenge";
+import JoinChallenge from "./pages/JoinChallenge";
+import InviteScreen from "./pages/InviteScreen";
+import ChallengeDetails from "./pages/ChallengeDetails";
 import History from "./pages/History";
 import Ranking from "./pages/Ranking";
 import Profile from "./pages/Profile";
@@ -32,16 +36,21 @@ const App = () => {
         {splashDone && <PwaInstallPrompt />}
         <BrowserRouter>
           <AuthProvider>
-            <Routes>
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-              <Route path="/grupo" element={<ProtectedRoute><Group /></ProtectedRoute>} />
-              <Route path="/desafio" element={<ProtectedRoute><Challenge /></ProtectedRoute>} />
-              <Route path="/historico" element={<ProtectedRoute><History /></ProtectedRoute>} />
-              <Route path="/ranking" element={<ProtectedRoute><Ranking /></ProtectedRoute>} />
-              <Route path="/perfil" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <ActiveChallengeProvider>
+              <Routes>
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                <Route path="/desafios" element={<ProtectedRoute><ChallengeList /></ProtectedRoute>} />
+                <Route path="/desafios/criar" element={<ProtectedRoute><CreateChallenge /></ProtectedRoute>} />
+                <Route path="/desafios/entrar" element={<ProtectedRoute><JoinChallenge /></ProtectedRoute>} />
+                <Route path="/desafios/:id/convidar" element={<ProtectedRoute><InviteScreen /></ProtectedRoute>} />
+                <Route path="/desafios/:id/detalhes" element={<ProtectedRoute><ChallengeDetails /></ProtectedRoute>} />
+                <Route path="/historico" element={<ProtectedRoute><History /></ProtectedRoute>} />
+                <Route path="/ranking" element={<ProtectedRoute><Ranking /></ProtectedRoute>} />
+                <Route path="/perfil" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </ActiveChallengeProvider>
           </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>

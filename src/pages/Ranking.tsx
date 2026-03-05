@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useUserGroups, useGroupMembers } from "@/hooks/useGroup";
-import { useGroupChallenges } from "@/hooks/useChallenge";
+import { useActiveChallenge } from "@/contexts/ActiveChallengeContext";
+import { useChallengeDetail, useChallengeParticipants } from "@/hooks/useChallengeData";
 import { useWorkoutLogs, computeStreaks } from "@/hooks/useWorkoutLogs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -10,26 +10,24 @@ import BottomNav from "@/components/BottomNav";
 
 const Ranking = () => {
   const { user } = useAuth();
-  const { data: groups, isLoading: gLoading } = useUserGroups();
-  const group = groups?.[0];
-  const { data: members } = useGroupMembers(group?.id);
-  const { data: challenges } = useGroupChallenges(group?.id);
-  const challenge = challenges?.[0];
-  const { data: logs, isLoading: logsLoading } = useWorkoutLogs(challenge?.id);
+  const { activeChallengeId } = useActiveChallenge();
+  const { data: challenge } = useChallengeDetail(activeChallengeId || undefined);
+  const { data: participants } = useChallengeParticipants(activeChallengeId || undefined);
+  const { data: logs, isLoading: logsLoading } = useWorkoutLogs(activeChallengeId || undefined);
 
   const ranked = useMemo(() => {
-    if (!members || !logs || !challenge) return [];
-    return members
-      .map((m) => {
-        const profile = m.profiles as any;
-        const userLogs = logs.filter((l) => l.user_id === m.user_id);
+    if (!participants || !logs || !challenge) return [];
+    return participants
+      .map((p) => {
+        const profile = p.profiles as any;
+        const userLogs = logs.filter((l) => l.user_id === p.user_id);
         const dates = userLogs.map((l) => l.workout_date);
         const streaks = computeStreaks(dates);
         const pct = challenge.goal_days_per_user > 0
           ? Math.min(Math.round((dates.length / challenge.goal_days_per_user) * 100), 100)
           : 0;
         return {
-          userId: m.user_id,
+          userId: p.user_id,
           name: profile?.display_name || "Sem nome",
           avatar: profile?.avatar_url,
           days: dates.length,
@@ -38,10 +36,10 @@ const Ranking = () => {
           ...streaks,
         };
       })
-      .sort((a, b) => b.days - a.days);
-  }, [members, logs, challenge]);
+      .sort((a, b) => b.days - a.days || b.current - a.current);
+  }, [participants, logs, challenge]);
 
-  if (gLoading || logsLoading) {
+  if (logsLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -78,7 +76,6 @@ const Ranking = () => {
         {ranked.map((m, i) => (
           <Card key={m.userId} className={`border-0 transition-all ${i === 0 ? "glow-primary" : ""}`}>
             <CardContent className="flex items-center gap-4 p-4">
-              {/* Position */}
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-secondary">
                 {i < 3 ? (
                   <Medal className={`h-5 w-5 ${getMedalColor(i)}`} />
@@ -86,8 +83,6 @@ const Ranking = () => {
                   <span className="text-sm font-bold text-muted-foreground">{i + 1}</span>
                 )}
               </div>
-
-              {/* Info */}
               <div className="flex-1">
                 <div className="flex items-center justify-between">
                   <span className="font-semibold font-display">

@@ -3,7 +3,6 @@ import { useGroupCheckins, computeDaysActive } from "@/hooks/useCheckins";
 import { useActiveGroup } from "@/contexts/ActiveGroupContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Loader2, Trophy, Plus, LogIn, Users, CalendarDays } from "lucide-react";
@@ -24,33 +23,34 @@ const GroupCard = ({ group, onSelect }: { group: any; onSelect: () => void }) =>
   const pct = goal > 0 ? Math.min(Math.round((myDays / goal) * 100), 100) : 0;
 
   return (
-    <Card className="border-0 cursor-pointer transition-all hover:ring-2 hover:ring-primary/30 active:scale-[0.98]" onClick={onSelect}>
-      <CardContent className="p-5">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-2">
-            <Trophy className="h-4 w-4 text-primary" />
-            <h3 className="font-display text-base font-bold">{group.name}</h3>
-          </div>
-          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-            <Users className="h-3.5 w-3.5" />
-            <span>{members?.length ?? 0}</span>
-          </div>
+    <button
+      onClick={onSelect}
+      className="w-full text-left rounded-[20px] surface-1 border border-subtle p-4 transition-all hover:ring-2 hover:ring-primary/30 active:scale-[0.98]"
+    >
+      <div className="flex items-start justify-between">
+        <div className="flex items-center gap-2">
+          <Trophy className="h-4 w-4 text-primary" />
+          <h3 className="text-body font-bold">{group.name}</h3>
         </div>
-        {group.start_date && group.end_date && (
-          <div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
-            <CalendarDays className="h-3.5 w-3.5" />
-            {format(new Date(group.start_date), "dd MMM", { locale: ptBR })} — {format(new Date(group.end_date), "dd MMM yyyy", { locale: ptBR })}
-          </div>
-        )}
-        <div className="mt-3">
-          <div className="mb-1 flex items-center justify-between text-xs">
-            <span className="text-muted-foreground">Dias ativos</span>
-            <span className="font-semibold text-primary">{myDays}/{goal}</span>
-          </div>
-          <Progress value={pct} className="h-2" />
+        <div className="flex items-center gap-1 text-caption text-muted-foreground">
+          <Users className="h-3.5 w-3.5" />
+          <span>{members?.length ?? 0}</span>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+      {group.start_date && group.end_date && (
+        <div className="mt-2 flex items-center gap-1.5 text-caption text-muted-foreground">
+          <CalendarDays className="h-3.5 w-3.5" />
+          {format(new Date(group.start_date), "dd MMM", { locale: ptBR })} — {format(new Date(group.end_date), "dd MMM yyyy", { locale: ptBR })}
+        </div>
+      )}
+      <div className="mt-3">
+        <div className="mb-1 flex items-center justify-between text-caption">
+          <span className="text-muted-foreground">Dias ativos</span>
+          <span className="font-bold text-primary">{myDays}/{goal}</span>
+        </div>
+        <Progress value={pct} className="h-2" />
+      </div>
+    </button>
   );
 };
 
@@ -74,17 +74,17 @@ const GroupList = () => {
 
   if (!groups || groups.length === 0) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-background p-6">
+      <div className="flex min-h-screen flex-col items-center justify-center bg-background px-5">
         <EmptyState
           image={logo}
-          title="CRIE OU ENTRE EM UM GRUPO"
+          title="Crie ou entre em um grupo"
           description="Treine com seus amigos e compita para ver quem treina mais."
         >
-          <Button onClick={() => navigate("/grupos/criar")} size="lg" className="h-14 w-full rounded-2xl text-base font-semibold glow-primary">
-            <Plus className="mr-2 h-5 w-5" /> Criar Grupo
+          <Button onClick={() => navigate("/grupos/criar")} size="lg" className="h-14 w-full rounded-[18px] text-body font-bold glow-primary">
+            <Plus className="mr-2 h-5 w-5" /> Criar grupo
           </Button>
-          <Button onClick={() => navigate("/grupos/entrar")} variant="outline" size="lg" className="h-14 w-full rounded-2xl text-base font-semibold border-0 bg-card">
-            <LogIn className="mr-2 h-5 w-5" /> Entrar com Convite
+          <Button onClick={() => navigate("/grupos/entrar")} variant="outline" size="lg" className="h-14 w-full rounded-[18px] text-body font-bold border-subtle bg-surface-1">
+            <LogIn className="mr-2 h-5 w-5" /> Entrar com convite
           </Button>
         </EmptyState>
         <BottomNav />

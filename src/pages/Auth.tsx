@@ -50,8 +50,8 @@ const Auth = () => {
   };
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background p-4">
-      {/* Glow */}
+    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background px-5">
+      {/* Subtle glow */}
       <div
         className="pointer-events-none absolute top-[8%] left-1/2 -translate-x-1/2 -translate-y-1/4"
         style={{
@@ -65,20 +65,20 @@ const Auth = () => {
         <img
           src={logo}
           alt="GYM WOLVES"
-          className="mb-1 object-contain drop-shadow-[0_0_24px_hsl(142_71%_45%/0.15)]"
-          style={{ height: "248px", width: "248px" }}
+          className="mb-1 object-contain"
+          style={{ height: "200px", width: "200px", filter: "drop-shadow(0 0 20px hsl(142 71% 45% / 0.15))" }}
         />
 
-        <h1 className="font-display text-[3.4rem] leading-none text-foreground" style={{ textShadow: "0 0 20px hsl(142 71% 45% / 0.2), 0 3px 8px rgba(0,0,0,0.5)" }}>
+        <h1 className="text-[48px] font-bold leading-none tracking-tight">
           GYM WOLVES
         </h1>
 
-        <p className="mt-1.5 text-[11px] font-medium tracking-[0.3em] uppercase text-muted-foreground">
+        <p className="mt-1.5 text-caption font-medium tracking-[0.25em] uppercase text-muted-foreground">
           TREINE • EVOLUA • REPITA
         </p>
 
         {/* Form */}
-        <div className="mt-8 w-full rounded-3xl bg-card/50 p-6 backdrop-blur-xl" style={{ boxShadow: "0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)" }}>
+        <div className="mt-8 w-full rounded-[24px] surface-1 border border-subtle p-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
               <div className="relative">
@@ -88,7 +88,7 @@ const Auth = () => {
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
                   required={!isLogin}
-                  className="h-[52px] rounded-2xl border-0 bg-secondary pl-12 text-sm"
+                  className="h-[52px] rounded-[16px] border-subtle bg-secondary pl-12 text-body"
                 />
               </div>
             )}
@@ -100,7 +100,7 @@ const Auth = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="h-[52px] rounded-2xl border-0 bg-secondary pl-12 text-sm"
+                className="h-[52px] rounded-[16px] border-subtle bg-secondary pl-12 text-body"
               />
             </div>
             <div className="relative">
@@ -112,13 +112,13 @@ const Auth = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={6}
-                className="h-[52px] rounded-2xl border-0 bg-secondary pl-12 text-sm"
+                className="h-[52px] rounded-[16px] border-subtle bg-secondary pl-12 text-body"
               />
             </div>
 
             <Button
               type="submit"
-              className="h-14 w-full rounded-2xl text-base font-bold uppercase tracking-widest glow-primary"
+              className="h-14 w-full rounded-[18px] text-body font-bold uppercase tracking-widest glow-primary"
               disabled={loading}
             >
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -126,9 +126,9 @@ const Auth = () => {
             </Button>
           </form>
 
-          <div className="mt-5 text-center text-sm text-muted-foreground">
+          <div className="mt-5 text-center text-subtitle text-muted-foreground">
             {isLogin ? "Não tem conta?" : "Já tem conta?"}{" "}
-            <button onClick={() => setIsLogin(!isLogin)} className="font-semibold text-primary transition-colors hover:opacity-80">
+            <button onClick={() => setIsLogin(!isLogin)} className="font-bold text-primary transition-colors hover:opacity-80">
               {isLogin ? "Criar conta" : "Fazer login"}
             </button>
           </div>

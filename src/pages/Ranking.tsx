@@ -3,15 +3,16 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useActiveGroup } from "@/contexts/ActiveGroupContext";
 import { useGroupDetail, useGroupMembers } from "@/hooks/useGroupData";
 import { useGroupCheckins, computeDaysActive, computeStreaks } from "@/hooks/useCheckins";
-import { Card, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Trophy, Flame, Loader2, Medal } from "lucide-react";
+import { Trophy, Flame, Loader2 } from "lucide-react";
 import AppScaffold from "@/components/ds/AppScaffold";
 import EmptyState from "@/components/ds/EmptyState";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const Ranking = () => {
   const { user } = useAuth();
   const { activeGroupId } = useActiveGroup();
+  const navigate = useNavigate();
   const { data: group } = useGroupDetail(activeGroupId || undefined);
   const { data: members } = useGroupMembers(activeGroupId || undefined);
   const { data: checkins, isLoading } = useGroupCheckins(activeGroupId || undefined);
@@ -54,46 +55,66 @@ const Ranking = () => {
 
   return (
     <AppScaffold title="Ranking" subtitle={group ? `${group.name} · Dias ativos` : "Nenhum desafio ativo"}>
-      {ranked.length === 0 ? (
-        <EmptyState icon={Trophy} title="Nenhum dado disponível" description="Nenhum desafio ativo para exibir o ranking." />
+      {(!activeGroupId || !group || ranked.length === 0) ? (
+        <EmptyState
+          icon={Trophy}
+          title="Nenhum dado de ranking"
+          description="Nenhum desafio ativo para exibir o ranking."
+        >
+          <Button onClick={() => navigate("/grupos/criar")} className="h-14 w-full rounded-[18px] text-body font-bold glow-primary">
+            Criar desafio
+          </Button>
+          <Button onClick={() => navigate("/grupos/entrar")} variant="outline" className="h-14 w-full rounded-[18px] text-body font-bold border-subtle bg-surface-1">
+            Entrar em um grupo
+          </Button>
+        </EmptyState>
       ) : (
-        ranked.map((m) => {
-          const isMe = m.userId === user?.id;
-          return (
-            <Card key={m.userId} className={`border-0 transition-all ${isMe ? "ring-1 ring-primary/30 glow-primary" : ""}`}>
-              <CardContent className="flex items-center gap-4 p-4">
+        <div className="space-y-2">
+          {/* Period info */}
+          {(group as any).start_date && (group as any).end_date && (
+            <div className="rounded-[20px] surface-1 border border-subtle p-4 mb-2">
+              <p className="text-caption text-muted-foreground">Método de pontuação</p>
+              <p className="text-body font-bold mt-0.5">Dias ativos</p>
+            </div>
+          )}
+
+          {ranked.map((m) => {
+            const isMe = m.userId === user?.id;
+            return (
+              <div
+                key={m.userId}
+                className={`flex items-center gap-4 rounded-[20px] surface-1 border p-4 transition-all ${
+                  isMe ? "border-primary/30 glow-primary-sm" : "border-subtle"
+                }`}
+              >
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-secondary">
                   {getMedalIcon(m.rank) ? (
                     <span className="text-lg">{getMedalIcon(m.rank)}</span>
                   ) : (
-                    <span className="text-sm font-bold text-muted-foreground">{m.rank}</span>
+                    <span className="text-body font-bold text-muted-foreground">{m.rank}</span>
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
-                    <span className="font-semibold font-display truncate">
+                    <span className="text-body font-bold truncate">
                       {m.name}
-                      {isMe && <span className="ml-1 text-xs text-muted-foreground">(você)</span>}
+                      {isMe && <span className="ml-1 text-caption text-muted-foreground">(você)</span>}
                     </span>
-                    <span className="text-sm font-bold text-primary ml-2 shrink-0">{m.days} treinos</span>
+                    <span className="text-body font-bold text-primary ml-2 shrink-0">{m.days} treinos</span>
                   </div>
-                  <Progress value={m.pct} className="mt-2 h-2" />
-                  <div className="mt-1.5 flex justify-between text-xs text-muted-foreground">
-                    <div className="flex gap-3">
-                      <span className="flex items-center gap-1">
-                        <Flame className="h-3 w-3 text-primary" /> {m.current} seguidos
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Trophy className="h-3 w-3" /> Recorde: {m.best}
-                      </span>
-                    </div>
-                    <span>{m.pct}%</span>
+                  <div className="mt-1.5 flex gap-3 text-caption text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <Flame className="h-3 w-3 text-primary" /> {m.current} seguidos
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Trophy className="h-3 w-3" /> Recorde: {m.best}
+                    </span>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          );
-        })
+              </div>
+            );
+          })}
+        </div>
       )}
     </AppScaffold>
   );

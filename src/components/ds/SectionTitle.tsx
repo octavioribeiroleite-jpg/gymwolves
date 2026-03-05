@@ -8,7 +8,7 @@ interface SectionTitleProps {
 const SectionTitle = ({ children, action }: SectionTitleProps) => {
   return (
     <div className="flex items-center justify-between">
-      <h3 className="text-sm font-semibold font-display">{children}</h3>
+      <h3 className="text-h2">{children}</h3>
       {action}
     </div>
   );

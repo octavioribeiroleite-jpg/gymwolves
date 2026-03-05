@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, AlertTriangle, Camera, X, Dumbbell } from "lucide-react";
+import { Loader2, AlertTriangle, Camera, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const WORKOUT_TYPES = [
@@ -106,13 +106,13 @@ const CheckinDialog = ({ open, onOpenChange, groupId, alreadyCheckedIn }: Checki
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="mx-4 max-w-sm rounded-3xl border-0 bg-card max-h-[90vh] overflow-y-auto">
+      <DialogContent className="mx-4 max-w-sm rounded-[24px] border-subtle surface-2 max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="font-display text-title-section">Registrar Treino</DialogTitle>
+          <DialogTitle className="text-h1">Registrar treino</DialogTitle>
         </DialogHeader>
 
         {alreadyCheckedIn && (
-          <div className="flex items-start gap-2 rounded-2xl bg-primary/10 p-3 text-sm">
+          <div className="flex items-start gap-2 rounded-[16px] bg-primary/10 p-3 text-body">
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
             <p className="text-muted-foreground">
               Hoje já conta como <strong className="text-foreground">1 dia</strong>. 
@@ -124,7 +124,7 @@ const CheckinDialog = ({ open, onOpenChange, groupId, alreadyCheckedIn }: Checki
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Workout type */}
           <div className="space-y-2">
-            <Label className="text-xs font-medium text-muted-foreground">Tipo de treino</Label>
+            <Label className="text-caption font-medium text-muted-foreground">Tipo de treino</Label>
             <div className="grid grid-cols-4 gap-2">
               {WORKOUT_TYPES.map((wt) => (
                 <button
@@ -137,10 +137,10 @@ const CheckinDialog = ({ open, onOpenChange, groupId, alreadyCheckedIn }: Checki
                     }
                   }}
                   className={cn(
-                    "flex flex-col items-center gap-1 rounded-2xl py-2.5 text-xs font-medium transition-all",
+                    "flex flex-col items-center gap-1 rounded-[16px] py-2.5 text-caption font-medium transition-all",
                     workoutType === wt.value
                       ? "bg-primary text-primary-foreground"
-                      : "bg-secondary text-muted-foreground hover:bg-secondary/80"
+                      : "bg-secondary text-muted-foreground"
                   )}
                 >
                   <span className="text-lg">{wt.emoji}</span>
@@ -152,32 +152,32 @@ const CheckinDialog = ({ open, onOpenChange, groupId, alreadyCheckedIn }: Checki
 
           {/* Title */}
           <div className="space-y-2">
-            <Label className="text-xs font-medium text-muted-foreground">Título *</Label>
+            <Label className="text-caption font-medium text-muted-foreground">Título *</Label>
             <Input
               placeholder="Ex: Treino de peito"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               required
-              className="h-12 rounded-2xl border-0 bg-secondary"
+              className="h-[52px] rounded-[16px] border-subtle bg-secondary text-body"
             />
           </div>
 
           {/* Note */}
           <div className="space-y-2">
-            <Label className="text-xs font-medium text-muted-foreground">Nota (opcional)</Label>
+            <Label className="text-caption font-medium text-muted-foreground">Nota (opcional)</Label>
             <Textarea
               placeholder="Como foi o treino?"
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              className="min-h-[70px] rounded-2xl border-0 bg-secondary resize-none"
+              className="min-h-[70px] rounded-[16px] border-subtle bg-secondary resize-none text-body"
             />
           </div>
 
           {/* Photo */}
           <div className="space-y-2">
-            <Label className="text-xs font-medium text-muted-foreground">Foto (opcional)</Label>
+            <Label className="text-caption font-medium text-muted-foreground">Foto (opcional)</Label>
             {photoPreview ? (
-              <div className="relative rounded-2xl overflow-hidden">
+              <div className="relative rounded-[16px] overflow-hidden">
                 <img src={photoPreview} alt="Preview" className="w-full h-40 object-cover" />
                 <button
                   type="button"
@@ -191,7 +191,7 @@ const CheckinDialog = ({ open, onOpenChange, groupId, alreadyCheckedIn }: Checki
               <button
                 type="button"
                 onClick={() => fileRef.current?.click()}
-                className="flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border bg-secondary/50 py-6 text-sm text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
+                className="flex w-full items-center justify-center gap-2 rounded-[16px] border-2 border-dashed border-subtle bg-secondary/50 py-6 text-body text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
               >
                 <Camera className="h-5 w-5" />
                 Adicionar foto do treino
@@ -209,11 +209,11 @@ const CheckinDialog = ({ open, onOpenChange, groupId, alreadyCheckedIn }: Checki
 
           <Button
             type="submit"
-            className="h-14 w-full rounded-2xl text-base font-semibold glow-primary"
+            className="h-14 w-full rounded-[18px] text-body font-bold glow-primary"
             disabled={isPending}
           >
             {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Concluir Treino 💪
+            Concluir treino 💪
           </Button>
         </form>
       </DialogContent>

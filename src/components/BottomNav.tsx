@@ -3,8 +3,8 @@ import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const items = [
-  { to: "/", icon: Home, label: "Home" },
-  { to: "/grupos", icon: Swords, label: "Desafios" },
+  { to: "/", icon: Home, label: "Início" },
+  { to: "/grupos", icon: Swords, label: "Grupos" },
   { to: "/historico", icon: Calendar, label: "Histórico" },
   { to: "/ranking", icon: Trophy, label: "Ranking" },
   { to: "/perfil", icon: User, label: "Perfil" },
@@ -14,7 +14,7 @@ const BottomNav = () => {
   const { pathname } = useLocation();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border/50 bg-surface/95 backdrop-blur-xl supports-[backdrop-filter]:bg-surface/80">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-subtle bg-background/95 backdrop-blur-xl">
       <div className="mx-auto flex max-w-md items-center justify-around pb-[env(safe-area-inset-bottom)] pt-1">
         {items.map(({ to, icon: Icon, label }) => {
           const active = pathname === to || (to !== "/" && pathname.startsWith(to));
@@ -24,14 +24,14 @@ const BottomNav = () => {
               to={to}
               className={cn(
                 "flex flex-col items-center gap-0.5 px-3 py-2 text-[11px] transition-all duration-200",
-                active ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                active ? "text-primary" : "text-tertiary-alpha hover:text-foreground"
               )}
             >
               <div className={cn(
                 "flex h-8 w-8 items-center justify-center rounded-xl transition-all duration-200",
                 active && "bg-primary/15"
               )}>
-                <Icon className={cn("h-5 w-5", active && "drop-shadow-[0_0_6px_hsl(142_71%_45%/0.5)]")} />
+                <Icon className="h-[20px] w-[20px]" strokeWidth={active ? 2.2 : 1.8} />
               </div>
               <span className="font-medium">{label}</span>
             </Link>

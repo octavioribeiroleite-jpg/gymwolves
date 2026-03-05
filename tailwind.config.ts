@@ -7,15 +7,14 @@ export default {
   theme: {
     container: {
       center: true,
-      padding: "1rem",
+      padding: "1.25rem",
       screens: {
         "2xl": "1400px",
       },
     },
     extend: {
       fontFamily: {
-        sans: ["Inter", "sans-serif"],
-        display: ["Bebas Neue", "Anton", "sans-serif"],
+        sans: ["Inter", "system-ui", "-apple-system", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -23,9 +22,11 @@ export default {
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
-        surface: "hsl(var(--surface))",
+        "surface-1": "hsl(var(--surface-1))",
+        "surface-2": "hsl(var(--surface-2))",
         primary: {
           DEFAULT: "hsl(var(--primary))",
+          dark: "hsl(var(--primary-dark))",
           foreground: "hsl(var(--primary-foreground))",
         },
         secondary: {
@@ -48,6 +49,8 @@ export default {
           DEFAULT: "hsl(var(--success))",
           foreground: "hsl(var(--success-foreground))",
         },
+        warning: "hsl(var(--warning))",
+        info: "hsl(var(--info))",
         popover: {
           DEFAULT: "hsl(var(--popover))",
           foreground: "hsl(var(--popover-foreground))",
@@ -71,14 +74,20 @@ export default {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
-        "2xl": "1.125rem",
+        "2xl": "1.25rem",
         "3xl": "1.5rem",
       },
+      spacing: {
+        "ds": "16px",
+        "ds-lg": "20px",
+      },
       fontSize: {
-        "title-lg": ["1.75rem", { lineHeight: "1.2", fontWeight: "600" }],
-        "title-section": ["1.375rem", { lineHeight: "1.3", fontWeight: "600" }],
-        "body": ["1rem", { lineHeight: "1.5" }],
-        "description": ["0.875rem", { lineHeight: "1.5" }],
+        "h1": ["28px", { lineHeight: "1.15", fontWeight: "700", letterSpacing: "-0.2px" }],
+        "h2": ["18px", { lineHeight: "1.35", fontWeight: "700" }],
+        "subtitle": ["15px", { lineHeight: "1.4", fontWeight: "500" }],
+        "body": ["15px", { lineHeight: "1.5", fontWeight: "500" }],
+        "small": ["13px", { lineHeight: "1.4", fontWeight: "500" }],
+        "caption": ["12px", { lineHeight: "1.3", fontWeight: "500" }],
       },
       keyframes: {
         "accordion-down": {

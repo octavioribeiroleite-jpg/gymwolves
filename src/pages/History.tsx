@@ -3,7 +3,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useActiveGroup } from "@/contexts/ActiveGroupContext";
 import { useGroupDetail, useGroupMembers } from "@/hooks/useGroupData";
 import { useGroupCheckins, getUserDates } from "@/hooks/useCheckins";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, addMonths, subMonths, isSameMonth } from "date-fns";
@@ -64,10 +63,10 @@ const History = () => {
                 key={m.user_id}
                 onClick={() => setSelectedUserId(m.user_id)}
                 className={cn(
-                  "shrink-0 rounded-2xl px-4 py-2 text-sm font-medium transition-all",
+                  "shrink-0 rounded-[16px] px-4 py-2.5 text-small font-medium transition-all",
                   activeUserId === m.user_id
-                    ? "bg-primary text-primary-foreground glow-primary"
-                    : "bg-card text-muted-foreground hover:bg-secondary"
+                    ? "bg-primary text-primary-foreground glow-primary-sm"
+                    : "surface-1 border border-subtle text-muted-foreground"
                 )}
               >
                 {profile?.display_name || "Sem nome"}
@@ -78,61 +77,59 @@ const History = () => {
       )}
 
       {/* Calendar */}
-      <Card className="border-0">
-        <CardContent className="p-5">
-          <div className="mb-4 flex items-center justify-between">
-            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-2xl" onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}>
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <span className="text-sm font-semibold font-display capitalize">
-              {format(currentMonth, "MMMM yyyy", { locale: ptBR })}
-            </span>
-            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-2xl" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}>
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
+      <div className="rounded-[20px] surface-1 border border-subtle p-4">
+        <div className="mb-4 flex items-center justify-between">
+          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-2xl" onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}>
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <span className="text-body font-bold capitalize">
+            {format(currentMonth, "MMMM yyyy", { locale: ptBR })}
+          </span>
+          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-2xl" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
 
-          <div className="grid grid-cols-7 gap-1 text-center">
-            {weekDays.map((d, i) => (
-              <div key={i} className="py-1 text-[11px] font-medium text-muted-foreground">{d}</div>
-            ))}
-            {Array.from({ length: startDayOffset }).map((_, i) => (
-              <div key={`empty-${i}`} />
-            ))}
-            {days.map((day) => {
-              const dateStr = format(day, "yyyy-MM-dd");
-              const worked = userDates.has(dateStr);
-              const isToday = dateStr === format(new Date(), "yyyy-MM-dd");
-              const isFuture = day > new Date();
-              return (
-                <div
-                  key={dateStr}
-                  className={cn(
-                    "flex h-10 w-full items-center justify-center rounded-xl text-sm transition-all",
-                    worked && "bg-primary text-primary-foreground font-semibold",
-                    !worked && !isFuture && "bg-secondary/50",
-                    isFuture && "text-muted-foreground/30",
-                    isToday && !worked && "ring-2 ring-primary/40"
-                  )}
-                >
-                  {format(day, "d")}
-                </div>
-              );
-            })}
-          </div>
+        <div className="grid grid-cols-7 gap-1 text-center">
+          {weekDays.map((d, i) => (
+            <div key={i} className="py-1 text-caption font-medium text-muted-foreground">{d}</div>
+          ))}
+          {Array.from({ length: startDayOffset }).map((_, i) => (
+            <div key={`empty-${i}`} />
+          ))}
+          {days.map((day) => {
+            const dateStr = format(day, "yyyy-MM-dd");
+            const worked = userDates.has(dateStr);
+            const isToday = dateStr === format(new Date(), "yyyy-MM-dd");
+            const isFuture = day > new Date();
+            return (
+              <div
+                key={dateStr}
+                className={cn(
+                  "flex h-10 w-full items-center justify-center rounded-xl text-small transition-all",
+                  worked && "bg-primary text-primary-foreground font-bold",
+                  !worked && !isFuture && "bg-secondary/50",
+                  isFuture && "text-muted-foreground/30",
+                  isToday && !worked && "ring-2 ring-primary/40"
+                )}
+              >
+                {format(day, "d")}
+              </div>
+            );
+          })}
+        </div>
 
-          {/* Legend */}
-          <div className="mt-4 flex items-center justify-between rounded-2xl bg-secondary/50 px-4 py-3">
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <div className="h-3 w-3 rounded-sm bg-primary" />
-              <span>Treinou</span>
-              <div className="ml-2 h-3 w-3 rounded-sm bg-secondary" />
-              <span>Não treinou</span>
-            </div>
-            <span className="text-sm font-bold text-primary">{monthWorkouts} dias</span>
+        {/* Legend */}
+        <div className="mt-4 flex items-center justify-between rounded-2xl bg-secondary/50 px-4 py-3">
+          <div className="flex items-center gap-2 text-caption text-muted-foreground">
+            <div className="h-3 w-3 rounded-sm bg-primary" />
+            <span>Treinou</span>
+            <div className="ml-2 h-3 w-3 rounded-sm bg-secondary" />
+            <span>Não treinou</span>
           </div>
-        </CardContent>
-      </Card>
+          <span className="text-body font-bold text-primary">{monthWorkouts} dias</span>
+        </div>
+      </div>
     </AppScaffold>
   );
 };

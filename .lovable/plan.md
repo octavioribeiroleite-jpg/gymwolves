@@ -1,26 +1,12 @@
 
 
-## Plano: Editar configurações do grupo (admin)
+## Problema
 
-### O que será feito
+O botão "Criar desafio" no `HomeChallengesList.tsx` navega para `/create-group`, mas a rota correta definida no `App.tsx` é `/grupos/criar`. Isso causa o erro 404.
 
-Adicionar um botão "Editar" na tela de detalhes do grupo, visível apenas para o criador/admin. Ao clicar, abre um Drawer (mobile) ou Dialog (desktop) com formulário para editar: nome, meta de treinos, datas de início/fim e sistema de pontuação.
+## Correção
 
-### Alterações
+Alterar a linha 37 de `src/components/dashboard/HomeChallengesList.tsx`: trocar `navigate("/create-group")` por `navigate("/grupos/criar")`.
 
-1. **`src/hooks/useGroupData.ts`** — Adicionar hook `useUpdateGroup` (mutation que faz `supabase.from("groups").update(...)` filtrando pelo `id` do grupo)
-
-2. **`src/pages/GroupDetails.tsx`** — Adicionar:
-   - Verificação se o usuário logado é o `created_by` do grupo (admin)
-   - Botão "Editar" no header ou no card de info (visível só para admin)
-   - State para controlar abertura do modal de edição
-   - Componente `EditGroupDialog` inline ou importado
-
-3. **`src/components/EditGroupDialog.tsx`** (novo) — Drawer/Dialog responsivo com:
-   - Campos: nome, meta de treinos (`goal_total`), data início, data fim, sistema de pontuação
-   - Usa o hook `useUpdateGroup` para salvar
-   - Usa `useIsMobile` para alternar entre Drawer e Dialog
-
-### Segurança
-A tabela `groups` já permite `UPDATE` via RLS para membros do grupo. A verificação de `created_by` no frontend garante que só o criador veja o botão. Para segurança extra, podemos adicionar uma policy RLS que restringe UPDATE ao `created_by`.
+Verificar também o botão "Entrar com código" na mesma tela — ele navega para `/join`, mas a rota correta é `/grupos/entrar`.
 

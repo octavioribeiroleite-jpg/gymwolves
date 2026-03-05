@@ -50,7 +50,7 @@ const CreateGroup = () => {
       {
         onSuccess: (group) => {
           setActiveGroupId(group.id);
-          navigate(`/grupos/${group.id}/convidar`);
+          navigate(`/grupos/${group.id}/detalhes`);
         },
       }
     );

@@ -4,8 +4,8 @@ import { useActiveGroup } from "@/contexts/ActiveGroupContext";
 import { useGroupDetail } from "@/hooks/useGroupData";
 import { useGroupCheckins, computeDaysActive, computeStreaks } from "@/hooks/useCheckins";
 import { Button } from "@/components/ui/button";
-import { Flame, Target, Trophy, LogOut, Users } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Flame, Target, Trophy, LogOut, Users, ChevronRight, CheckCircle, Smartphone, Settings } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import { useMemo } from "react";
 import AppScaffold from "@/components/ds/AppScaffold";
 import StatCard from "@/components/ds/StatCard";
@@ -16,13 +16,13 @@ const Profile = () => {
   const { activeGroupId } = useActiveGroup();
   const { data: group } = useGroupDetail(activeGroupId || undefined);
   const { data: checkins } = useGroupCheckins(activeGroupId || undefined);
+  const navigate = useNavigate();
 
   const myStats = useMemo(() => {
     if (!checkins || !user || !group) return null;
     const days = computeDaysActive(checkins, user.id);
     const streaks = computeStreaks(checkins, user.id);
-    const goal = (group as any).goal_total || 200;
-    return { days, goal, ...streaks };
+    return { days, ...streaks };
   }, [checkins, user, group]);
 
   const initials = (profile?.display_name || "U")
@@ -32,42 +32,51 @@ const Profile = () => {
     .toUpperCase()
     .slice(0, 2);
 
+  const menuItems = [
+    { icon: Users, label: "Meus grupos", sub: group?.name || "Nenhum grupo ativo", to: "/grupos" },
+    { icon: Trophy, label: "Ranking", sub: "Ver posição no desafio", to: "/ranking" },
+    { icon: CheckCircle, label: "Desafios concluídos", sub: "Histórico de desafios", to: "/desafios-concluidos" },
+    { icon: Smartphone, label: "Meus dispositivos", sub: "Conectar apps de fitness", to: "/dispositivos" },
+  ];
+
   return (
     <AppScaffold title="Perfil">
       {/* Avatar + Info */}
-      <div className="flex flex-col items-center py-4">
+      <div className="flex flex-col items-center py-6">
         <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/15 text-[22px] font-bold text-primary">
           {initials}
         </div>
         <h2 className="mt-3 text-h2">{profile?.display_name || "Sem nome"}</h2>
-        <p className="text-subtitle text-muted-foreground">{user?.email}</p>
+        <p className="text-small text-muted-foreground">{user?.email}</p>
       </div>
 
       {/* Stats */}
       {myStats && (
         <div className="grid grid-cols-3 gap-3">
           <StatCard icon={Flame} value={myStats.current} label="Sequência" />
-          <StatCard icon={Target} value={myStats.days} label="Treinos" />
+          <StatCard icon={Target} value={myStats.days} label="Dias ativos" />
           <StatCard icon={Trophy} value={myStats.best} label="Recorde" />
         </div>
       )}
 
-      {/* Account links */}
+      {/* Menu list */}
       <div className="rounded-[20px] surface-1 border border-subtle overflow-hidden">
-        <Link to="/grupos" className="flex items-center gap-3 p-4 transition-colors hover:bg-surface-2 border-b border-subtle">
-          <Users className="h-5 w-5 text-primary" />
-          <div className="flex-1">
-            <p className="text-body font-medium">Meus grupos</p>
-            <p className="text-caption text-muted-foreground">{group?.name || "Nenhum grupo ativo"}</p>
-          </div>
-        </Link>
-        <Link to="/ranking" className="flex items-center gap-3 p-4 transition-colors hover:bg-surface-2">
-          <Trophy className="h-5 w-5 text-primary" />
-          <div className="flex-1">
-            <p className="text-body font-medium">Ranking</p>
-            <p className="text-caption text-muted-foreground">Ver posição no desafio</p>
-          </div>
-        </Link>
+        {menuItems.map((item, i) => (
+          <button
+            key={item.to}
+            onClick={() => navigate(item.to)}
+            className={`flex w-full items-center gap-4 px-4 py-4 text-left transition-colors hover:bg-surface-2 ${
+              i < menuItems.length - 1 ? "border-b border-subtle" : ""
+            }`}
+          >
+            <item.icon className="h-5 w-5 text-primary shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-body font-medium">{item.label}</p>
+              <p className="text-small text-muted-foreground truncate">{item.sub}</p>
+            </div>
+            <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+          </button>
+        ))}
       </div>
 
       {/* Logout */}

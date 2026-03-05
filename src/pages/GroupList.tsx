@@ -25,7 +25,7 @@ const GroupCard = ({ group, onSelect }: { group: any; onSelect: () => void }) =>
   return (
     <button
       onClick={onSelect}
-      className="w-full text-left rounded-[20px] surface-1 border border-subtle p-4 transition-all hover:ring-2 hover:ring-primary/30 active:scale-[0.98]"
+      className="w-full text-left rounded-[20px] surface-1 border border-subtle p-4 transition-all active:scale-[0.98]"
     >
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-2">
@@ -74,11 +74,11 @@ const GroupList = () => {
 
   if (!groups || groups.length === 0) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-background px-5">
+      <AppScaffold title="Matilha" subtitle="Seus grupos de treino">
         <EmptyState
           image={logo}
-          title="Crie ou entre em um grupo"
-          description="Treine com seus amigos e compita para ver quem treina mais."
+          title="Nenhum grupo ainda"
+          description="Crie ou entre em um grupo para treinar com amigos."
         >
           <Button onClick={() => navigate("/grupos/criar")} size="lg" className="h-14 w-full rounded-[18px] text-body font-bold glow-primary">
             <Plus className="mr-2 h-5 w-5" /> Criar grupo
@@ -87,14 +87,13 @@ const GroupList = () => {
             <LogIn className="mr-2 h-5 w-5" /> Entrar com convite
           </Button>
         </EmptyState>
-        <BottomNav />
-      </div>
+      </AppScaffold>
     );
   }
 
   return (
     <AppScaffold
-      title="Grupos"
+      title="Matilha"
       subtitle="Seus grupos de treino"
       headerRight={
         <div className="flex gap-2">

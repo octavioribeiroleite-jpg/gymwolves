@@ -18,6 +18,9 @@ import GroupDetails from "./pages/GroupDetails";
 import History from "./pages/History";
 import Ranking from "./pages/Ranking";
 import Profile from "./pages/Profile";
+import ScoringSelect from "./pages/ScoringSelect";
+import CompletedChallenges from "./pages/CompletedChallenges";
+import Devices from "./pages/Devices";
 import NotFound from "./pages/NotFound";
 import PwaInstallPrompt from "./components/PwaInstallPrompt";
 
@@ -48,6 +51,9 @@ const App = () => {
                 <Route path="/historico" element={<ProtectedRoute><History /></ProtectedRoute>} />
                 <Route path="/ranking" element={<ProtectedRoute><Ranking /></ProtectedRoute>} />
                 <Route path="/perfil" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+                <Route path="/pontuacao" element={<ProtectedRoute><ScoringSelect /></ProtectedRoute>} />
+                <Route path="/desafios-concluidos" element={<ProtectedRoute><CompletedChallenges /></ProtectedRoute>} />
+                <Route path="/dispositivos" element={<ProtectedRoute><Devices /></ProtectedRoute>} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </ActiveGroupProvider>

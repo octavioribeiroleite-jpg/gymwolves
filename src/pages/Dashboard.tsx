@@ -3,19 +3,21 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useActiveGroup } from "@/contexts/ActiveGroupContext";
 import { useGroupDetail, useGroupMembers } from "@/hooks/useGroupData";
 import { useGroupCheckins, computeDaysActive, computeStreaks, hasCheckedInToday } from "@/hooks/useCheckins";
-import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle2, Flame, Trophy, Loader2, Target, Info, Dumbbell } from "lucide-react";
-import { format } from "date-fns";
+import { Button } from "@/components/ui/button";
+import { CheckCircle2, Flame, Trophy, Loader2, Target, Dumbbell, CalendarDays } from "lucide-react";
+import { format, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import BottomNav from "@/components/BottomNav";
 import CheckinDialog from "@/components/CheckinDialog";
 import ActivityFeed from "@/components/ActivityFeed";
-import EmptyState from "@/components/ds/EmptyState";
 import StatCard from "@/components/ds/StatCard";
 import ProgressCard from "@/components/ds/ProgressCard";
 import SectionTitle from "@/components/ds/SectionTitle";
+import SidebarMenu from "@/components/SidebarMenu";
+import FloatingActionButton from "@/components/FloatingActionButton";
+import Onboarding from "./Onboarding";
 import logo from "@/assets/logo.png";
 
 const Dashboard = () => {
@@ -42,6 +44,14 @@ const Dashboard = () => {
     return { days, goal, pct, ...streaks };
   }, [checkins, user, group]);
 
+  const daysRemaining = useMemo(() => {
+    if (!group) return null;
+    const g = group as any;
+    if (!g.end_date) return null;
+    const diff = differenceInDays(new Date(g.end_date), new Date());
+    return Math.max(0, diff);
+  }, [group]);
+
   const topMembers = useMemo(() => {
     if (!members || !checkins || !group) return [];
     return members
@@ -62,25 +72,9 @@ const Dashboard = () => {
     );
   }
 
-  // No group — welcome screen
+  // No group — show onboarding
   if (!activeGroupId || !group) {
-    return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-background px-5">
-        <EmptyState
-          image={logo}
-          title="Crie ou entre em um grupo"
-          description="Treine com seus amigos e compita para ver quem treina mais."
-        >
-          <Button asChild size="lg" className="h-14 w-full rounded-[18px] text-body font-bold glow-primary">
-            <Link to="/grupos/criar">Criar grupo</Link>
-          </Button>
-          <Button asChild variant="outline" size="lg" className="h-14 w-full rounded-[18px] text-body font-bold border-subtle bg-surface-1">
-            <Link to="/grupos/entrar">Entrar com convite</Link>
-          </Button>
-        </EmptyState>
-        <BottomNav />
-      </div>
-    );
+    return <Onboarding />;
   }
 
   const groupAny = group as any;
@@ -88,27 +82,35 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-background pb-24">
       {/* Header */}
-      <header className="sticky top-0 z-40 border-b border-subtle bg-background/95 px-5 py-4 backdrop-blur-xl">
+      <header className="sticky top-0 z-40 border-b border-subtle bg-background/95 px-5 py-3 backdrop-blur-xl">
         <div className="mx-auto max-w-md">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <img src={logo} alt="GYM WOLVES" className="h-7 w-7 object-contain" />
+              <SidebarMenu />
+              <img src={logo} alt="GYM WOLVES" className="h-6 w-6 object-contain" />
               <span className="text-caption font-bold uppercase tracking-[0.15em] text-primary">GYM WOLVES</span>
             </div>
-            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-2xl" onClick={() => navigate(`/grupos/${group.id}/detalhes`)}>
-              <Info className="h-4 w-4" />
-            </Button>
           </div>
-          <h1 className="text-h1 mt-1">{group.name}</h1>
-          {groupAny.start_date && groupAny.end_date && (
-            <p className="text-subtitle text-muted-foreground">
-              {format(new Date(groupAny.start_date), "dd MMM", { locale: ptBR })} — {format(new Date(groupAny.end_date), "dd MMM yyyy", { locale: ptBR })}
-            </p>
-          )}
         </div>
       </header>
 
       <div className="mx-auto max-w-md space-y-4 px-5 py-4">
+        {/* Group info */}
+        <div>
+          <h1 className="text-h1">{group.name}</h1>
+          <div className="mt-1 flex items-center gap-3 text-small text-muted-foreground">
+            {groupAny.start_date && groupAny.end_date && (
+              <span className="flex items-center gap-1">
+                <CalendarDays className="h-3.5 w-3.5" />
+                {format(new Date(groupAny.start_date), "dd MMM", { locale: ptBR })} — {format(new Date(groupAny.end_date), "dd MMM yyyy", { locale: ptBR })}
+              </span>
+            )}
+            {daysRemaining !== null && (
+              <span className="text-primary font-medium">{daysRemaining} dias restantes</span>
+            )}
+          </div>
+        </div>
+
         {/* Check-in Card */}
         <button
           onClick={() => setCheckinOpen(true)}
@@ -129,7 +131,7 @@ const Dashboard = () => {
             <p className={`text-h2 ${todayDone ? "text-primary-foreground" : ""}`}>
               {todayDone ? "Treino concluído! 💪" : "Registrar treino"}
             </p>
-            <p className={`text-subtitle ${todayDone ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+            <p className={`text-small ${todayDone ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
               {format(new Date(), "EEEE, d 'de' MMMM", { locale: ptBR })}
             </p>
           </div>
@@ -139,7 +141,7 @@ const Dashboard = () => {
         {myStats && (
           <div className="grid grid-cols-3 gap-3">
             <StatCard icon={Flame} value={myStats.current} label="Sequência" />
-            <StatCard icon={Target} value={myStats.days} label="Treinos" />
+            <StatCard icon={Target} value={myStats.days} label="Dias ativos" />
             <StatCard icon={Trophy} value={myStats.best} label="Recorde" />
           </div>
         )}
@@ -181,6 +183,9 @@ const Dashboard = () => {
         {/* Activity Feed */}
         <ActivityFeed groupId={activeGroupId} />
       </div>
+
+      {/* FAB */}
+      <FloatingActionButton onClick={() => setCheckinOpen(true)} />
 
       <CheckinDialog
         open={checkinOpen}

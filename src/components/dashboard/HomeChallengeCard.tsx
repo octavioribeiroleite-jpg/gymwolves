@@ -65,7 +65,7 @@ const HomeChallengeCard = ({ group, userId }: HomeChallengeCardProps) => {
 
   const handleClick = () => {
     setActiveGroupId(group.id);
-    navigate(`/group/${group.id}`);
+    navigate(`/grupos/${group.id}/detalhes`);
   };
 
   const isChallenge = group.type === "challenge";

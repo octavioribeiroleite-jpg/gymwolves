@@ -11,6 +11,8 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import logo from "@/assets/logo.png";
 import BottomNav from "@/components/BottomNav";
+import AppScaffold from "@/components/ds/AppScaffold";
+import EmptyState from "@/components/ds/EmptyState";
 
 const GroupCard = ({ group, onSelect }: { group: any; onSelect: () => void }) => {
   const { user } = useAuth();
@@ -42,7 +44,7 @@ const GroupCard = ({ group, onSelect }: { group: any; onSelect: () => void }) =>
         )}
         <div className="mt-3">
           <div className="mb-1 flex items-center justify-between text-xs">
-            <span className="text-muted-foreground">Days Active</span>
+            <span className="text-muted-foreground">Dias ativos</span>
             <span className="font-semibold text-primary">{myDays}/{goal}</span>
           </div>
           <Progress value={pct} className="h-2" />
@@ -72,51 +74,43 @@ const GroupList = () => {
 
   if (!groups || groups.length === 0) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-background p-6 text-center">
-        <img src={logo} alt="GYM WOLVES" className="h-24 w-24 object-contain drop-shadow-[0_0_20px_hsl(142_71%_45%/0.3)]" />
-        <div>
-          <h1 className="text-2xl font-bold tracking-[0.15em]" style={{ fontFamily: "'Anton', sans-serif" }}>
-            CRIE SEU PRIMEIRO GRUPO
-          </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Monte um grupo de treino e convide seus parceiros.
-          </p>
-        </div>
-        <div className="flex w-full max-w-xs flex-col gap-3">
+      <div className="flex min-h-screen flex-col items-center justify-center bg-background p-6">
+        <EmptyState
+          image={logo}
+          title="CRIE SEU PRIMEIRO DESAFIO"
+          description="Monte um desafio e convide seu parceiro(a) para treinar junto."
+        >
           <Button onClick={() => navigate("/grupos/criar")} size="lg" className="h-14 w-full rounded-2xl text-base font-semibold glow-primary">
-            <Plus className="mr-2 h-5 w-5" /> Criar Grupo
+            <Plus className="mr-2 h-5 w-5" /> Criar Desafio
           </Button>
           <Button onClick={() => navigate("/grupos/entrar")} variant="outline" size="lg" className="h-14 w-full rounded-2xl text-base font-semibold border-0 bg-card">
             <LogIn className="mr-2 h-5 w-5" /> Entrar com Convite
           </Button>
-        </div>
+        </EmptyState>
         <BottomNav />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background pb-24">
-      <header className="sticky top-0 z-40 border-b border-border/50 bg-background/95 px-4 py-4 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-md items-center justify-between">
-          <h1 className="font-display text-xl font-bold">Meus Grupos</h1>
-          <div className="flex gap-2">
-            <Button size="sm" variant="ghost" className="rounded-xl" onClick={() => navigate("/grupos/entrar")}>
-              <LogIn className="h-4 w-4" />
-            </Button>
-            <Button size="sm" className="rounded-xl" onClick={() => navigate("/grupos/criar")}>
-              <Plus className="h-4 w-4" />
-            </Button>
-          </div>
+    <AppScaffold
+      title="Desafios"
+      subtitle="Crie um desafio ou entre em um existente."
+      headerRight={
+        <div className="flex gap-2">
+          <Button size="sm" variant="ghost" className="rounded-2xl" onClick={() => navigate("/grupos/entrar")}>
+            <LogIn className="h-4 w-4" />
+          </Button>
+          <Button size="sm" className="rounded-2xl" onClick={() => navigate("/grupos/criar")}>
+            <Plus className="h-4 w-4" />
+          </Button>
         </div>
-      </header>
-      <div className="mx-auto max-w-md space-y-3 p-4">
-        {groups.map((g) => (
-          <GroupCard key={g.id} group={g} onSelect={() => handleSelect(g.id)} />
-        ))}
-      </div>
-      <BottomNav />
-    </div>
+      }
+    >
+      {groups.map((g) => (
+        <GroupCard key={g.id} group={g} onSelect={() => handleSelect(g.id)} />
+      ))}
+    </AppScaffold>
   );
 };
 

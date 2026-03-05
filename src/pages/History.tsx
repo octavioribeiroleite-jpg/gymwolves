@@ -9,7 +9,7 @@ import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, addMonths, subMonths, isSameMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
-import BottomNav from "@/components/BottomNav";
+import AppScaffold from "@/components/ds/AppScaffold";
 
 const History = () => {
   const { user } = useAuth();
@@ -53,95 +53,87 @@ const History = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-24">
-      <header className="sticky top-0 z-40 border-b border-border/50 bg-background/95 px-4 py-4 backdrop-blur-xl">
-        <div className="mx-auto max-w-md">
-          <h1 className="font-display text-xl font-bold">Histórico</h1>
-          <p className="text-xs text-muted-foreground">{group?.name || "Nenhum grupo ativo"}</p>
+    <AppScaffold title="Histórico" subtitle={group?.name || "Nenhum desafio ativo"}>
+      {/* Member selector */}
+      {members && members.length > 1 && (
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          {members.map((m) => {
+            const profile = m.profiles as any;
+            return (
+              <button
+                key={m.user_id}
+                onClick={() => setSelectedUserId(m.user_id)}
+                className={cn(
+                  "shrink-0 rounded-2xl px-4 py-2 text-sm font-medium transition-all",
+                  activeUserId === m.user_id
+                    ? "bg-primary text-primary-foreground glow-primary"
+                    : "bg-card text-muted-foreground hover:bg-secondary"
+                )}
+              >
+                {profile?.display_name || "Sem nome"}
+              </button>
+            );
+          })}
         </div>
-      </header>
+      )}
 
-      <div className="mx-auto max-w-md space-y-4 p-4">
-        {members && members.length > 1 && (
-          <div className="flex gap-2 overflow-x-auto">
-            {members.map((m) => {
-              const profile = m.profiles as any;
+      {/* Calendar */}
+      <Card className="border-0">
+        <CardContent className="p-5">
+          <div className="mb-4 flex items-center justify-between">
+            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-2xl" onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}>
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <span className="text-sm font-semibold font-display capitalize">
+              {format(currentMonth, "MMMM yyyy", { locale: ptBR })}
+            </span>
+            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-2xl" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}>
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-7 gap-1 text-center">
+            {weekDays.map((d, i) => (
+              <div key={i} className="py-1 text-[11px] font-medium text-muted-foreground">{d}</div>
+            ))}
+            {Array.from({ length: startDayOffset }).map((_, i) => (
+              <div key={`empty-${i}`} />
+            ))}
+            {days.map((day) => {
+              const dateStr = format(day, "yyyy-MM-dd");
+              const worked = userDates.has(dateStr);
+              const isToday = dateStr === format(new Date(), "yyyy-MM-dd");
+              const isFuture = day > new Date();
               return (
-                <button
-                  key={m.user_id}
-                  onClick={() => setSelectedUserId(m.user_id)}
+                <div
+                  key={dateStr}
                   className={cn(
-                    "shrink-0 rounded-xl px-4 py-2 text-sm font-medium transition-all",
-                    activeUserId === m.user_id
-                      ? "bg-primary text-primary-foreground glow-primary"
-                      : "bg-card text-muted-foreground hover:bg-secondary"
+                    "flex h-10 w-full items-center justify-center rounded-xl text-sm transition-all",
+                    worked && "bg-primary text-primary-foreground font-semibold",
+                    !worked && !isFuture && "bg-secondary/50",
+                    isFuture && "text-muted-foreground/30",
+                    isToday && !worked && "ring-2 ring-primary/40"
                   )}
                 >
-                  {profile?.display_name || "Sem nome"}
-                </button>
+                  {format(day, "d")}
+                </div>
               );
             })}
           </div>
-        )}
 
-        <Card className="border-0">
-          <CardContent className="p-5">
-            <div className="mb-4 flex items-center justify-between">
-              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-xl" onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}>
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <span className="text-sm font-semibold font-display capitalize">
-                {format(currentMonth, "MMMM yyyy", { locale: ptBR })}
-              </span>
-              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-xl" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}>
-                <ChevronRight className="h-4 w-4" />
-              </Button>
+          {/* Legend */}
+          <div className="mt-4 flex items-center justify-between rounded-2xl bg-secondary/50 px-4 py-3">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <div className="h-3 w-3 rounded-sm bg-primary" />
+              <span>Treinou</span>
+              <div className="ml-2 h-3 w-3 rounded-sm bg-secondary" />
+              <span>Não treinou</span>
             </div>
-
-            <div className="grid grid-cols-7 gap-1 text-center">
-              {weekDays.map((d, i) => (
-                <div key={i} className="py-1 text-[11px] font-medium text-muted-foreground">{d}</div>
-              ))}
-              {Array.from({ length: startDayOffset }).map((_, i) => (
-                <div key={`empty-${i}`} />
-              ))}
-              {days.map((day) => {
-                const dateStr = format(day, "yyyy-MM-dd");
-                const worked = userDates.has(dateStr);
-                const isToday = dateStr === format(new Date(), "yyyy-MM-dd");
-                const isFuture = day > new Date();
-                return (
-                  <div
-                    key={dateStr}
-                    className={cn(
-                      "flex h-10 w-full items-center justify-center rounded-xl text-sm transition-all",
-                      worked && "bg-primary text-primary-foreground font-semibold",
-                      !worked && !isFuture && "bg-secondary/50",
-                      isFuture && "text-muted-foreground/30",
-                      isToday && !worked && "ring-2 ring-primary/40"
-                    )}
-                  >
-                    {format(day, "d")}
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="mt-4 flex items-center justify-between rounded-xl bg-secondary/50 px-4 py-3">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <div className="h-3 w-3 rounded-sm bg-primary" />
-                <span>Treinou</span>
-                <div className="ml-2 h-3 w-3 rounded-sm bg-secondary" />
-                <span>Não treinou</span>
-              </div>
-              <span className="text-sm font-bold text-primary">{monthWorkouts} dias</span>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <BottomNav />
-    </div>
+            <span className="text-sm font-bold text-primary">{monthWorkouts} dias</span>
+          </div>
+        </CardContent>
+      </Card>
+    </AppScaffold>
   );
 };
 

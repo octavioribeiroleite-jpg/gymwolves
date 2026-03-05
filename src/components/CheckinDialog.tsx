@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, AlertTriangle, Camera, X } from "lucide-react";
+import { Loader2, AlertTriangle, Camera, ImagePlus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const WORKOUT_TYPES = [
@@ -50,6 +50,7 @@ const CheckinDialog = ({ open, onOpenChange, groupId, alreadyCheckedIn }: Checki
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const galleryRef = useRef<HTMLInputElement>(null);
   const createCheckin = useCreateCheckin();
 
   const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -65,6 +66,7 @@ const CheckinDialog = ({ open, onOpenChange, groupId, alreadyCheckedIn }: Checki
     setPhoto(null);
     setPhotoPreview(null);
     if (fileRef.current) fileRef.current.value = "";
+    if (galleryRef.current) galleryRef.current.value = "";
   };
 
   const uploadPhoto = async (): Promise<string | null> => {
@@ -191,20 +193,37 @@ const CheckinDialog = ({ open, onOpenChange, groupId, alreadyCheckedIn }: Checki
               </button>
             </div>
           ) : (
-            <button
-              type="button"
-              onClick={() => fileRef.current?.click()}
-              className="flex w-full items-center justify-center gap-2 rounded-[16px] border-2 border-dashed border-subtle bg-secondary/50 py-6 text-body text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
-            >
-              <Camera className="h-5 w-5" />
-              Adicionar foto do treino
-            </button>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => fileRef.current?.click()}
+                className="flex items-center justify-center gap-2 rounded-[16px] border-2 border-dashed border-subtle bg-secondary/50 py-5 text-body text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
+              >
+                <Camera className="h-5 w-5" />
+                Câmera
+              </button>
+              <button
+                type="button"
+                onClick={() => galleryRef.current?.click()}
+                className="flex items-center justify-center gap-2 rounded-[16px] border-2 border-dashed border-subtle bg-secondary/50 py-5 text-body text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
+              >
+                <ImagePlus className="h-5 w-5" />
+                Galeria
+              </button>
+            </div>
           )}
           <input
             ref={fileRef}
             type="file"
             accept="image/*"
             capture="environment"
+            onChange={handlePhotoSelect}
+            className="hidden"
+          />
+          <input
+            ref={galleryRef}
+            type="file"
+            accept="image/*"
             onChange={handlePhotoSelect}
             className="hidden"
           />

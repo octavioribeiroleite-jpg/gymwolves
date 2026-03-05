@@ -57,9 +57,9 @@ const Dashboard = () => {
   if (!group) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-background p-6 text-center">
-        <img src={logo} alt="Ratos de Academia" className="h-20 w-20 object-contain" />
+        <img src={logo} alt="GYM WOVES" className="h-24 w-24 object-contain drop-shadow-[0_0_20px_hsl(142_71%_45%/0.3)]" />
         <div>
-          <h1 className="font-display text-2xl font-bold">Bem-vindo ao Ratos de Academia!</h1>
+          <h1 className="text-3xl font-bold tracking-[0.15em]" style={{ fontFamily: "'Anton', sans-serif" }}>GYM WOVES 🐺</h1>
           <p className="mt-2 text-muted-foreground">
             Crie ou entre em um grupo para começar seu desafio.
           </p>
@@ -96,8 +96,8 @@ const Dashboard = () => {
       <header className="sticky top-0 z-40 border-b border-border/50 bg-background/95 px-4 py-4 backdrop-blur-xl">
         <div className="mx-auto max-w-md">
           <div className="flex items-center gap-2">
-            <img src={logo} alt="Ratos de Academia" className="h-8 w-8 object-contain" />
-            <span className="text-xs font-medium uppercase tracking-wider text-primary">Ratos de Academia</span>
+            <img src={logo} alt="GYM WOVES" className="h-8 w-8 object-contain" />
+            <span className="text-xs font-bold uppercase tracking-[0.15em] text-primary" style={{ fontFamily: "'Anton', sans-serif" }}>GYM WOVES</span>
           </div>
           <h1 className="font-display text-xl font-bold">{challenge.name}</h1>
           <p className="text-xs text-muted-foreground">

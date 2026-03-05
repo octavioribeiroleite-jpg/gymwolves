@@ -23,9 +23,9 @@ export default defineConfig(({ mode }) => ({
         navigateFallbackDenylist: [/^\/~oauth/],
       },
       manifest: {
-        name: "Ratos de Academia",
-        short_name: "Ratos",
-        description: "Desafio de treinos em grupo com seus parceiros de academia",
+        name: "GYM WOVES",
+        short_name: "GYM WOVES",
+        description: "Treine. Evolua. Repita. Desafio fitness em grupo.",
         theme_color: "#16a34a",
         background_color: "#0a0a0a",
         display: "standalone",

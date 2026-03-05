@@ -9,7 +9,6 @@ import { differenceInDays } from "date-fns";
 import BottomNav from "@/components/BottomNav";
 import CheckinDialog from "@/components/CheckinDialog";
 import ActivityFeed from "@/components/ActivityFeed";
-import SidebarMenu from "@/components/SidebarMenu";
 import Onboarding from "./Onboarding";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import ChallengeInfoCard from "@/components/dashboard/ChallengeInfoCard";
@@ -18,13 +17,11 @@ import ProgressSection from "@/components/dashboard/ProgressSection";
 import StatsSection from "@/components/dashboard/StatsSection";
 import MiniRanking from "@/components/dashboard/MiniRanking";
 import DashboardFAB from "@/components/dashboard/DashboardFAB";
-import DashboardTabs from "@/components/dashboard/DashboardTabs";
 
 const Dashboard = () => {
   const { user } = useAuth();
   const { activeGroupId } = useActiveGroup();
   const [checkinOpen, setCheckinOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("detalhes");
 
   const { data: group, isLoading } = useGroupDetail(activeGroupId || undefined);
   const { data: members } = useGroupMembers(activeGroupId || undefined);
@@ -106,19 +103,11 @@ const Dashboard = () => {
           />
         )}
 
-        <MiniRanking
-          topMembers={topMembers}
-          currentUserId={user?.id}
-        />
-
-        {activeTab === "detalhes" && (
-          <ActivityFeed groupId={activeGroupId} />
-        )}
+        {activeGroupId && <ActivityFeed groupId={activeGroupId} />}
+        <MiniRanking topMembers={topMembers} currentUserId={user?.id} />
       </div>
 
       <DashboardFAB onCheckin={() => setCheckinOpen(true)} />
-
-      <DashboardTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
       <CheckinDialog
         open={checkinOpen}

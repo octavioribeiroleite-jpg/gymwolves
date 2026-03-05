@@ -32,7 +32,7 @@ const DashboardFAB = ({ onCheckin }: DashboardFABProps) => {
 
       {/* Action menu */}
       {open && (
-        <div className="fixed bottom-[140px] right-4 z-50 flex flex-col items-end gap-2">
+        <div className="fixed bottom-24 right-4 z-50 flex flex-col items-end gap-2">
           {actions.map((a) => (
             <button
               key={a.key}
@@ -49,7 +49,7 @@ const DashboardFAB = ({ onCheckin }: DashboardFABProps) => {
       {/* FAB button */}
       <button
         onClick={() => setOpen(!open)}
-        className={`fixed bottom-[88px] right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg glow-primary transition-all active:scale-90 ${
+        className={`fixed bottom-6 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg glow-primary transition-all active:scale-90 ${
           open ? "rotate-45" : ""
         }`}
         aria-label="Ações rápidas"

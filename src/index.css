@@ -7,16 +7,16 @@
 @layer base {
   :root {
     /* ─── Background & Surface ─── */
-    --background: 240 6% 12%;             /* #1C1C1E */
-    --foreground: 0 0% 100%;              /* #FFFFFF */
+    --background: 220 14% 96%;            /* #F3F4F6 */
+    --foreground: 220 39% 11%;            /* #111827 */
 
-    --surface-1: 240 4% 18%;              /* #2C2C2E */
-    --surface-2: 240 3% 15%;              /* #252528 */
-    --card: 240 4% 18%;                   /* #2C2C2E */
-    --card-foreground: 0 0% 100%;
+    --surface-1: 0 0% 100%;              /* #FFFFFF */
+    --surface-2: 210 20% 98%;            /* #F9FAFB */
+    --card: 0 0% 100%;                   /* #FFFFFF */
+    --card-foreground: 220 39% 11%;      /* #111827 */
 
-    --popover: 240 4% 18%;
-    --popover-foreground: 0 0% 100%;
+    --popover: 0 0% 100%;               /* #FFFFFF */
+    --popover-foreground: 220 39% 11%;   /* #111827 */
 
     /* ─── Primary (Verde Matilha) ─── */
     --primary: 142 71% 45%;               /* #22C55E */
@@ -24,12 +24,12 @@
     --primary-foreground: 0 0% 100%;
 
     /* ─── Secondary ─── */
-    --secondary: 240 4% 18%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 210 20% 98%;            /* #F9FAFB */
+    --secondary-foreground: 220 39% 11%; /* #111827 */
 
     /* ─── Muted ─── */
-    --muted: 240 4% 18%;
-    --muted-foreground: 240 5% 63%;       /* #A1A1AA */
+    --muted: 210 20% 98%;               /* #F9FAFB */
+    --muted-foreground: 220 9% 46%;      /* #6B7280 */
 
     /* ─── Accent ─── */
     --accent: 142 71% 45%;
@@ -50,24 +50,24 @@
     --success-foreground: 0 0% 100%;
 
     /* ─── Border / Input / Ring ─── */
-    --border: 240 3% 24%;                 /* #3A3A3C */
-    --input: 240 3% 15%;                  /* #252528 */
+    --border: 220 13% 91%;               /* #E5E7EB */
+    --input: 213 27% 95%;                /* #F1F5F9 */
     --ring: 142 71% 45%;
 
     --radius: 1rem;
 
     /* ─── Sidebar ─── */
-    --sidebar-background: 240 6% 12%;
-    --sidebar-foreground: 0 0% 100%;
+    --sidebar-background: 220 14% 96%;   /* #F3F4F6 */
+    --sidebar-foreground: 220 39% 11%;   /* #111827 */
     --sidebar-primary: 142 71% 45%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 4% 18%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 240 3% 24%;
+    --sidebar-accent: 210 20% 98%;       /* #F9FAFB */
+    --sidebar-accent-foreground: 220 39% 11%; /* #111827 */
+    --sidebar-border: 220 13% 91%;       /* #E5E7EB */
     --sidebar-ring: 142 71% 45%;
 
     /* ─── Text Tertiário ─── */
-    --text-tertiary: 220 10% 42%;         /* #6B7280 */
+    --text-tertiary: 220 9% 64%;          /* #9CA3AF */
 
     /* ─── Medalhas ─── */
     --medal-gold: 48 96% 53%;             /* #FACC15 */
@@ -100,11 +100,11 @@
 
 @layer utilities {
   .glow-primary {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    box-shadow: 0 10px 20px rgba(34,197,94,0.25);
   }
 
   .glow-primary-sm {
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px rgba(34,197,94,0.15);
   }
 
   .gradient-primary {
@@ -112,19 +112,19 @@
   }
 
   .gradient-card {
-    background: linear-gradient(180deg, hsl(240 4% 20%), hsl(240 4% 16%));
+    background: linear-gradient(180deg, hsl(0 0% 100%), hsl(210 20% 98%));
   }
 
   .text-secondary-alpha {
-    color: hsl(240 5% 63%);
+    color: hsl(220 9% 46%);
   }
 
   .text-tertiary-alpha {
-    color: hsl(220 10% 42%);
+    color: hsl(220 9% 64%);
   }
 
   .border-subtle {
-    border-color: hsl(240 3% 24%);
+    border-color: hsl(220 13% 91%);
   }
 
   .surface-1 {
@@ -136,7 +136,7 @@
   }
 
   .card-shadow {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
   }
 
   .transition-default {

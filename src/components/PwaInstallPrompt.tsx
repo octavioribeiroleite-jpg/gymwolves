@@ -68,11 +68,13 @@ export default function PwaInstallPrompt() {
     return () => window.removeEventListener("beforeinstallprompt", handler);
   }, []);
 
-  // Initial show
+  // Initial show — shorter delay for better UX
   useEffect(() => {
     const t = setTimeout(() => {
-      if (shouldShow()) setOpen(true);
-    }, 1500);
+      if (shouldShow()) {
+        setOpen(true);
+      }
+    }, 800);
     return () => clearTimeout(t);
   }, [shouldShow]);
 

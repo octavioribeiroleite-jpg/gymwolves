@@ -159,7 +159,7 @@ const GroupDetails = () => {
       try {
         await navigator.share({
           title: group.name,
-          text: `Entre no desafio "${group.name}"! Código: ${group.invite_code}`,
+          text: `Entre no desafio "${group.name}"! Código: ${group.invite_code}\nBaixe o app: https://gymwolves.lovable.app`,
         });
       } catch { /* cancelled */ }
     } else {

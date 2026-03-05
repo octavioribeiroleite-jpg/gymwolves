@@ -95,50 +95,53 @@ export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
           {/* Wolf eyes — diffuse glow */}
           <div className="relative z-10 flex items-center gap-12">
             {/* Left eye */}
-            <motion.div
-              className="relative"
-              style={{ width: 60, height: 36 }}
-              animate={{
-                opacity: phase >= 2 && phase <= 6 ? 1 : 0,
-                scaleY: phase === 2 ? [0.1, 1.3, 1] : phase === 3 || phase === 4 ? 1.2 : phase === 5 ? 0.15 : phase >= 6 ? 0 : 1,
-                scaleX: phase === 4 ? 1.1 : 1,
-              }}
-              transition={{
-                duration: phase === 2 ? 0.35 : 0.45,
-                ease: "easeInOut",
-              }}
-            >
-              {/* Outer glow */}
-              <div
-                className="absolute inset-0 rounded-full"
-                style={{
-                  background: "radial-gradient(ellipse at center, #22C55E 0%, rgba(34,197,94,0.4) 50%, transparent 80%)",
-                  filter: "blur(18px)",
-                }}
-              />
-              {/* Inner bright core */}
-              <div
-                className="absolute rounded-full"
-                style={{
-                  top: "15%",
-                  left: "20%",
-                  width: "60%",
-                  height: "70%",
-                  background: "radial-gradient(ellipse at center, rgba(255,255,255,0.9) 0%, rgba(200,255,200,0.6) 40%, transparent 80%)",
-                  filter: "blur(6px)",
-                }}
-              />
-              {/* LED Pupil */}
+            <div className="relative" style={{ width: 60, height: 36 }}>
               <motion.div
-                className="absolute rounded-full"
+                className="relative w-full h-full"
+                animate={{
+                  opacity: phase >= 2 && phase <= 6 ? 1 : 0,
+                  scaleY: phase === 2 ? [0.1, 1.3, 1] : phase === 3 || phase === 4 ? 1.2 : phase === 5 ? 0.15 : phase >= 6 ? 0 : 1,
+                  scaleX: phase === 4 ? 1.1 : 1,
+                }}
+                transition={{
+                  duration: phase === 2 ? 0.35 : 0.45,
+                  ease: "easeInOut",
+                }}
+              >
+                {/* Outer glow */}
+                <div
+                  className="absolute inset-0 rounded-full"
+                  style={{
+                    background: "radial-gradient(ellipse at center, #22C55E 0%, rgba(34,197,94,0.4) 50%, transparent 80%)",
+                    filter: "blur(18px)",
+                  }}
+                />
+                {/* Inner bright core */}
+                <div
+                  className="absolute rounded-full"
+                  style={{
+                    top: "15%",
+                    left: "20%",
+                    width: "60%",
+                    height: "70%",
+                    background: "radial-gradient(ellipse at center, rgba(255,255,255,0.9) 0%, rgba(200,255,200,0.6) 40%, transparent 80%)",
+                    filter: "blur(6px)",
+                  }}
+                />
+              </motion.div>
+              {/* LED Pupil — outside eye scaleY */}
+              <motion.div
+                className="absolute"
                 style={{
-                  top: "15%",
+                  top: "50%",
                   left: "50%",
-                  marginLeft: -2,
-                  width: 4,
-                  height: "70%",
-                  backgroundColor: "#fff",
-                  boxShadow: `0 0 8px ${NEON}, 0 0 20px ${NEON}, 0 0 40px ${NEON}`,
+                  marginLeft: -3,
+                  marginTop: -14,
+                  width: 6,
+                  height: 28,
+                  borderRadius: "3px / 14px",
+                  background: `radial-gradient(ellipse at center, #fff 0%, rgba(200,255,200,0.8) 40%, ${NEON} 100%)`,
+                  boxShadow: `0 0 8px ${NEON}, 0 0 20px ${NEON}, 0 0 40px ${NEON}, 0 0 60px rgba(34,197,94,0.4)`,
                 }}
                 animate={{
                   opacity: phase >= 2 && phase <= 4 ? 1 : 0,
@@ -146,53 +149,56 @@ export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
                 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
               />
-            </motion.div>
+            </div>
 
             {/* Right eye */}
-            <motion.div
-              className="relative"
-              style={{ width: 60, height: 36 }}
-              animate={{
-                opacity: phase >= 2 && phase <= 6 ? 1 : 0,
-                scaleY: phase === 2 ? [0.1, 1.3, 1] : phase === 3 || phase === 4 ? 1.2 : phase === 5 ? 0.15 : phase >= 6 ? 0 : 1,
-                scaleX: phase === 4 ? 1.1 : 1,
-              }}
-              transition={{
-                duration: phase === 2 ? 0.35 : 0.45,
-                ease: "easeInOut",
-              }}
-            >
-              {/* Outer glow */}
-              <div
-                className="absolute inset-0 rounded-full"
-                style={{
-                  background: "radial-gradient(ellipse at center, #22C55E 0%, rgba(34,197,94,0.4) 50%, transparent 80%)",
-                  filter: "blur(18px)",
-                }}
-              />
-              {/* Inner bright core */}
-              <div
-                className="absolute rounded-full"
-                style={{
-                  top: "15%",
-                  left: "20%",
-                  width: "60%",
-                  height: "70%",
-                  background: "radial-gradient(ellipse at center, rgba(255,255,255,0.9) 0%, rgba(200,255,200,0.6) 40%, transparent 80%)",
-                  filter: "blur(6px)",
-                }}
-              />
-              {/* LED Pupil */}
+            <div className="relative" style={{ width: 60, height: 36 }}>
               <motion.div
-                className="absolute rounded-full"
+                className="relative w-full h-full"
+                animate={{
+                  opacity: phase >= 2 && phase <= 6 ? 1 : 0,
+                  scaleY: phase === 2 ? [0.1, 1.3, 1] : phase === 3 || phase === 4 ? 1.2 : phase === 5 ? 0.15 : phase >= 6 ? 0 : 1,
+                  scaleX: phase === 4 ? 1.1 : 1,
+                }}
+                transition={{
+                  duration: phase === 2 ? 0.35 : 0.45,
+                  ease: "easeInOut",
+                }}
+              >
+                {/* Outer glow */}
+                <div
+                  className="absolute inset-0 rounded-full"
+                  style={{
+                    background: "radial-gradient(ellipse at center, #22C55E 0%, rgba(34,197,94,0.4) 50%, transparent 80%)",
+                    filter: "blur(18px)",
+                  }}
+                />
+                {/* Inner bright core */}
+                <div
+                  className="absolute rounded-full"
+                  style={{
+                    top: "15%",
+                    left: "20%",
+                    width: "60%",
+                    height: "70%",
+                    background: "radial-gradient(ellipse at center, rgba(255,255,255,0.9) 0%, rgba(200,255,200,0.6) 40%, transparent 80%)",
+                    filter: "blur(6px)",
+                  }}
+                />
+              </motion.div>
+              {/* LED Pupil — outside eye scaleY */}
+              <motion.div
+                className="absolute"
                 style={{
-                  top: "15%",
+                  top: "50%",
                   left: "50%",
-                  marginLeft: -2,
-                  width: 4,
-                  height: "70%",
-                  backgroundColor: "#fff",
-                  boxShadow: `0 0 8px ${NEON}, 0 0 20px ${NEON}, 0 0 40px ${NEON}`,
+                  marginLeft: -3,
+                  marginTop: -14,
+                  width: 6,
+                  height: 28,
+                  borderRadius: "3px / 14px",
+                  background: `radial-gradient(ellipse at center, #fff 0%, rgba(200,255,200,0.8) 40%, ${NEON} 100%)`,
+                  boxShadow: `0 0 8px ${NEON}, 0 0 20px ${NEON}, 0 0 40px ${NEON}, 0 0 60px rgba(34,197,94,0.4)`,
                 }}
                 animate={{
                   opacity: phase >= 2 && phase <= 4 ? 1 : 0,
@@ -200,7 +206,7 @@ export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
                 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
               />
-            </motion.div>
+            </div>
           </div>
         </motion.div>
       )}

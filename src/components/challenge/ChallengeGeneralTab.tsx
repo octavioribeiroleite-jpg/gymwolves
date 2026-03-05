@@ -2,13 +2,16 @@ import { useMemo, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useGroupMembers } from "@/hooks/useGroupData";
 import { useGroupCheckins, computeDaysActive, computeStreaks } from "@/hooks/useCheckins";
+import { useChallengePosts, useUserLikes, useToggleLike, useUpdatePost, useDeletePost } from "@/hooks/useChallengePosts";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { CalendarDays, Copy, Flame, Share2, Trophy, Settings } from "lucide-react";
+import { CalendarDays, Copy, Flame, Share2, Trophy, Settings, Loader2, ImageIcon } from "lucide-react";
 import { format, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 import StatCard from "@/components/ds/StatCard";
+import PostCard from "@/components/challenge/PostCard";
+import CommentsSheet from "@/components/challenge/CommentsSheet";
 import EditGroupDialog from "@/components/EditGroupDialog";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 
@@ -32,9 +35,18 @@ const ChallengeGeneralTab = ({ group, groupId }: Props) => {
   const { data: members } = useGroupMembers(groupId);
   const { data: checkins } = useGroupCheckins(groupId);
   const [editOpen, setEditOpen] = useState(false);
-  const [showFullRanking, setShowFullRanking] = useState(false);
+  const [commentPostId, setCommentPostId] = useState<string | null>(null);
   const isAdmin = !!group && !!user && group.created_by === user.id;
   const scoringMode = group?.scoring_mode || "days_active";
+
+  // Feed data
+  const { data: postsData, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading: postsLoading } = useChallengePosts(groupId);
+  const allPosts = useMemo(() => postsData?.pages.flatMap((p) => p.data) || [], [postsData]);
+  const postIds = useMemo(() => allPosts.map((p: any) => p.id), [allPosts]);
+  const { data: likedSet } = useUserLikes(groupId, postIds);
+  const toggleLike = useToggleLike();
+  const updatePost = useUpdatePost();
+  const deletePost = useDeletePost();
 
   const ranked = useMemo(() => {
     if (!members || !checkins || !group) return [];
@@ -91,7 +103,7 @@ const ChallengeGeneralTab = ({ group, groupId }: Props) => {
   }, [members, checkins, group, scoringMode]);
 
   const hasMore = ranked.length > 5;
-  const displayRanked = showFullRanking ? ranked : ranked.slice(0, 5);
+  const displayRanked = ranked.slice(0, 5);
 
   const totalDays = useMemo(() => {
     if (!group?.start_date || !group?.end_date) return null;
@@ -144,21 +156,18 @@ const ChallengeGeneralTab = ({ group, groupId }: Props) => {
     name.split(" ").map((w: string) => w[0]).join("").slice(0, 2).toUpperCase();
 
   return (
-    <div className="space-y-4">
-      {/* Challenge info card */}
-      <div className="rounded-[20px] surface-1 border border-subtle p-5 space-y-3">
+    <div className="space-y-3">
+      {/* ── 1. Header compacto ── */}
+      <div className="rounded-[20px] surface-1 border border-subtle p-4 space-y-2">
         <div className="flex items-center gap-2">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/10">
-            <Trophy className="h-5 w-5 text-primary" />
-          </div>
           <div className="flex-1 min-w-0">
             <h2 className="text-[17px] font-bold truncate">{group?.name}</h2>
             <p className="text-[12px] text-muted-foreground">
-              {SCORING_LABELS[scoringMode]} · {members?.length || 0} membros
+              {members?.length || 0} membros · {SCORING_LABELS[scoringMode]}
             </p>
           </div>
           {isAdmin && (
-            <Button variant="ghost" size="icon" onClick={() => setEditOpen(true)} className="shrink-0 rounded-xl">
+            <Button variant="ghost" size="icon" onClick={() => setEditOpen(true)} className="shrink-0 rounded-xl h-8 w-8">
               <Settings className="h-4 w-4 text-muted-foreground" />
             </Button>
           )}
@@ -166,40 +175,39 @@ const ChallengeGeneralTab = ({ group, groupId }: Props) => {
 
         {group?.start_date && group?.end_date && (
           <>
-            <div className="flex items-center gap-2 text-[13px] text-muted-foreground">
-              <CalendarDays className="h-4 w-4 text-primary" />
-              {format(new Date(group.start_date), "dd MMM", { locale: ptBR })} — {format(new Date(group.end_date), "dd MMM yyyy", { locale: ptBR })}
+            <div className="flex items-center justify-between text-[12px] text-muted-foreground">
+              <span className="flex items-center gap-1.5">
+                <CalendarDays className="h-3.5 w-3.5 text-primary" />
+                {format(new Date(group.start_date), "dd MMM", { locale: ptBR })} — {format(new Date(group.end_date), "dd MMM yyyy", { locale: ptBR })}
+              </span>
               {totalDays && (
-                <span className="ml-auto text-[12px] font-medium text-primary">
-                  {totalDays - daysPassed} dias restantes
+                <span className="text-[11px] font-medium text-primary">
+                  {Math.max(0, totalDays - daysPassed)} dias restantes
                 </span>
               )}
             </div>
-            <div>
-              <Progress value={timePct} className="h-[6px]" />
-              <p className="mt-1 text-[11px] text-muted-foreground text-right">{timePct}% do tempo</p>
-            </div>
+            <Progress value={timePct} className="h-[6px]" />
           </>
         )}
       </div>
 
-      {/* Invite code */}
-      <div className="rounded-[20px] surface-1 border border-subtle p-4">
-        <p className="mb-2 text-[12px] text-muted-foreground font-medium">Convide amigos</p>
+      {/* ── 2. Convite compacto ── */}
+      <div className="rounded-[20px] surface-1 border border-subtle px-4 py-3">
         <div className="flex items-center gap-2">
-          <code className="flex-1 rounded-[14px] bg-secondary px-4 py-3 text-center font-mono text-[18px] font-bold tracking-[0.3em] text-primary">
+          <span className="text-[12px] text-muted-foreground whitespace-nowrap">Código:</span>
+          <code className="flex-1 rounded-[10px] bg-secondary px-3 py-1.5 text-center font-mono text-[14px] font-bold tracking-[0.2em] text-primary">
             {group?.invite_code}
           </code>
-          <Button variant="outline" size="icon" onClick={copyCode} className="h-12 w-12 rounded-[14px] border-subtle bg-secondary">
-            <Copy className="h-4 w-4" />
+          <Button variant="outline" size="icon" onClick={copyCode} className="h-9 w-9 rounded-[12px] border-subtle bg-secondary shrink-0">
+            <Copy className="h-3.5 w-3.5" />
           </Button>
-          <Button variant="outline" size="icon" onClick={shareCode} className="h-12 w-12 rounded-[14px] border-subtle bg-secondary">
-            <Share2 className="h-4 w-4" />
+          <Button variant="outline" size="icon" onClick={shareCode} className="h-9 w-9 rounded-[12px] border-subtle bg-secondary shrink-0">
+            <Share2 className="h-3.5 w-3.5" />
           </Button>
         </div>
       </div>
 
-      {/* Ranking Top 5 */}
+      {/* ── 3. Ranking ── */}
       <div className="space-y-2">
         <div className="flex items-center justify-between px-1">
           <h3 className="text-[15px] font-bold flex items-center gap-2">
@@ -209,39 +217,39 @@ const ChallengeGeneralTab = ({ group, groupId }: Props) => {
         </div>
 
         {ranked.length === 0 ? (
-          <div className="rounded-[20px] surface-1 border border-subtle p-8 text-center">
-            <Trophy className="mx-auto h-8 w-8 text-muted-foreground/30 mb-2" />
-            <p className="text-[14px] text-muted-foreground">Nenhum participante ainda</p>
+          <div className="rounded-[20px] surface-1 border border-subtle p-6 text-center">
+            <Trophy className="mx-auto h-7 w-7 text-muted-foreground/30 mb-2" />
+            <p className="text-[13px] text-muted-foreground">Nenhum participante ainda</p>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             {displayRanked.map((m: any) => {
               const isMe = m.userId === user?.id;
               const medal = getMedalIcon(m.rank);
               return (
                 <div
                   key={m.userId}
-                  className={`flex items-center gap-3 rounded-[18px] surface-1 border p-4 transition-all ${
+                  className={`flex items-center gap-3 rounded-[18px] surface-1 border p-3 transition-all ${
                     isMe ? "border-primary/30 ring-1 ring-primary/10" : "border-subtle"
                   }`}
                 >
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-secondary">
-                    {medal ? <span className="text-lg">{medal}</span> : <span className="text-[14px] font-bold text-muted-foreground">{m.rank}</span>}
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-secondary">
+                    {medal ? <span className="text-base">{medal}</span> : <span className="text-[13px] font-bold text-muted-foreground">{m.rank}</span>}
                   </div>
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10">
                     {m.avatarUrl ? (
                       <img src={m.avatarUrl} alt="" className="h-full w-full rounded-full object-cover" />
                     ) : (
-                      <span className="text-[12px] font-bold text-primary">{getInitials(m.name)}</span>
+                      <span className="text-[11px] font-bold text-primary">{getInitials(m.name)}</span>
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
-                      <span className="text-[14px] font-bold truncate">
+                      <span className="text-[13px] font-bold truncate">
                         {m.name}
-                        {isMe && <span className="ml-1 text-[11px] text-primary font-medium">(você)</span>}
+                        {isMe && <span className="ml-1 text-[10px] text-primary font-medium">(você)</span>}
                       </span>
-                      <span className="text-[14px] font-bold text-primary ml-2 shrink-0">{m.scoreLabel}</span>
+                      <span className="text-[13px] font-bold text-primary ml-2 shrink-0">{m.scoreLabel}</span>
                     </div>
                     <div className="mt-0.5 flex gap-3 text-[11px] text-muted-foreground">
                       <span className="flex items-center gap-1">
@@ -256,10 +264,10 @@ const ChallengeGeneralTab = ({ group, groupId }: Props) => {
               );
             })}
 
-            {hasMore && !showFullRanking && (
+            {hasMore && (
               <Drawer>
                 <DrawerTrigger asChild>
-                  <Button variant="outline" className="w-full rounded-[14px] h-10 text-[13px]">
+                  <Button variant="outline" className="w-full rounded-[14px] h-9 text-[12px]">
                     Ver ranking completo
                   </Button>
                 </DrawerTrigger>
@@ -267,7 +275,7 @@ const ChallengeGeneralTab = ({ group, groupId }: Props) => {
                   <DrawerHeader>
                     <DrawerTitle>Ranking completo</DrawerTitle>
                   </DrawerHeader>
-                  <div className="px-4 pb-6 space-y-2 overflow-y-auto max-h-[70vh]">
+                  <div className="px-4 pb-6 space-y-1.5 overflow-y-auto max-h-[70vh]">
                     {ranked.map((m: any) => {
                       const isMe = m.userId === user?.id;
                       const medal = getMedalIcon(m.rank);
@@ -282,7 +290,11 @@ const ChallengeGeneralTab = ({ group, groupId }: Props) => {
                             {medal ? <span className="text-sm">{medal}</span> : <span className="text-[12px] font-bold text-muted-foreground">{m.rank}</span>}
                           </div>
                           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
-                            <span className="text-[10px] font-bold text-primary">{getInitials(m.name)}</span>
+                            {m.avatarUrl ? (
+                              <img src={m.avatarUrl} alt="" className="h-full w-full rounded-full object-cover" />
+                            ) : (
+                              <span className="text-[10px] font-bold text-primary">{getInitials(m.name)}</span>
+                            )}
                           </div>
                           <div className="flex-1 min-w-0">
                             <span className="text-[13px] font-bold truncate block">
@@ -302,12 +314,60 @@ const ChallengeGeneralTab = ({ group, groupId }: Props) => {
         )}
       </div>
 
-      {/* My stats */}
+      {/* ── 4. Estatísticas mini ── */}
       <div className="grid grid-cols-3 gap-2">
         <StatCard icon={Flame} value={myStats.streak} label="Sequência" />
         <StatCard icon={CalendarDays} value={myStats.daysActive} label="Dias ativos" />
         <StatCard icon={Trophy} value={myStats.record} label="Recorde" />
       </div>
+
+      {/* ── 5. Feed embutido ── */}
+      <div className="space-y-3">
+        <h3 className="text-[15px] font-bold px-1">Atualizações</h3>
+        {postsLoading ? (
+          <div className="flex justify-center py-6">
+            <Loader2 className="h-5 w-5 animate-spin text-primary" />
+          </div>
+        ) : allPosts.length === 0 ? (
+          <div className="rounded-[20px] surface-1 border border-subtle p-6 text-center">
+            <ImageIcon className="mx-auto h-7 w-7 text-muted-foreground/30 mb-1" />
+            <p className="text-[13px] text-muted-foreground">Nenhum post ainda</p>
+          </div>
+        ) : (
+          <>
+            {allPosts.map((post: any) => (
+              <PostCard
+                key={post.id}
+                post={post}
+                isLiked={likedSet?.has(post.id) || false}
+                onLike={() => toggleLike.mutate({ postId: post.id, isLiked: likedSet?.has(post.id) || false, challengeId: groupId })}
+                onComment={() => setCommentPostId(post.id)}
+                currentUserId={user?.id}
+                onEdit={(postId, caption) => updatePost.mutate({ postId, caption, challengeId: groupId })}
+                onDelete={(postId) => deletePost.mutate({ postId, challengeId: groupId })}
+              />
+            ))}
+            {hasNextPage && (
+              <Button
+                variant="outline"
+                className="w-full rounded-[14px] h-9 text-[12px]"
+                onClick={() => fetchNextPage()}
+                disabled={isFetchingNextPage}
+              >
+                {isFetchingNextPage ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                Carregar mais
+              </Button>
+            )}
+          </>
+        )}
+      </div>
+
+      <CommentsSheet
+        postId={commentPostId}
+        challengeId={groupId}
+        open={!!commentPostId}
+        onOpenChange={(open) => { if (!open) setCommentPostId(null); }}
+      />
 
       {isAdmin && <EditGroupDialog open={editOpen} onOpenChange={setEditOpen} group={group} />}
     </div>

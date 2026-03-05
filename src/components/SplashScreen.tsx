@@ -38,11 +38,8 @@ export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
     };
   }, [onFinish]);
 
-  const glowIntensity = phase === 4 ? 1.4 : phase >= 2 && phase <= 5 ? 1 : 0;
-  const pupilFilter = `drop-shadow(0 0 ${8 * glowIntensity}px ${NEON}) drop-shadow(0 0 ${20 * glowIntensity}px rgba(34,197,94,0.5))`;
 
-  // Eye lid vertical offset: 0 = closed, 1 = open
-  const lidOpen = phase === 3 || phase === 4 ? 1 : 0;
+
 
   return (
     <AnimatePresence>
@@ -95,131 +92,80 @@ export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
             );
           })}
 
-          {/* Wolf eyes SVG */}
-          <svg
-            width="200"
-            height="80"
-            viewBox="0 0 200 80"
-            fill="none"
-            className="relative z-10"
-            style={{ filter: pupilFilter }}
-          >
+          {/* Wolf eyes — diffuse glow */}
+          <div className="relative z-10 flex items-center gap-12">
             {/* Left eye */}
-            <g>
-              {/* Upper lid */}
-              <motion.path
-                d="M10 40 Q50 40 90 40"
-                stroke={NEON}
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                fill="none"
-                animate={{
-                  d: lidOpen
-                    ? "M10 40 Q50 18 90 40"
-                    : "M10 40 Q50 40 90 40",
-                  opacity: phase >= 3 ? 0.8 : 0,
-                }}
-                transition={{ duration: 0.5, ease: "easeInOut" }}
-              />
-              {/* Lower lid */}
-              <motion.path
-                d="M10 40 Q50 40 90 40"
-                stroke={NEON}
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                fill="none"
-                animate={{
-                  d: lidOpen
-                    ? "M10 40 Q50 62 90 40"
-                    : "M10 40 Q50 40 90 40",
-                  opacity: phase >= 3 ? 0.8 : 0,
-                }}
-                transition={{ duration: 0.5, ease: "easeInOut" }}
-              />
-              {/* Left pupil */}
-              <motion.rect
-                x="46"
-                y="30"
-                width="8"
-                height="20"
-                rx="4"
-                fill={NEON}
-                animate={{
-                  opacity: phase >= 2 && phase <= 6 ? 1 : 0,
-                  scaleY: phase === 2 ? [0.1, 1.2, 1] : phase >= 5 ? 0.1 : 1,
-                  fillOpacity: phase === 4 ? [0.8, 1, 0.8] : 1,
-                }}
-                style={{ transformOrigin: "50px 40px" }}
-                transition={{
-                  duration: phase === 2 ? 0.3 : 0.4,
-                  ease: "easeOut",
-                  fillOpacity: {
-                    duration: 0.5,
-                    repeat: phase === 4 ? Infinity : 0,
-                    ease: "easeInOut",
-                  },
+            <motion.div
+              className="relative"
+              style={{ width: 60, height: 36 }}
+              animate={{
+                opacity: phase >= 2 && phase <= 6 ? 1 : 0,
+                scaleY: phase === 2 ? [0.1, 1.3, 1] : phase === 3 || phase === 4 ? 1.2 : phase === 5 ? 0.15 : phase >= 6 ? 0 : 1,
+                scaleX: phase === 4 ? 1.1 : 1,
+              }}
+              transition={{
+                duration: phase === 2 ? 0.35 : 0.45,
+                ease: "easeInOut",
+              }}
+            >
+              {/* Outer glow */}
+              <div
+                className="absolute inset-0 rounded-full"
+                style={{
+                  background: "radial-gradient(ellipse at center, #22C55E 0%, rgba(34,197,94,0.4) 50%, transparent 80%)",
+                  filter: "blur(18px)",
                 }}
               />
-            </g>
+              {/* Inner bright core */}
+              <div
+                className="absolute rounded-full"
+                style={{
+                  top: "15%",
+                  left: "20%",
+                  width: "60%",
+                  height: "70%",
+                  background: "radial-gradient(ellipse at center, rgba(255,255,255,0.9) 0%, rgba(200,255,200,0.6) 40%, transparent 80%)",
+                  filter: "blur(6px)",
+                }}
+              />
+            </motion.div>
 
             {/* Right eye */}
-            <g>
-              {/* Upper lid */}
-              <motion.path
-                d="M110 40 Q150 40 190 40"
-                stroke={NEON}
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                fill="none"
-                animate={{
-                  d: lidOpen
-                    ? "M110 40 Q150 18 190 40"
-                    : "M110 40 Q150 40 190 40",
-                  opacity: phase >= 3 ? 0.8 : 0,
-                }}
-                transition={{ duration: 0.5, ease: "easeInOut" }}
-              />
-              {/* Lower lid */}
-              <motion.path
-                d="M110 40 Q150 40 190 40"
-                stroke={NEON}
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                fill="none"
-                animate={{
-                  d: lidOpen
-                    ? "M110 40 Q150 62 190 40"
-                    : "M110 40 Q150 40 190 40",
-                  opacity: phase >= 3 ? 0.8 : 0,
-                }}
-                transition={{ duration: 0.5, ease: "easeInOut" }}
-              />
-              {/* Right pupil */}
-              <motion.rect
-                x="146"
-                y="30"
-                width="8"
-                height="20"
-                rx="4"
-                fill={NEON}
-                animate={{
-                  opacity: phase >= 2 && phase <= 6 ? 1 : 0,
-                  scaleY: phase === 2 ? [0.1, 1.2, 1] : phase >= 5 ? 0.1 : 1,
-                  fillOpacity: phase === 4 ? [0.8, 1, 0.8] : 1,
-                }}
-                style={{ transformOrigin: "150px 40px" }}
-                transition={{
-                  duration: phase === 2 ? 0.3 : 0.4,
-                  ease: "easeOut",
-                  fillOpacity: {
-                    duration: 0.5,
-                    repeat: phase === 4 ? Infinity : 0,
-                    ease: "easeInOut",
-                  },
+            <motion.div
+              className="relative"
+              style={{ width: 60, height: 36 }}
+              animate={{
+                opacity: phase >= 2 && phase <= 6 ? 1 : 0,
+                scaleY: phase === 2 ? [0.1, 1.3, 1] : phase === 3 || phase === 4 ? 1.2 : phase === 5 ? 0.15 : phase >= 6 ? 0 : 1,
+                scaleX: phase === 4 ? 1.1 : 1,
+              }}
+              transition={{
+                duration: phase === 2 ? 0.35 : 0.45,
+                ease: "easeInOut",
+              }}
+            >
+              {/* Outer glow */}
+              <div
+                className="absolute inset-0 rounded-full"
+                style={{
+                  background: "radial-gradient(ellipse at center, #22C55E 0%, rgba(34,197,94,0.4) 50%, transparent 80%)",
+                  filter: "blur(18px)",
                 }}
               />
-            </g>
-          </svg>
+              {/* Inner bright core */}
+              <div
+                className="absolute rounded-full"
+                style={{
+                  top: "15%",
+                  left: "20%",
+                  width: "60%",
+                  height: "70%",
+                  background: "radial-gradient(ellipse at center, rgba(255,255,255,0.9) 0%, rgba(200,255,200,0.6) 40%, transparent 80%)",
+                  filter: "blur(6px)",
+                }}
+              />
+            </motion.div>
+          </div>
         </motion.div>
       )}
     </AnimatePresence>

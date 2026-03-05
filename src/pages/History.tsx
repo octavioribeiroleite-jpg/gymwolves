@@ -1,8 +1,9 @@
 import { useState, useMemo } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import { useUserGroups, useGroupMembers } from "@/hooks/useGroup";
 import { useGroupChallenges } from "@/hooks/useChallenge";
 import { useWorkoutLogs } from "@/hooks/useWorkoutLogs";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, addMonths, subMonths, isSameMonth } from "date-fns";
@@ -11,6 +12,7 @@ import { cn } from "@/lib/utils";
 import BottomNav from "@/components/BottomNav";
 
 const History = () => {
+  const { user } = useAuth();
   const { data: groups } = useUserGroups();
   const group = groups?.[0];
   const { data: members } = useGroupMembers(group?.id);
@@ -21,7 +23,7 @@ const History = () => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
-  const activeUserId = selectedUserId || members?.[0]?.user_id;
+  const activeUserId = selectedUserId || user?.id || members?.[0]?.user_id;
 
   const userDates = useMemo(() => {
     if (!logs || !activeUserId) return new Set<string>();
@@ -37,21 +39,31 @@ const History = () => {
   }, [currentMonth]);
 
   const startDayOffset = getDay(startOfMonth(currentMonth));
-  const weekDays = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+  const weekDays = ["D", "S", "T", "Q", "Q", "S", "S"];
+
+  const monthWorkouts = useMemo(() => {
+    return [...userDates].filter((d) => {
+      const date = new Date(d + "T12:00:00");
+      return isSameMonth(date, currentMonth);
+    }).length;
+  }, [userDates, currentMonth]);
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <header className="border-b bg-card px-4 py-4">
-        <h1 className="mx-auto max-w-md font-display text-xl font-bold">Histórico</h1>
+    <div className="min-h-screen bg-background pb-24">
+      <header className="sticky top-0 z-40 border-b border-border/50 bg-background/95 px-4 py-4 backdrop-blur-xl">
+        <div className="mx-auto max-w-md">
+          <h1 className="font-display text-xl font-bold">Histórico</h1>
+        </div>
       </header>
+
       <div className="mx-auto max-w-md space-y-4 p-4">
         {/* Member selector */}
         {members && members.length > 1 && (
@@ -63,10 +75,10 @@ const History = () => {
                   key={m.user_id}
                   onClick={() => setSelectedUserId(m.user_id)}
                   className={cn(
-                    "rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
+                    "rounded-xl px-4 py-2 text-sm font-medium transition-all",
                     activeUserId === m.user_id
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted text-muted-foreground hover:bg-muted/80"
+                      ? "bg-primary text-primary-foreground glow-primary"
+                      : "bg-card text-muted-foreground hover:bg-secondary"
                   )}
                 >
                   {p?.display_name || "Sem nome"}
@@ -77,24 +89,25 @@ const History = () => {
         )}
 
         {/* Calendar */}
-        <Card>
-          <CardHeader className="pb-2">
-            <div className="flex items-center justify-between">
-              <Button variant="ghost" size="icon" onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}>
+        <Card className="border-0">
+          <CardContent className="p-5">
+            {/* Month navigation */}
+            <div className="mb-4 flex items-center justify-between">
+              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-xl" onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}>
                 <ChevronLeft className="h-4 w-4" />
               </Button>
-              <CardTitle className="text-base font-display capitalize">
+              <span className="text-sm font-semibold font-display capitalize">
                 {format(currentMonth, "MMMM yyyy", { locale: ptBR })}
-              </CardTitle>
-              <Button variant="ghost" size="icon" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}>
+              </span>
+              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-xl" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}>
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
-          </CardHeader>
-          <CardContent>
+
+            {/* Week days header */}
             <div className="grid grid-cols-7 gap-1 text-center">
-              {weekDays.map((d) => (
-                <div key={d} className="py-1 text-xs font-medium text-muted-foreground">
+              {weekDays.map((d, i) => (
+                <div key={i} className="py-1 text-[11px] font-medium text-muted-foreground">
                   {d}
                 </div>
               ))}
@@ -110,11 +123,11 @@ const History = () => {
                   <div
                     key={dateStr}
                     className={cn(
-                      "flex h-9 w-full items-center justify-center rounded-md text-sm transition-colors",
+                      "flex h-10 w-full items-center justify-center rounded-xl text-sm transition-all",
                       worked && "bg-primary text-primary-foreground font-semibold",
-                      !worked && !isFuture && "bg-muted/50",
+                      !worked && !isFuture && "bg-secondary/50",
                       isFuture && "text-muted-foreground/30",
-                      isToday && !worked && "ring-2 ring-primary/30"
+                      isToday && !worked && "ring-2 ring-primary/40"
                     )}
                   >
                     {format(day, "d")}
@@ -123,31 +136,20 @@ const History = () => {
               })}
             </div>
 
-            {/* Legend */}
-            <div className="mt-4 flex items-center justify-center gap-4 text-xs text-muted-foreground">
-              <div className="flex items-center gap-1.5">
+            {/* Stats */}
+            <div className="mt-4 flex items-center justify-between rounded-xl bg-secondary/50 px-4 py-3">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <div className="h-3 w-3 rounded-sm bg-primary" />
                 <span>Treinou</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="h-3 w-3 rounded-sm bg-muted/50" />
+                <div className="ml-2 h-3 w-3 rounded-sm bg-secondary" />
                 <span>Não treinou</span>
               </div>
-            </div>
-
-            {/* Stats */}
-            <div className="mt-3 text-center text-sm text-muted-foreground">
-              <strong className="text-foreground">
-                {[...userDates].filter((d) => {
-                  const date = new Date(d);
-                  return isSameMonth(date, currentMonth);
-                }).length}
-              </strong>{" "}
-              treinos neste mês
+              <span className="text-sm font-bold text-primary">{monthWorkouts} dias</span>
             </div>
           </CardContent>
         </Card>
       </div>
+
       <BottomNav />
     </div>
   );

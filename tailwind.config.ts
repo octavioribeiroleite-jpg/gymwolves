@@ -85,11 +85,16 @@ export default {
           "50%": { transform: "scale(1.15)" },
           "100%": { transform: "scale(1)" },
         },
+        "pulse-glow": {
+          "0%, 100%": { boxShadow: "0 0 20px hsl(142 71% 45% / 0.2)" },
+          "50%": { boxShadow: "0 0 30px hsl(142 71% 45% / 0.4)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "check-bounce": "check-bounce 0.3s ease-out",
+        "pulse-glow": "pulse-glow 2s ease-in-out infinite",
       },
     },
   },

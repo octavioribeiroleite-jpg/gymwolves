@@ -1,14 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Dumbbell, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useEffect } from "react";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -53,33 +52,35 @@ const Auth = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-sm">
-        <CardHeader className="text-center">
-          <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-            <Dumbbell className="h-6 w-6" />
-          </div>
-          <CardTitle className="font-display text-2xl">Ratos de Academia</CardTitle>
-          <CardDescription>
-            {isLogin ? "Entre na sua conta" : "Crie sua conta"}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+    <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
+      <div className="mb-8 text-center">
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/15 glow-primary">
+          <Dumbbell className="h-8 w-8 text-primary" />
+        </div>
+        <h1 className="font-display text-3xl font-bold">Ratos de Academia</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {isLogin ? "Entre na sua conta" : "Crie sua conta"}
+        </p>
+      </div>
+
+      <Card className="w-full max-w-sm border-0">
+        <CardContent className="p-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
               <div className="space-y-2">
-                <Label htmlFor="name">Nome</Label>
+                <Label htmlFor="name" className="text-xs font-medium text-muted-foreground">Nome</Label>
                 <Input
                   id="name"
                   placeholder="Seu nome"
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
                   required={!isLogin}
+                  className="h-12 rounded-xl border-0 bg-secondary"
                 />
               </div>
             )}
             <div className="space-y-2">
-              <Label htmlFor="email">E-mail</Label>
+              <Label htmlFor="email" className="text-xs font-medium text-muted-foreground">E-mail</Label>
               <Input
                 id="email"
                 type="email"
@@ -87,10 +88,11 @@ const Auth = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                className="h-12 rounded-xl border-0 bg-secondary"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Senha</Label>
+              <Label htmlFor="password" className="text-xs font-medium text-muted-foreground">Senha</Label>
               <Input
                 id="password"
                 type="password"
@@ -99,18 +101,23 @@ const Auth = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={6}
+                className="h-12 rounded-xl border-0 bg-secondary"
               />
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button
+              type="submit"
+              className="h-14 w-full rounded-2xl text-base font-semibold glow-primary"
+              disabled={loading}
+            >
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {isLogin ? "Entrar" : "Criar conta"}
             </Button>
           </form>
-          <div className="mt-4 text-center text-sm text-muted-foreground">
+          <div className="mt-6 text-center text-sm text-muted-foreground">
             {isLogin ? "Não tem conta?" : "Já tem conta?"}{" "}
             <button
               onClick={() => setIsLogin(!isLogin)}
-              className="text-primary underline hover:text-primary/80"
+              className="font-semibold text-primary hover:text-primary/80"
             >
               {isLogin ? "Criar conta" : "Fazer login"}
             </button>

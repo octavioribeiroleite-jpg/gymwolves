@@ -10,6 +10,8 @@ import Dashboard from "./pages/Dashboard";
 import Group from "./pages/Group";
 import Challenge from "./pages/Challenge";
 import History from "./pages/History";
+import Ranking from "./pages/Ranking";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,6 +29,8 @@ const App = () => (
             <Route path="/grupo" element={<ProtectedRoute><Group /></ProtectedRoute>} />
             <Route path="/desafio" element={<ProtectedRoute><Challenge /></ProtectedRoute>} />
             <Route path="/historico" element={<ProtectedRoute><History /></ProtectedRoute>} />
+            <Route path="/ranking" element={<ProtectedRoute><Ranking /></ProtectedRoute>} />
+            <Route path="/perfil" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>

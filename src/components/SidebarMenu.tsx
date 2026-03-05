@@ -28,9 +28,26 @@ import {
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import logo from "@/assets/logo.png";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
+import { Download } from "lucide-react";
+
+interface BeforeInstallPromptEvent extends Event {
+  prompt(): Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+}
+
+function isStandalone() {
+  return (
+    window.matchMedia("(display-mode: standalone)").matches ||
+    (navigator as any).standalone === true
+  );
+}
+
+function isIos() {
+  return /iphone|ipad|ipod/i.test(navigator.userAgent);
+}
 
 const itemVariants = {
   hidden: { opacity: 0, x: -16 },
@@ -74,6 +91,39 @@ const SidebarMenu = () => {
   const { data: group } = useGroupDetail(activeGroupId || undefined);
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [isInstalled, setIsInstalled] = useState(isStandalone());
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
+    };
+    window.addEventListener("beforeinstallprompt", handler);
+    const onInstalled = () => setIsInstalled(true);
+    window.addEventListener("appinstalled", onInstalled);
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handler);
+      window.removeEventListener("appinstalled", onInstalled);
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    setOpen(false);
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === "accepted") {
+        localStorage.setItem("gymwolves_pwa_installed", "true");
+        setIsInstalled(true);
+        toast.success("App instalado com sucesso! 🐺");
+      }
+    } else if (isIos()) {
+      toast("No Safari, toque em Compartilhar → Adicionar à Tela de Início", { duration: 5000 });
+    } else {
+      toast("No menu do navegador (⋮), selecione \"Instalar aplicativo\"", { duration: 5000 });
+    }
+  };
 
   const go = (path: string) => {
     setOpen(false);
@@ -117,6 +167,7 @@ const SidebarMenu = () => {
 
   const generalItems = [
     { icon: Share2, label: "Compartilhar o app", action: shareApp, highlight: true },
+    ...(!isInstalled ? [{ icon: Download, label: "Instalar app", action: handleInstallClick, highlight: true }] : []),
     { icon: Plus, label: "Criar grupo", action: () => go("/grupos/criar") },
     { icon: LogIn, label: "Juntar-se ao grupo", action: () => go("/grupos/entrar") },
     { icon: CheckCircle, label: "Desafios concluídos", action: () => go("/desafios-concluidos") },

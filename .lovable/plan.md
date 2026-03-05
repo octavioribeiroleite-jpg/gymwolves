@@ -1,28 +1,18 @@
 
 
-## Splash Screen — Olhos de Lobo (Imagem + Animação)
+## Corrigir cor da barra de status para tema claro
 
-Usar a imagem enviada pelo usuario como base da splash screen. Sem logo, sem titulo, sem tagline. Apenas os olhos com animacao de abertura e piscada.
+O problema: a `theme-color` no `index.html` e no manifest PWA está definida como `#0B1220` (azul escuro/preto), que era do tema antigo. E o `apple-mobile-web-app-status-bar-style` está como `black-translucent`. Isso faz a barra de status do celular ficar escura, destoando do app que agora é claro.
 
-### Abordagem
+### Alterações
 
-1. **Copiar a imagem** para `src/assets/wolf-eyes.png`
-2. **Reescrever `SplashScreen.tsx`** com animacao simples usando a imagem real:
-   - A imagem fica centralizada na tela com fundo `#F3F4F6`
-   - Animacao via `clipPath` ou `scaleY` para simular abertura dos olhos (uma faixa horizontal que expande verticalmente revelando a imagem)
-   - Glow verde pulsante ao redor via box-shadow animado
+1. **`index.html`** (linha 6-8):
+   - `theme-color`: de `#0B1220` para `#F3F4F6` (cinza claro do fundo do app)
+   - `apple-mobile-web-app-status-bar-style`: de `black-translucent` para `default` (barra clara com texto escuro)
 
-### Sequencia de Animacao (framer-motion)
+2. **`vite.config.ts`** — manifest PWA (linhas 33-34):
+   - `theme_color`: de `#0B1220` para `#F3F4F6`
+   - `background_color`: de `#0B1220` para `#F3F4F6`
 
-1. **0-0.6s**: Tela cinza vazia, glow verde sutil aparece no centro
-2. **0.6-1.4s**: Olhos "abrem" — a imagem aparece via `clipPath: inset(45% 0 45% 0)` animando para `inset(0 0 0 0)`, simulando palpebras abrindo
-3. **1.4-2.4s**: Olhos abertos, glow pulsa. Piscada lenta (clipPath fecha parcialmente e reabre)
-4. **2.4-3.0s**: Olhos fecham (clipPath volta a fechar) + fade out
-5. **3.0-3.5s**: Tela limpa, app inicia (onFinish)
-
-### Arquivo alterado
-1. **`src/components/SplashScreen.tsx`** — Reescrever completamente. Remover WolfFace SVG, Particles, logo, titulo, tagline. Usar apenas a imagem PNG com animacoes de clipPath
-
-### Resultado
-Splash minimalista: fundo cinza, os olhos verdes neon da imagem aparecem como se o lobo abrisse os olhos, pisca uma vez de forma imponente, depois fecha e o app inicia.
+Isso sincroniza a barra de status com o tema claro do app, criando a experiência imersiva desejada.
 

@@ -1,22 +1,20 @@
 
 
-## Tornar o banner clicável com upload de imagem
+## Atualizar imagem de compartilhamento (OG Image)
 
 ### Problema
-O banner "Foto do banner" na tela de criação de grupo é apenas um `div` estático sem interação. Precisa abrir o seletor de arquivo ao clicar e exibir a imagem selecionada.
+As meta tags `og:image` e `twitter:image` apontam para um screenshot antigo hospedado no R2. Quando o link é compartilhado no WhatsApp, aparece essa imagem antiga em vez da logo do app.
 
-### Alterações em `src/pages/CreateGroup.tsx`
+### Solução
 
-1. Adicionar estado `bannerFile` e `bannerPreview` (igual ao padrão do CreatePostDialog)
-2. Adicionar um `<input type="file" accept="image/*" ref={...} className="hidden" />` 
-3. Transformar o `div` do banner em um `button` (ou adicionar `onClick` + `cursor-pointer`) que dispara o click no input hidden
-4. Ao selecionar arquivo: gerar preview com `URL.createObjectURL` e exibir no banner
-5. No `handleCreate`: fazer upload da imagem para o bucket `checkin-photos` (caminho `${user.id}/banner_${Date.now()}.${ext}`) antes de criar o grupo
-6. Passar a URL pública do banner para o `createGroup.mutate` (se o campo `banner_url` existir na tabela `groups`)
+Criar uma imagem OG personalizada (1200x630px) com fundo escuro `#0B1220` e a logo do GYM WOLVES centralizada, para ser usada como preview de compartilhamento. Alternativamente, usar a logo existente (`/logo.png`) diretamente.
 
-### Verificação necessária
-Checar se a tabela `groups` possui coluna para banner. Se não tiver, será necessária uma migração para adicionar `banner_url text`.
+**Melhor abordagem**: Usar `/logo.png` já existente no projeto como OG image, referenciando com URL absoluta (`https://gymwolves.lovable.app/logo.png`).
 
-### Resultado
-O usuário toca no banner, abre a galeria/câmera, seleciona a foto, vê o preview, e ao criar o grupo a imagem é salva.
+### Alterações em `index.html`
+- Atualizar `og:image` de URL do R2 para `https://gymwolves.lovable.app/logo.png`
+- Atualizar `twitter:image` igualmente
+- Mudar `twitter:card` de `summary_large_image` para `summary` (melhor para logos quadradas)
+
+> **Nota**: O WhatsApp pode cachear a imagem antiga por algum tempo. Para forçar atualização, pode-se usar ferramentas como o [Facebook Sharing Debugger](https://developers.facebook.com/tools/debug/).
 

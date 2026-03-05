@@ -149,6 +149,36 @@ export const useJoinGroup = () => {
   });
 };
 
+// ── Update group (admin only) ──
+export const useUpdateGroup = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ groupId, updates }: {
+      groupId: string;
+      updates: {
+        name?: string;
+        goal_total?: number;
+        start_date?: string | null;
+        end_date?: string | null;
+        scoring_mode?: string;
+      };
+    }) => {
+      const { error } = await supabase
+        .from("groups")
+        .update(updates)
+        .eq("id", groupId);
+      if (error) throw error;
+      return groupId;
+    },
+    onSuccess: (groupId) => {
+      qc.invalidateQueries({ queryKey: ["group-detail", groupId] });
+      qc.invalidateQueries({ queryKey: ["user-groups"] });
+      toast.success("Grupo atualizado!");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+};
+
 // ── Remove member (admin only) ──
 export const useRemoveMember = () => {
   const qc = useQueryClient();

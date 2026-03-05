@@ -1,28 +1,22 @@
 
 
-## Problema
+## Tornar o banner clicável com upload de imagem
 
-A barra de status (topo) aparece com fundo diferente (verde ou branco) e a barra de navegação (inferior) também não combina com o fundo escuro do app. Isso acontece porque faltam meta tags de controle de cor no `index.html` e o viewport não está configurado para cobrir a área segura (notch/barra inferior).
+### Problema
+O banner "Foto do banner" na tela de criação de grupo é apenas um `div` estático sem interação. Precisa abrir o seletor de arquivo ao clicar e exibir a imagem selecionada.
 
-## Solução
+### Alterações em `src/pages/CreateGroup.tsx`
 
-Ajustar `index.html` para que o navegador/PWA pinte as barras do sistema com a mesma cor de fundo do app (`#0B1220`).
+1. Adicionar estado `bannerFile` e `bannerPreview` (igual ao padrão do CreatePostDialog)
+2. Adicionar um `<input type="file" accept="image/*" ref={...} className="hidden" />` 
+3. Transformar o `div` do banner em um `button` (ou adicionar `onClick` + `cursor-pointer`) que dispara o click no input hidden
+4. Ao selecionar arquivo: gerar preview com `URL.createObjectURL` e exibir no banner
+5. No `handleCreate`: fazer upload da imagem para o bucket `checkin-photos` (caminho `${user.id}/banner_${Date.now()}.${ext}`) antes de criar o grupo
+6. Passar a URL pública do banner para o `createGroup.mutate` (se o campo `banner_url` existir na tabela `groups`)
 
-### Alterações em `index.html`
-
-1. Adicionar `viewport-fit=cover` na meta viewport para permitir que o conteúdo se estenda até as bordas
-2. Adicionar `<meta name="theme-color" content="#0B1220">` para pintar a barra de status com a cor do fundo do app
-3. Adicionar `<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">` para iOS
-
-### Alterações em `src/index.css`
-
-4. Adicionar `padding` com `env(safe-area-inset-*)` no `body` para que o conteúdo não fique sob o notch ou barra de gestos
-
-### Alterações em `vite.config.ts`
-
-5. Atualizar `theme_color` no manifest PWA de `#16a34a` (verde) para `#0B1220` (fundo escuro) — essa é a causa da barra verde que aparece
+### Verificação necessária
+Checar se a tabela `groups` possui coluna para banner. Se não tiver, será necessária uma migração para adicionar `banner_url text`.
 
 ### Resultado
-
-As barras superior e inferior do celular ficarão com a mesma cor escura do app, criando uma experiência visual contínua e imersiva.
+O usuário toca no banner, abre a galeria/câmera, seleciona a foto, vê o preview, e ao criar o grupo a imagem é salva.
 

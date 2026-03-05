@@ -1,26 +1,26 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { useUserGroups, useGroupMembers } from "@/hooks/useGroup";
-import { useGroupChallenges } from "@/hooks/useChallenge";
+import { useActiveChallenge } from "@/contexts/ActiveChallengeContext";
+import { useChallengeDetail, useChallengeParticipants } from "@/hooks/useChallengeData";
 import { useWorkoutLogs, useToggleWorkout, computeStreaks } from "@/hooks/useWorkoutLogs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle2, Circle, Flame, Trophy, Loader2, Target } from "lucide-react";
+import { CheckCircle2, Circle, Flame, Trophy, Loader2, Target, Info } from "lucide-react";
 import { format } from "date-fns";
 import logo from "@/assets/logo.png";
 import { ptBR } from "date-fns/locale";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import BottomNav from "@/components/BottomNav";
 import { useMemo } from "react";
 
 const Dashboard = () => {
   const { user } = useAuth();
-  const { data: groups, isLoading: gLoading } = useUserGroups();
-  const group = groups?.[0];
-  const { data: members } = useGroupMembers(group?.id);
-  const { data: challenges } = useGroupChallenges(group?.id);
-  const challenge = challenges?.[0];
-  const { data: logs, isLoading: logsLoading } = useWorkoutLogs(challenge?.id);
+  const { activeChallengeId } = useActiveChallenge();
+  const navigate = useNavigate();
+
+  const { data: challenge, isLoading: cLoading } = useChallengeDetail(activeChallengeId || undefined);
+  const { data: participants } = useChallengeParticipants(activeChallengeId || undefined);
+  const { data: logs, isLoading: logsLoading } = useWorkoutLogs(activeChallengeId || undefined);
   const toggleWorkout = useToggleWorkout();
 
   const today = format(new Date(), "yyyy-MM-dd");
@@ -46,7 +46,7 @@ const Dashboard = () => {
     toggleWorkout.mutate({ challengeId: challenge.id, date: today, isCompleted: todayCompleted });
   };
 
-  if (gLoading) {
+  if (cLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -54,36 +54,19 @@ const Dashboard = () => {
     );
   }
 
-  if (!group) {
+  // No active challenge - redirect to challenge list
+  if (!activeChallengeId || !challenge) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-background p-6 text-center">
-        <img src={logo} alt="GYM WOVES" className="h-24 w-24 object-contain drop-shadow-[0_0_20px_hsl(142_71%_45%/0.3)]" />
+        <img src={logo} alt="GYM WOLVES" className="h-24 w-24 object-contain drop-shadow-[0_0_20px_hsl(142_71%_45%/0.3)]" />
         <div>
-          <h1 className="text-3xl font-bold tracking-[0.15em]" style={{ fontFamily: "'Anton', sans-serif" }}>GYM WOVES 🐺</h1>
+          <h1 className="text-3xl font-bold tracking-[0.15em]" style={{ fontFamily: "'Anton', sans-serif" }}>GYM WOLVES 🐺</h1>
           <p className="mt-2 text-muted-foreground">
-            Crie ou entre em um grupo para começar seu desafio.
+            Crie ou entre em um desafio para começar.
           </p>
         </div>
         <Button asChild size="lg" className="h-14 w-full max-w-xs rounded-2xl text-base font-semibold glow-primary">
-          <Link to="/grupo">Ir para Grupos</Link>
-        </Button>
-        <BottomNav />
-      </div>
-    );
-  }
-
-  if (!challenge) {
-    return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-background p-6 text-center">
-        <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-primary/10">
-          <Trophy className="h-10 w-10 text-primary" />
-        </div>
-        <div>
-          <h1 className="font-display text-2xl font-bold">Grupo: {group.name}</h1>
-          <p className="mt-2 text-muted-foreground">Crie um desafio para começar.</p>
-        </div>
-        <Button asChild size="lg" className="h-14 w-full max-w-xs rounded-2xl text-base font-semibold glow-primary">
-          <Link to="/desafio">Criar Desafio</Link>
+          <Link to="/desafios">Ver Desafios</Link>
         </Button>
         <BottomNav />
       </div>
@@ -95,9 +78,14 @@ const Dashboard = () => {
       {/* Header */}
       <header className="sticky top-0 z-40 border-b border-border/50 bg-background/95 px-4 py-4 backdrop-blur-xl">
         <div className="mx-auto max-w-md">
-          <div className="flex items-center gap-2">
-            <img src={logo} alt="GYM WOVES" className="h-8 w-8 object-contain" />
-            <span className="text-xs font-bold uppercase tracking-[0.15em] text-primary" style={{ fontFamily: "'Anton', sans-serif" }}>GYM WOVES</span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <img src={logo} alt="GYM WOLVES" className="h-8 w-8 object-contain" />
+              <span className="text-xs font-bold uppercase tracking-[0.15em] text-primary" style={{ fontFamily: "'Anton', sans-serif" }}>GYM WOLVES</span>
+            </div>
+            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-xl" onClick={() => navigate(`/desafios/${challenge.id}/detalhes`)}>
+              <Info className="h-4 w-4" />
+            </Button>
           </div>
           <h1 className="font-display text-xl font-bold">{challenge.name}</h1>
           <p className="text-xs text-muted-foreground">
@@ -188,23 +176,23 @@ const Dashboard = () => {
         )}
 
         {/* Group progress */}
-        {members && members.length > 1 && (
+        {participants && participants.length > 1 && (
           <Card className="border-0">
             <CardContent className="p-5">
-              <h3 className="mb-3 text-sm font-semibold font-display">Progresso do Grupo</h3>
+              <h3 className="mb-3 text-sm font-semibold font-display">Progresso do Desafio</h3>
               <div className="space-y-3">
-                {members.map((m) => {
-                  const profile = m.profiles as any;
-                  const userLogs = logs?.filter((l) => l.user_id === m.user_id) ?? [];
+                {participants.map((p) => {
+                  const profile = p.profiles as any;
+                  const userLogs = logs?.filter((l) => l.user_id === p.user_id) ?? [];
                   const pct = challenge.goal_days_per_user > 0
                     ? Math.min(Math.round((userLogs.length / challenge.goal_days_per_user) * 100), 100)
                     : 0;
                   return (
-                    <div key={m.user_id}>
+                    <div key={p.user_id}>
                       <div className="mb-1 flex items-center justify-between text-xs">
                         <span className="font-medium">
                           {profile?.display_name || "Sem nome"}
-                          {m.user_id === user?.id && <span className="ml-1 text-muted-foreground">(você)</span>}
+                          {p.user_id === user?.id && <span className="ml-1 text-muted-foreground">(você)</span>}
                         </span>
                         <span className="text-muted-foreground">{userLogs.length} dias</span>
                       </div>

@@ -1,21 +1,22 @@
 
 
-## Problema
+## Situação Atual
 
-O dialog de check-in usa o componente `Dialog` (modal centralizado com position fixed) que não se adapta bem ao mobile — fica cortado ou com scroll estranho. A screenshot mostra o modal ocupando quase toda a tela mas sem encaixar direito.
+- **Cíntia** (`3d5250ba`): 1 dia de check-in registrado
+- **Octávio** (`6c258b87`): 1 dia de check-in registrado
+- **Grupo**: "Cintia e Octávio" (`f7f6e216`)
 
-## Solução
+## Plano
 
-Trocar o `Dialog` por um **Drawer** (bottom sheet) no mobile, que é o padrão UX para formulários em apps mobile. O drawer sobe de baixo, se encaixa naturalmente e permite scroll interno.
+Inserir check-ins retroativos para completar os dias desejados:
 
-### Mudança no `CheckinDialog.tsx`
+- **Cíntia**: precisa de +46 check-ins (total = 47 dias), um por dia, retroativos a partir de ontem
+- **Octávio**: precisa de +40 check-ins (total = 41 dias), um por dia, retroativos a partir de ontem
 
-1. Importar o `Drawer` do vaul (já instalado e configurado em `src/components/ui/drawer.tsx`)
-2. Usar o hook `useIsMobile` para detectar mobile
-3. No mobile: renderizar como `Drawer` (bottom sheet) com `DrawerContent`, `DrawerHeader`, `DrawerTitle`
-4. No desktop: manter o `Dialog` atual
-5. O formulário interno permanece o mesmo — só muda o container
+Será feito via migração SQL com `generate_series` para criar um check-in por dia em datas consecutivas passadas, evitando duplicar a data que já existe.
 
-### Arquivo afetado
-- `src/components/CheckinDialog.tsx` — trocar Dialog por Drawer no mobile
+### Detalhes técnicos
+- Inserção em `checkins` com `workout_type = 'musculacao'`, `title = 'Treino'`, `proof_type = 'manual'`
+- Datas geradas com `generate_series(CURRENT_DATE - interval 'N days', CURRENT_DATE - interval '1 day', '1 day')`
+- Exclui datas que já possuem check-in para evitar duplicatas
 

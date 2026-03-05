@@ -1,23 +1,34 @@
 
 
-## Padronização Visual — Topo Limpo e Imersivo
+## Plano: Aviso de Reinstalação para Atualizar Ícone
 
-Após análise de todos os headers e scaffolds do app, identifiquei os pontos que ainda criam linhas visuais indesejadas.
+### Conceito
 
-### Alterações por arquivo
+Criar um componente `PwaReinstallBanner` que aparece **apenas para quem já tem o app instalado em modo standalone** e está com a versão antiga. Usa um número de versão salvo no `localStorage` para detectar se o usuário precisa reinstalar.
 
-**1. `src/pages/InviteScreen.tsx`**
-- Linha 59: remover `border-b border-subtle` do `<header>`
-- Linha 78: remover `border-b border-subtle` do container de tabs (manter apenas o `border-b-2` individual de cada tab ativa)
+### Como funciona
 
-**2. `src/pages/GroupDetails.tsx`**
-- Linha 107: remover `border-b border-subtle` do container das tabs (manter apenas o indicador `h-[2px] bg-primary` da tab ativa)
+1. Definir uma constante `APP_ICON_VERSION` no código (ex: `"2"`)
+2. Quando o app abre em modo standalone, comparar com o valor salvo em `localStorage`
+3. Se for diferente (ou não existir), exibir um banner/pop-up:
+   - **Título**: "Nova identidade visual!"
+   - **Mensagem**: "Reinstale o app para atualizar o ícone na tela inicial"
+   - **Passos**: Desinstalar o app → Acessar o site → Instalar novamente
+   - **Botão "Lembrar depois"**: salva snooze de 24h
+   - **Botão "Já reinstalei"**: salva a versão atual e fecha
+4. Futuras mudanças de ícone: basta incrementar `APP_ICON_VERSION`
 
-**3. Headers com transparência → fundo sólido**
-Todos os headers usam `bg-background/95` com `backdrop-blur-xl`, o que pode criar uma sutil separação visual. Trocar para `bg-background` sólido nos seguintes arquivos:
-- `src/components/dashboard/DashboardHeader.tsx` (linha 11)
-- `src/components/ds/AppScaffold.tsx` (linha 23)
-- `src/pages/GroupDetails.tsx` (linha 94)
+### Alterações
 
-Nenhuma alteração de funcionalidade, navegação ou estrutura.
+| Arquivo | O que muda |
+|---|---|
+| `src/components/PwaReinstallBanner.tsx` | **Novo** — componente com o banner de reinstalação, só visível em standalone + versão desatualizada |
+| `src/App.tsx` | Adicionar `<PwaReinstallBanner />` junto aos outros componentes globais |
+
+### Detalhes do banner
+
+- Aparece como bottom sheet (similar ao `PwaInstallPrompt`)
+- Instruções específicas por plataforma (Android: segurar ícone → desinstalar; iOS: segurar → remover app)
+- Link para copiar URL do app para facilitar o acesso após desinstalar
+- Só aparece em modo standalone (quem tem o app instalado)
 

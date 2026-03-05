@@ -1,18 +1,25 @@
 
 
-## Adicionar Pupila LED Forte que Some na Piscada
+## Problema
 
-Adicionar uma fina linha vertical neon brilhante no centro de cada olho (pupila LED), com glow intenso, que aparece junto com os olhos e desaparece na fase de piscada (fase 5), antes do shutdown geral.
+A pupila aparece como linha horizontal porque o container pai do olho aplica `scaleY` (ex: 0.15 na piscada, valores variados nas outras fases). A pupila herda essa compressão vertical, achatando-a.
 
-### Alteração
+## Solução
 
-**`src/components/SplashScreen.tsx`** — Dentro de cada olho (left eye e right eye), adicionar um `motion.div` representando a pupila:
+1. **Tirar a pupila de dentro do container do olho** — mover cada `motion.div` da pupila para fora do `motion.div` do olho, posicionando-a absolutamente no container `gap-12`. Assim ela não herda o `scaleY` do pai.
 
-- **Visual**: Retângulo fino vertical (4px largura × 70% altura), bordas arredondadas, cor `#22C55E` com `box-shadow` intenso (`0 0 12px, 0 0 24px`) para efeito LED forte
-- **Animação**:
-  - Aparece na fase 2 (junto com os olhos), com scaleY de 0→1
-  - Fica visível nas fases 3 e 4 (olhar intenso)
-  - **Some na fase 5** (piscada) — opacity→0 e scaleY→0 simultaneamente
-  - Não reaparece nas fases 6-7 (já sumiu com a piscada)
-- Posicionamento: `absolute`, centralizado horizontal e verticalmente dentro de cada olho
+2. **Melhorar o visual da pupila** — formato de fenda vertical de lobo mais realista:
+   - Largura: 6px (era 4px), altura: 28px (fixa, não percentual)
+   - `border-radius` elíptico (`3px / 14px`) para forma de amêndoa vertical
+   - Gradiente radial interno (branco no centro → verde neon nas bordas)
+   - `box-shadow` com múltiplas camadas para glow mais intenso e difuso
+
+3. **Animação independente da pupila**:
+   - Fases 2-4: visível com `scaleY: 1`
+   - Fase 5 (piscada): `scaleY: 0` e `opacity: 0` (some junto com a piscada)
+   - Fases 6-7: permanece oculta
+
+### Arquivo alterado
+
+**`src/components/SplashScreen.tsx`** — Reestruturar: mover as pupilas para fora dos containers dos olhos (ficam como siblings no flex container), com posicionamento absoluto centralizado sobre cada olho. Atualizar dimensões e estilo para fenda vertical mais realista.
 

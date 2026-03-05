@@ -54,31 +54,31 @@ const Auth = () => {
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden p-4"
       style={{ background: '#0B0F14' }}
     >
-      {/* Radial glow behind logo */}
+      {/* Radial glow behind logo — subtle */}
       <div
-        className="pointer-events-none absolute top-[10%] left-1/2 -translate-x-1/2 -translate-y-1/4"
+        className="pointer-events-none absolute top-[8%] left-1/2 -translate-x-1/2 -translate-y-1/4"
         style={{
-          width: '400px',
-          height: '400px',
-          background: 'radial-gradient(circle, hsl(142 71% 45% / 0.08) 0%, transparent 70%)',
+          width: '360px',
+          height: '360px',
+          background: 'radial-gradient(circle, hsl(142 71% 45% / 0.05) 0%, transparent 65%)',
         }}
       />
 
       <div className="relative z-10 flex w-full max-w-sm flex-col items-center">
-        {/* Logo */}
+        {/* Logo — 10% bigger, tighter spacing */}
         <img
           src={logo}
           alt="GYM WOVES"
-          className="mb-3 h-56 w-56 object-contain"
-          style={{ filter: 'drop-shadow(0 0 40px hsl(142 71% 45% / 0.25))' }}
+          className="mb-1 object-contain"
+          style={{ height: '248px', width: '248px', filter: 'drop-shadow(0 0 24px hsl(142 71% 45% / 0.15))' }}
         />
 
-        {/* Title */}
+        {/* Title — tighter tracking */}
         <h1
-          className="text-[3.2rem] leading-none font-bold tracking-[0.08em] text-foreground"
+          className="text-[3.4rem] leading-none font-bold tracking-[0.03em] text-foreground"
           style={{
             fontFamily: "'Anton', sans-serif",
-            textShadow: '0 0 30px hsl(142 71% 45% / 0.3), 0 4px 12px rgba(0,0,0,0.6)',
+            textShadow: '0 0 20px hsl(142 71% 45% / 0.2), 0 3px 8px rgba(0,0,0,0.5)',
           }}
         >
           GYM WOVES
@@ -86,7 +86,7 @@ const Auth = () => {
 
         {/* Slogan */}
         <p
-          className="mt-2 text-xs font-medium tracking-[0.35em] uppercase"
+          className="mt-1.5 text-[11px] font-medium tracking-[0.3em] uppercase"
           style={{ color: '#9CA3AF' }}
         >
           TREINE • EVOLUA • REPITA
@@ -104,20 +104,20 @@ const Auth = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
               <div className="relative">
-                <User className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <User className="absolute left-4 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-muted-foreground" />
                 <Input
                   id="name"
                   placeholder="Seu nome"
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
                   required={!isLogin}
-                  className="h-13 rounded-2xl border-0 pl-11 text-sm"
-                  style={{ background: '#1F2937', color: '#F3F4F6' }}
+                  className="h-[52px] rounded-2xl border-0 pl-12 text-sm placeholder:text-[#6B7280]"
+                  style={{ background: '#1A2030', color: '#F3F4F6' }}
                 />
               </div>
             )}
             <div className="relative">
-              <Mail className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Mail className="absolute left-4 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-muted-foreground" />
               <Input
                 id="email"
                 type="email"
@@ -125,12 +125,12 @@ const Auth = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="h-13 rounded-2xl border-0 pl-11 text-sm"
-                style={{ background: '#1F2937', color: '#F3F4F6' }}
+                className="h-[52px] rounded-2xl border-0 pl-12 text-sm placeholder:text-[#6B7280]"
+                style={{ background: '#1A2030', color: '#F3F4F6' }}
               />
             </div>
             <div className="relative">
-              <Lock className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Lock className="absolute left-4 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-muted-foreground" />
               <Input
                 id="password"
                 type="password"
@@ -139,19 +139,19 @@ const Auth = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={6}
-                className="h-13 rounded-2xl border-0 pl-11 text-sm"
-                style={{ background: '#1F2937', color: '#F3F4F6' }}
+                className="h-[52px] rounded-2xl border-0 pl-12 text-sm placeholder:text-[#6B7280]"
+                style={{ background: '#1A2030', color: '#F3F4F6' }}
               />
             </div>
 
             <Button
               type="submit"
-              className="h-14 w-full rounded-2xl text-base font-bold uppercase tracking-widest"
+              className="h-[56px] w-full rounded-2xl text-base font-bold uppercase tracking-widest"
               disabled={loading}
               style={{
                 background: '#22C55E',
                 color: '#fff',
-                boxShadow: '0 0 24px hsl(142 71% 45% / 0.35), 0 4px 12px rgba(0,0,0,0.3)',
+                boxShadow: '0 0 20px hsl(142 71% 45% / 0.3), 0 4px 10px rgba(0,0,0,0.25)',
               }}
             >
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

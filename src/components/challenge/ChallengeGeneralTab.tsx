@@ -11,7 +11,6 @@ import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 import StatCard from "@/components/ds/StatCard";
 import PostCard from "@/components/challenge/PostCard";
-import CommentsSheet from "@/components/challenge/CommentsSheet";
 import EditGroupDialog from "@/components/EditGroupDialog";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 
@@ -35,7 +34,6 @@ const ChallengeGeneralTab = ({ group, groupId }: Props) => {
   const { data: members } = useGroupMembers(groupId);
   const { data: checkins } = useGroupCheckins(groupId);
   const [editOpen, setEditOpen] = useState(false);
-  const [commentPostId, setCommentPostId] = useState<string | null>(null);
   const isAdmin = !!group && !!user && group.created_by === user.id;
   const scoringMode = group?.scoring_mode || "days_active";
 
@@ -341,8 +339,8 @@ const ChallengeGeneralTab = ({ group, groupId }: Props) => {
                 post={post}
                 isLiked={likedSet?.has(post.id) || false}
                 onLike={() => toggleLike.mutate({ postId: post.id, isLiked: likedSet?.has(post.id) || false, challengeId: groupId })}
-                onComment={() => setCommentPostId(post.id)}
                 currentUserId={user?.id}
+                challengeId={groupId}
                 onEdit={(postId, caption) => updatePost.mutate({ postId, caption, challengeId: groupId })}
                 onDelete={(postId) => deletePost.mutate({ postId, challengeId: groupId })}
               />
@@ -362,12 +360,6 @@ const ChallengeGeneralTab = ({ group, groupId }: Props) => {
         )}
       </div>
 
-      <CommentsSheet
-        postId={commentPostId}
-        challengeId={groupId}
-        open={!!commentPostId}
-        onOpenChange={(open) => { if (!open) setCommentPostId(null); }}
-      />
 
       {isAdmin && <EditGroupDialog open={editOpen} onOpenChange={setEditOpen} group={group} />}
     </div>

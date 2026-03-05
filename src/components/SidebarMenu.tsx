@@ -17,6 +17,8 @@ import {
   LogOut,
   ChevronRight,
   Smartphone,
+  FileText,
+  MessageCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import logo from "@/assets/logo.png";
@@ -41,6 +43,14 @@ const SidebarMenu = () => {
     .join("")
     .toUpperCase()
     .slice(0, 2);
+
+  const challengeItems = group
+    ? [
+        { icon: FileText, label: "Detalhes", action: () => go(`/grupos/${group.id}/detalhes`) },
+        { icon: Trophy, label: "Classificações", action: () => go("/ranking") },
+        { icon: MessageCircle, label: "Bate-papo", action: () => go("/ranking") },
+      ]
+    : [];
 
   const menuItems = [
     ...(group
@@ -77,8 +87,26 @@ const SidebarMenu = () => {
           </div>
         </div>
 
+        {/* Challenge section */}
+        {challengeItems.length > 0 && (
+          <div className="py-2 border-b border-subtle">
+            <p className="px-5 py-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Desafio</p>
+            {challengeItems.map((item, i) => (
+              <button
+                key={`challenge-${i}`}
+                onClick={item.action}
+                className="flex w-full items-center gap-4 px-5 py-3.5 text-left transition-colors hover:bg-surface-1 active:bg-surface-2"
+              >
+                <item.icon className="h-5 w-5 text-primary" />
+                <span className="flex-1 text-[14px] font-medium">{item.label}</span>
+                <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
+              </button>
+            ))}
+          </div>
+        )}
+
         {/* Menu items */}
-        <div className="flex-1 py-2">
+        <div className="py-2">
           {menuItems.map((item, i) => (
             <button
               key={i}
@@ -86,7 +114,7 @@ const SidebarMenu = () => {
               className="flex w-full items-center gap-4 px-5 py-3.5 text-left transition-colors hover:bg-surface-1 active:bg-surface-2"
             >
               <item.icon className={`h-5 w-5 ${item.highlight ? "text-primary" : "text-muted-foreground"}`} />
-              <span className={`flex-1 text-body ${item.highlight ? "font-bold text-primary" : "font-medium"}`}>
+              <span className={`flex-1 text-[14px] ${item.highlight ? "font-bold text-primary" : "font-medium"}`}>
                 {item.label}
               </span>
               <ChevronRight className="h-4 w-4 text-muted-foreground/50" />

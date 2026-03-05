@@ -8,12 +8,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { CalendarDays, Copy, Loader2, LogOut, Trophy, Flame, Share2, Plus } from "lucide-react";
+import { CalendarDays, Copy, Loader2, LogOut, Trophy, Flame, Share2, Plus, Settings } from "lucide-react";
 import { format, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 import AppScaffold from "@/components/ds/AppScaffold";
 import CheckinDialog from "@/components/CheckinDialog";
+import EditGroupDialog from "@/components/EditGroupDialog";
 
 const SCORING_LABELS: Record<string, string> = {
   days_active: "Dias ativos",
@@ -36,6 +37,8 @@ const GroupDetails = () => {
   const { data: checkins } = useGroupCheckins(id);
   const leaveGroup = useLeaveGroup();
   const [checkinOpen, setCheckinOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const isAdmin = !!group && !!user && (group as any).created_by === user.id;
 
   // Realtime subscription for checkins
   useEffect(() => {
@@ -208,6 +211,11 @@ const GroupDetails = () => {
               {SCORING_LABELS[scoringMode]} · {members?.length || 0} membros
             </p>
           </div>
+          {isAdmin && (
+            <Button variant="ghost" size="icon" onClick={() => setEditOpen(true)} className="shrink-0 rounded-xl">
+              <Settings className="h-4 w-4 text-muted-foreground" />
+            </Button>
+          )}
         </div>
 
         {groupAny?.start_date && groupAny?.end_date && (
@@ -342,6 +350,8 @@ const GroupDetails = () => {
           />
         </>
       )}
+      {/* Edit group dialog */}
+      {isAdmin && <EditGroupDialog open={editOpen} onOpenChange={setEditOpen} group={group} />}
     </AppScaffold>
   );
 };

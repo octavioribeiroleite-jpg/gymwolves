@@ -33,7 +33,7 @@ const InviteScreen = () => {
 
   const shareWhatsApp = () => {
     const msg = encodeURIComponent(
-      `🐺 Entre no meu desafio GYM WOLVES!\n\nDesafio: ${group?.name}\nCódigo: ${inviteCode}\n\nBaixe o app e use o código para participar!`
+      `🐺 Entre no meu desafio GymWoves!\n\nDesafio: ${group?.name}\nCódigo: ${inviteCode}\n\nBaixe o app e use o código para participar!`
     );
     window.open(`https://wa.me/?text=${msg}`, "_blank");
   };

@@ -156,9 +156,9 @@ const SidebarMenu = () => {
   const shareApp = async () => {
     setOpen(false);
     const url = "https://gymwolves.lovable.app";
-    const text = "Treine com seus amigos no GYM WOLVES! 💪🐺";
+    const text = "Treine com seus amigos no GymWoves! 💪🐺";
     if (navigator.share) {
-      try { await navigator.share({ title: "GYM WOLVES", text, url }); } catch { /* cancelled */ }
+      try { await navigator.share({ title: "GymWoves", text, url }); } catch { /* cancelled */ }
     } else {
       await navigator.clipboard.writeText(url);
       toast.success("Link copiado!");

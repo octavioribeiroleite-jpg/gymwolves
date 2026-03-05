@@ -153,13 +153,13 @@ export default function PwaInstallPrompt() {
               <div className="flex justify-center">
                 <img
                   src={logo}
-                  alt="GYM WOLVES"
+                  alt="GymWoves"
                   className="h-16 w-16 object-contain"
                   style={{ filter: "drop-shadow(0 0 12px hsl(142 71% 45% / 0.25))" }}
                 />
               </div>
 
-              <h2 className="mt-3 text-center text-h2">Instalar o Gym Wolves</h2>
+              <h2 className="mt-3 text-center text-h2">Instalar o GymWoves</h2>
               <p className="mt-1.5 text-center text-subtitle text-muted-foreground">
                 Instale para abrir mais rápido, usar em tela cheia e receber melhorias.
               </p>

@@ -55,9 +55,14 @@ const Auth = () => {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
       <div className="mb-8 text-center">
-        <img src={logo} alt="Ratos de Academia" className="mx-auto mb-4 h-48 w-48 object-contain" />
-        <h1 className="font-display text-3xl font-bold">Ratos de Academia</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <img src={logo} alt="GYM WOVES" className="mx-auto mb-2 h-48 w-48 object-contain drop-shadow-[0_0_30px_hsl(142_71%_45%/0.3)]" />
+        <h1 className="text-5xl font-bold tracking-[0.15em] text-foreground" style={{ fontFamily: "'Anton', sans-serif", textShadow: '0 0 20px hsl(142 71% 45% / 0.4), 0 4px 8px rgba(0,0,0,0.5)' }}>
+          GYM WOVES
+        </h1>
+        <p className="mt-2 text-sm tracking-[0.2em] uppercase text-muted-foreground">
+          Treine. Evolua. Repita.
+        </p>
+        <p className="mt-3 text-xs text-muted-foreground">
           {isLogin ? "Entre na sua conta" : "Crie sua conta"}
         </p>
       </div>

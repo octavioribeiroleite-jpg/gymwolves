@@ -155,6 +155,7 @@ export type Database = {
           steps: number | null
           title: string
           user_id: string
+          workout_type: string
         }
         Insert: {
           calories?: number | null
@@ -170,6 +171,7 @@ export type Database = {
           steps?: number | null
           title?: string
           user_id: string
+          workout_type?: string
         }
         Update: {
           calories?: number | null
@@ -185,6 +187,7 @@ export type Database = {
           steps?: number | null
           title?: string
           user_id?: string
+          workout_type?: string
         }
         Relationships: [
           {

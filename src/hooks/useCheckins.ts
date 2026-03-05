@@ -32,6 +32,8 @@ export const useCreateCheckin = () => {
       groupId: string;
       title: string;
       note?: string;
+      workoutType?: string;
+      proofUrl?: string;
     }) => {
       if (!user) throw new Error("Não autenticado");
       const { data, error } = await supabase
@@ -41,7 +43,9 @@ export const useCreateCheckin = () => {
           user_id: user.id,
           title: params.title,
           note: params.note || null,
-          proof_type: "manual",
+          proof_type: params.proofUrl ? "photo" : "manual",
+          proof_url: params.proofUrl || null,
+          workout_type: params.workoutType || "musculacao",
           checkin_at: new Date().toISOString(),
         } as any)
         .select()
@@ -51,7 +55,7 @@ export const useCreateCheckin = () => {
     },
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: ["checkins", vars.groupId] });
-      toast.success("Check-in registrado! 💪");
+      toast.success("Treino registrado! 💪");
     },
     onError: (e: any) => toast.error(e.message),
   });
@@ -71,7 +75,7 @@ export const useDeleteCheckin = () => {
     },
     onSuccess: (groupId) => {
       qc.invalidateQueries({ queryKey: ["checkins", groupId] });
-      toast.success("Check-in removido");
+      toast.success("Treino removido");
     },
     onError: (e: any) => toast.error(e.message),
   });

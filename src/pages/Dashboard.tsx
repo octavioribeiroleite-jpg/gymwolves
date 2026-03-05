@@ -12,6 +12,7 @@ import { ptBR } from "date-fns/locale";
 import { Link, useNavigate } from "react-router-dom";
 import BottomNav from "@/components/BottomNav";
 import CheckinDialog from "@/components/CheckinDialog";
+import ActivityFeed from "@/components/ActivityFeed";
 import EmptyState from "@/components/ds/EmptyState";
 import StatCard from "@/components/ds/StatCard";
 import SectionTitle from "@/components/ds/SectionTitle";
@@ -66,11 +67,14 @@ const Dashboard = () => {
       <div className="flex min-h-screen flex-col items-center justify-center bg-background p-6">
         <EmptyState
           image={logo}
-          title="GYM WOLVES 🐺"
-          description="Crie ou entre em um desafio para começar a treinar com a matilha."
+          title="CRIE OU ENTRE EM UM GRUPO"
+          description="Treine com seus amigos e compita para ver quem treina mais."
         >
           <Button asChild size="lg" className="h-14 w-full rounded-2xl text-base font-semibold glow-primary">
-            <Link to="/grupos">Ver Desafios</Link>
+            <Link to="/grupos/criar">Criar Grupo</Link>
+          </Button>
+          <Button asChild variant="outline" size="lg" className="h-14 w-full rounded-2xl text-base font-semibold border-0 bg-card">
+            <Link to="/grupos/entrar">Entrar com Convite</Link>
           </Button>
         </EmptyState>
         <BottomNav />
@@ -124,7 +128,7 @@ const Dashboard = () => {
               </div>
               <div className="flex-1 text-left">
                 <p className={`text-lg font-bold font-display ${todayDone ? "text-white" : "text-foreground"}`}>
-                  {todayDone ? "Treino concluído! 💪" : "Concluir treino hoje"}
+                  {todayDone ? "Treino concluído! 💪" : "Registrar treino"}
                 </p>
                 <p className={`text-description ${todayDone ? "text-white/70" : "text-muted-foreground"}`}>
                   {format(new Date(), "EEEE, d 'de' MMMM", { locale: ptBR })}
@@ -147,9 +151,7 @@ const Dashboard = () => {
         {myStats && (
           <Card className="border-0">
             <CardContent className="p-5">
-              <SectionTitle>
-                Meu Progresso
-              </SectionTitle>
+              <SectionTitle>Meu Progresso</SectionTitle>
               <div className="mt-3">
                 <div className="mb-1 flex items-center justify-between text-description">
                   <span className="text-muted-foreground">Dias ativos</span>
@@ -177,21 +179,24 @@ const Dashboard = () => {
               </SectionTitle>
               <div className="mt-3 space-y-2">
                 {topMembers.map((m, i) => (
-                  <div key={m.userId} className="flex items-center gap-3 rounded-2xl bg-secondary/50 px-3 py-2.5">
+                  <div key={m.userId} className={`flex items-center gap-3 rounded-2xl px-3 py-2.5 ${m.userId === user?.id ? "bg-primary/10" : "bg-secondary/50"}`}>
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-secondary">
-                      <Medal className={`h-4 w-4 ${i === 0 ? "text-yellow-400" : i === 1 ? "text-gray-400" : "text-amber-700"}`} />
+                      <span className="text-sm">{i === 0 ? "🥇" : i === 1 ? "🥈" : "🥉"}</span>
                     </div>
                     <span className="flex-1 text-sm font-medium">
                       {m.name}
                       {m.userId === user?.id && <span className="ml-1 text-xs text-muted-foreground">(você)</span>}
                     </span>
-                    <span className="text-sm font-bold text-primary">{m.days}</span>
+                    <span className="text-sm font-bold text-primary">{m.days} treinos</span>
                   </div>
                 ))}
               </div>
             </CardContent>
           </Card>
         )}
+
+        {/* Activity Feed */}
+        <ActivityFeed groupId={activeGroupId} />
       </div>
 
       <CheckinDialog

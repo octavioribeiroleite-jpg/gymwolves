@@ -77,11 +77,11 @@ const GroupList = () => {
       <div className="flex min-h-screen flex-col items-center justify-center bg-background p-6">
         <EmptyState
           image={logo}
-          title="CRIE SEU PRIMEIRO DESAFIO"
-          description="Monte um desafio e convide seu parceiro(a) para treinar junto."
+          title="CRIE OU ENTRE EM UM GRUPO"
+          description="Treine com seus amigos e compita para ver quem treina mais."
         >
           <Button onClick={() => navigate("/grupos/criar")} size="lg" className="h-14 w-full rounded-2xl text-base font-semibold glow-primary">
-            <Plus className="mr-2 h-5 w-5" /> Criar Desafio
+            <Plus className="mr-2 h-5 w-5" /> Criar Grupo
           </Button>
           <Button onClick={() => navigate("/grupos/entrar")} variant="outline" size="lg" className="h-14 w-full rounded-2xl text-base font-semibold border-0 bg-card">
             <LogIn className="mr-2 h-5 w-5" /> Entrar com Convite
@@ -94,8 +94,8 @@ const GroupList = () => {
 
   return (
     <AppScaffold
-      title="Desafios"
-      subtitle="Crie um desafio ou entre em um existente."
+      title="Grupos"
+      subtitle="Seus grupos de treino"
       headerRight={
         <div className="flex gap-2">
           <Button size="sm" variant="ghost" className="rounded-2xl" onClick={() => navigate("/grupos/entrar")}>

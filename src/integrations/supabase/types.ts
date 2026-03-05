@@ -140,11 +140,68 @@ export type Database = {
           },
         ]
       }
+      checkins: {
+        Row: {
+          calories: number | null
+          checkin_at: string
+          created_at: string
+          distance_km: number | null
+          duration_min: number | null
+          group_id: string
+          id: string
+          note: string | null
+          proof_type: string
+          proof_url: string | null
+          steps: number | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          calories?: number | null
+          checkin_at?: string
+          created_at?: string
+          distance_km?: number | null
+          duration_min?: number | null
+          group_id: string
+          id?: string
+          note?: string | null
+          proof_type?: string
+          proof_url?: string | null
+          steps?: number | null
+          title?: string
+          user_id: string
+        }
+        Update: {
+          calories?: number | null
+          checkin_at?: string
+          created_at?: string
+          distance_km?: number | null
+          duration_min?: number | null
+          group_id?: string
+          id?: string
+          note?: string | null
+          proof_type?: string
+          proof_url?: string | null
+          steps?: number | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "checkins_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       group_members: {
         Row: {
           group_id: string
           id: string
           joined_at: string
+          role: string
           status: string
           user_id: string
         }
@@ -152,6 +209,7 @@ export type Database = {
           group_id: string
           id?: string
           joined_at?: string
+          role?: string
           status?: string
           user_id: string
         }
@@ -159,6 +217,7 @@ export type Database = {
           group_id?: string
           id?: string
           joined_at?: string
+          role?: string
           status?: string
           user_id?: string
         }
@@ -176,25 +235,40 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string
+          end_date: string | null
+          goal_total: number
           id: string
           invite_code: string
           name: string
+          scoring_mode: string
+          start_date: string | null
+          type: string
           updated_at: string
         }
         Insert: {
           created_at?: string
           created_by: string
+          end_date?: string | null
+          goal_total?: number
           id?: string
           invite_code?: string
           name: string
+          scoring_mode?: string
+          start_date?: string | null
+          type?: string
           updated_at?: string
         }
         Update: {
           created_at?: string
           created_by?: string
+          end_date?: string | null
+          goal_total?: number
           id?: string
           invite_code?: string
           name?: string
+          scoring_mode?: string
+          start_date?: string | null
+          type?: string
           updated_at?: string
         }
         Relationships: []

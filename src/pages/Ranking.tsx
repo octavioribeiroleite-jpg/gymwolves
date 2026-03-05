@@ -1,8 +1,8 @@
 import { useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useActiveChallenge } from "@/contexts/ActiveChallengeContext";
-import { useChallengeDetail, useChallengeParticipants } from "@/hooks/useChallengeData";
-import { useWorkoutLogs, computeStreaks } from "@/hooks/useWorkoutLogs";
+import { useActiveGroup } from "@/contexts/ActiveGroupContext";
+import { useGroupDetail, useGroupMembers } from "@/hooks/useGroupData";
+import { useGroupCheckins, computeDaysActive, computeStreaks } from "@/hooks/useCheckins";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Trophy, Flame, Loader2, Medal } from "lucide-react";
@@ -10,36 +10,42 @@ import BottomNav from "@/components/BottomNav";
 
 const Ranking = () => {
   const { user } = useAuth();
-  const { activeChallengeId } = useActiveChallenge();
-  const { data: challenge } = useChallengeDetail(activeChallengeId || undefined);
-  const { data: participants } = useChallengeParticipants(activeChallengeId || undefined);
-  const { data: logs, isLoading: logsLoading } = useWorkoutLogs(activeChallengeId || undefined);
+  const { activeGroupId } = useActiveGroup();
+  const { data: group } = useGroupDetail(activeGroupId || undefined);
+  const { data: members } = useGroupMembers(activeGroupId || undefined);
+  const { data: checkins, isLoading } = useGroupCheckins(activeGroupId || undefined);
 
   const ranked = useMemo(() => {
-    if (!participants || !logs || !challenge) return [];
-    return participants
-      .map((p) => {
-        const profile = p.profiles as any;
-        const userLogs = logs.filter((l) => l.user_id === p.user_id);
-        const dates = userLogs.map((l) => l.workout_date);
-        const streaks = computeStreaks(dates);
-        const pct = challenge.goal_days_per_user > 0
-          ? Math.min(Math.round((dates.length / challenge.goal_days_per_user) * 100), 100)
-          : 0;
-        return {
-          userId: p.user_id,
-          name: profile?.display_name || "Sem nome",
-          avatar: profile?.avatar_url,
-          days: dates.length,
-          goal: challenge.goal_days_per_user,
-          pct,
-          ...streaks,
-        };
-      })
-      .sort((a, b) => b.days - a.days || b.current - a.current);
-  }, [participants, logs, challenge]);
+    if (!members || !checkins || !group) return [];
+    const goal = (group as any).goal_total || 200;
 
-  if (logsLoading) {
+    const items = members.map((m) => {
+      const profile = m.profiles as any;
+      const days = computeDaysActive(checkins, m.user_id);
+      const streaks = computeStreaks(checkins, m.user_id);
+      const pct = goal > 0 ? Math.min(Math.round((days / goal) * 100), 100) : 0;
+      return {
+        userId: m.user_id,
+        name: profile?.display_name || "Sem nome",
+        days,
+        pct,
+        goal,
+        ...streaks,
+      };
+    });
+
+    // Sort: days DESC, current streak DESC
+    items.sort((a, b) => b.days - a.days || b.current - a.current);
+
+    // Standard competition ranking
+    let rank = 1;
+    return items.map((item, i) => {
+      if (i > 0 && item.days < items[i - 1].days) rank = i + 1;
+      return { ...item, rank };
+    });
+  }, [members, checkins, group]);
+
+  if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -47,10 +53,10 @@ const Ranking = () => {
     );
   }
 
-  const getMedalColor = (i: number) => {
-    if (i === 0) return "text-yellow-400";
-    if (i === 1) return "text-gray-400";
-    if (i === 2) return "text-amber-700";
+  const getMedalColor = (r: number) => {
+    if (r === 1) return "text-yellow-400";
+    if (r === 2) return "text-gray-400";
+    if (r === 3) return "text-amber-700";
     return "text-muted-foreground";
   };
 
@@ -60,7 +66,7 @@ const Ranking = () => {
         <div className="mx-auto max-w-md">
           <h1 className="font-display text-xl font-bold">Ranking</h1>
           <p className="text-xs text-muted-foreground">
-            {challenge ? challenge.name : "Nenhum desafio ativo"}
+            {group ? group.name : "Nenhum grupo ativo"} · Days Active
           </p>
         </div>
       </header>
@@ -73,14 +79,14 @@ const Ranking = () => {
           </div>
         )}
 
-        {ranked.map((m, i) => (
-          <Card key={m.userId} className={`border-0 transition-all ${i === 0 ? "glow-primary" : ""}`}>
+        {ranked.map((m) => (
+          <Card key={m.userId} className={`border-0 transition-all ${m.rank === 1 ? "glow-primary" : ""}`}>
             <CardContent className="flex items-center gap-4 p-4">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-secondary">
-                {i < 3 ? (
-                  <Medal className={`h-5 w-5 ${getMedalColor(i)}`} />
+                {m.rank <= 3 ? (
+                  <Medal className={`h-5 w-5 ${getMedalColor(m.rank)}`} />
                 ) : (
-                  <span className="text-sm font-bold text-muted-foreground">{i + 1}</span>
+                  <span className="text-sm font-bold text-muted-foreground">{m.rank}</span>
                 )}
               </div>
               <div className="flex-1">
@@ -94,13 +100,16 @@ const Ranking = () => {
                   <span className="text-sm font-bold text-primary">{m.days} dias</span>
                 </div>
                 <Progress value={m.pct} className="mt-2 h-2" />
-                <div className="mt-1.5 flex gap-4 text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1">
-                    <Flame className="h-3 w-3 text-primary" /> {m.current} seguidos
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Trophy className="h-3 w-3" /> Recorde: {m.best}
-                  </span>
+                <div className="mt-1.5 flex justify-between text-xs text-muted-foreground">
+                  <div className="flex gap-4">
+                    <span className="flex items-center gap-1">
+                      <Flame className="h-3 w-3 text-primary" /> {m.current} seguidos
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Trophy className="h-3 w-3" /> Recorde: {m.best}
+                    </span>
+                  </div>
+                  <span>{m.pct}%</span>
                 </div>
               </div>
             </CardContent>

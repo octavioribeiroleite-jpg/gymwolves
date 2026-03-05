@@ -26,7 +26,7 @@ const Onboarding = () => {
             />
             <img
               src={logo}
-              alt="GYM WOLVES"
+              alt="GymWoves"
               className="relative h-32 w-32 object-contain"
               style={{ filter: "drop-shadow(0 0 24px hsl(142 71% 45% / 0.3))" }}
             />

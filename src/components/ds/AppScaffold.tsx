@@ -24,8 +24,8 @@ const AppScaffold = ({ children, title, subtitle, showBack, headerRight, hideNav
         <div className="mx-auto max-w-md">
           {showLogo && (
             <div className="flex items-center gap-2 mb-1">
-              <img src={logo} alt="GYM WOLVES" className="h-7 w-7 object-contain" />
-              <span className="text-caption font-bold uppercase tracking-[0.15em] text-primary">GYM WOLVES</span>
+              <img src={logo} alt="GymWoves" className="h-7 w-7 object-contain" />
+              <span className="text-caption font-bold tracking-[0.15em] text-primary">GymWoves</span>
             </div>
           )}
           <div className="flex items-center gap-3">

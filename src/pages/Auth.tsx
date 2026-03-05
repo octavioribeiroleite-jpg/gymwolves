@@ -64,13 +64,13 @@ const Auth = () => {
       <div className="relative z-10 flex w-full max-w-sm flex-col items-center">
         <img
           src={logo}
-          alt="GYM WOLVES"
+          alt="GymWoves"
           className="mb-1 object-contain"
           style={{ height: "200px", width: "200px", filter: "drop-shadow(0 0 20px hsl(142 71% 45% / 0.15))" }}
         />
 
         <h1 className="text-[48px] font-bold leading-none tracking-tight">
-          GYM WOLVES
+          GymWoves
         </h1>
 
         <p className="mt-1.5 text-caption font-medium tracking-[0.25em] uppercase text-muted-foreground">

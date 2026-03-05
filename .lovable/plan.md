@@ -1,35 +1,21 @@
 
 
-## Problema Identificado
+## Problema
 
-A query de membros está falhando com erro **400** porque não existe uma **foreign key** entre `group_members.user_id` e `profiles.id`. A query no `useGroupMembers` tenta fazer um join automático:
+O dialog de check-in usa o componente `Dialog` (modal centralizado com position fixed) que não se adapta bem ao mobile — fica cortado ou com scroll estranho. A screenshot mostra o modal ocupando quase toda a tela mas sem encaixar direito.
 
-```
-.select("*, profiles:user_id(id, display_name, avatar_url)")
-```
+## Solução
 
-Mas o PostgREST precisa de uma FK para resolver esse join. Sem ela, retorna erro `PGRST200`.
+Trocar o `Dialog` por um **Drawer** (bottom sheet) no mobile, que é o padrão UX para formulários em apps mobile. O drawer sobe de baixo, se encaixa naturalmente e permite scroll interno.
 
-## Correção
+### Mudança no `CheckinDialog.tsx`
 
-Duas opções (vou usar a combinação):
+1. Importar o `Drawer` do vaul (já instalado e configurado em `src/components/ui/drawer.tsx`)
+2. Usar o hook `useIsMobile` para detectar mobile
+3. No mobile: renderizar como `Drawer` (bottom sheet) com `DrawerContent`, `DrawerHeader`, `DrawerTitle`
+4. No desktop: manter o `Dialog` atual
+5. O formulário interno permanece o mesmo — só muda o container
 
-**1. Adicionar FK** de `group_members.user_id` para `profiles.id` via migration SQL:
-```sql
-ALTER TABLE public.group_members
-ADD CONSTRAINT group_members_user_id_fkey
-FOREIGN KEY (user_id) REFERENCES public.profiles(id) ON DELETE CASCADE;
-```
-
-**2. Também adicionar FK** em `checkins.user_id` para `profiles.id` (mesmo problema potencial):
-```sql
-ALTER TABLE public.checkins
-ADD CONSTRAINT checkins_user_id_fkey
-FOREIGN KEY (user_id) REFERENCES public.profiles(id) ON DELETE CASCADE;
-```
-
-Isso resolve o join e os membros passam a aparecer no ranking.
-
-### Arquivos afetados
-- Apenas migration SQL (nenhuma mudança de código necessária)
+### Arquivo afetado
+- `src/components/CheckinDialog.tsx` — trocar Dialog por Drawer no mobile
 

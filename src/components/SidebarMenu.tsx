@@ -23,12 +23,14 @@ import {
   Calendar,
   User,
   Swords,
+  Share2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import logo from "@/assets/logo.png";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
 
 const itemVariants = {
   hidden: { opacity: 0, x: -16 },
@@ -101,7 +103,20 @@ const SidebarMenu = () => {
       ]
     : [];
 
+  const shareApp = async () => {
+    setOpen(false);
+    const url = "https://gymwolves.lovable.app";
+    const text = "Treine com seus amigos no GYM WOLVES! 💪🐺";
+    if (navigator.share) {
+      try { await navigator.share({ title: "GYM WOLVES", text, url }); } catch { /* cancelled */ }
+    } else {
+      await navigator.clipboard.writeText(url);
+      toast.success("Link copiado!");
+    }
+  };
+
   const generalItems = [
+    { icon: Share2, label: "Compartilhar o app", action: shareApp, highlight: true },
     { icon: Plus, label: "Criar grupo", action: () => go("/grupos/criar") },
     { icon: LogIn, label: "Juntar-se ao grupo", action: () => go("/grupos/entrar") },
     { icon: CheckCircle, label: "Desafios concluídos", action: () => go("/desafios-concluidos") },
@@ -177,7 +192,7 @@ const SidebarMenu = () => {
                   label={item.label}
                   action={item.action}
                   index={idx}
-                  iconClass="text-muted-foreground"
+                  iconClass={(item as any).highlight ? "text-primary" : "text-muted-foreground"}
                 />
               );
             })}

@@ -4,9 +4,10 @@ import { useActiveGroup } from "@/contexts/ActiveGroupContext";
 import { useGroupDetail } from "@/hooks/useGroupData";
 import { useGroupCheckins, computeDaysActive, computeStreaks } from "@/hooks/useCheckins";
 import { Button } from "@/components/ui/button";
-import { Flame, Target, Trophy, LogOut, Users, ChevronRight, CheckCircle, Smartphone, Settings } from "lucide-react";
+import { Flame, Target, Trophy, LogOut, Users, ChevronRight, CheckCircle, Smartphone, Settings, Share2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useMemo } from "react";
+import { toast } from "sonner";
 import AppScaffold from "@/components/ds/AppScaffold";
 import StatCard from "@/components/ds/StatCard";
 
@@ -31,6 +32,17 @@ const Profile = () => {
     .join("")
     .toUpperCase()
     .slice(0, 2);
+
+  const shareApp = async () => {
+    const url = "https://gymwolves.lovable.app";
+    const text = "Treine com seus amigos no GYM WOLVES! 💪🐺";
+    if (navigator.share) {
+      try { await navigator.share({ title: "GYM WOLVES", text, url }); } catch { /* cancelled */ }
+    } else {
+      await navigator.clipboard.writeText(url);
+      toast.success("Link copiado!");
+    }
+  };
 
   const menuItems = [
     { icon: Users, label: "Meus grupos", sub: group?.name || "Nenhum grupo ativo", to: "/grupos" },
@@ -58,6 +70,19 @@ const Profile = () => {
           <StatCard icon={Trophy} value={myStats.best} label="Recorde" />
         </div>
       )}
+
+      {/* Share app — destaque */}
+      <button
+        onClick={shareApp}
+        className="flex w-full items-center gap-4 rounded-[20px] surface-1 border border-primary/20 bg-primary/5 px-4 py-4 text-left transition-colors hover:bg-primary/10"
+      >
+        <Share2 className="h-5 w-5 text-primary shrink-0" />
+        <div className="flex-1 min-w-0">
+          <p className="text-body font-medium text-primary">Compartilhar o app</p>
+          <p className="text-small text-muted-foreground">Convide amigos para treinar</p>
+        </div>
+        <ChevronRight className="h-4 w-4 text-primary/50 shrink-0" />
+      </button>
 
       {/* Menu list */}
       <div className="rounded-[20px] surface-1 border border-subtle overflow-hidden">

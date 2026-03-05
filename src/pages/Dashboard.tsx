@@ -1,21 +1,18 @@
 import { useMemo, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useActiveGroup } from "@/contexts/ActiveGroupContext";
-import { useGroupDetail, useGroupMembers } from "@/hooks/useGroupData";
-import { useGroupCheckins, computeDaysActive, computeStreaks, hasCheckedInToday } from "@/hooks/useCheckins";
+import { useUserGroups } from "@/hooks/useGroupData";
 import { useProfile } from "@/hooks/useProfile";
+import { useGroupCheckins, computeDaysActive, computeStreaks, hasCheckedInToday } from "@/hooks/useCheckins";
 import { Loader2 } from "lucide-react";
-import { differenceInDays } from "date-fns";
 
 import CheckinDialog from "@/components/CheckinDialog";
 import ActivityFeed from "@/components/ActivityFeed";
 import Onboarding from "./Onboarding";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
-import ChallengeInfoCard from "@/components/dashboard/ChallengeInfoCard";
 import WorkoutStatusCard from "@/components/dashboard/WorkoutStatusCard";
-import ProgressSection from "@/components/dashboard/ProgressSection";
-import StatsSection from "@/components/dashboard/StatsSection";
-import MiniRanking from "@/components/dashboard/MiniRanking";
+import HomeWelcome from "@/components/dashboard/HomeWelcome";
+import HomeChallengesList from "@/components/dashboard/HomeChallengesList";
 import DashboardFAB from "@/components/dashboard/DashboardFAB";
 
 const Dashboard = () => {
@@ -23,42 +20,23 @@ const Dashboard = () => {
   const { activeGroupId } = useActiveGroup();
   const [checkinOpen, setCheckinOpen] = useState(false);
 
-  const { data: group, isLoading } = useGroupDetail(activeGroupId || undefined);
-  const { data: members } = useGroupMembers(activeGroupId || undefined);
-  const { data: checkins } = useGroupCheckins(activeGroupId || undefined);
+  const { data: groups, isLoading } = useUserGroups();
   const { data: profile } = useProfile();
+  const { data: checkins } = useGroupCheckins(activeGroupId || undefined);
 
+  // Aggregate stats across all groups - for now use active group checkins
+  // TODO: aggregate from all groups when we have a multi-group checkins hook
   const todayDone = useMemo(
     () => (checkins && user ? hasCheckedInToday(checkins, user.id) : false),
     [checkins, user]
   );
 
-  const myStats = useMemo(() => {
-    if (!checkins || !user || !group) return null;
+  const globalStats = useMemo(() => {
+    if (!checkins || !user) return { streak: 0, daysActive: 0, record: 0 };
     const days = computeDaysActive(checkins, user.id);
     const streaks = computeStreaks(checkins, user.id);
-    const goal = (group as any).goal_total || 200;
-    return { days, goal, ...streaks };
-  }, [checkins, user, group]);
-
-  const daysRemaining = useMemo(() => {
-    if (!group) return null;
-    const g = group as any;
-    if (!g.end_date) return null;
-    return Math.max(0, differenceInDays(new Date(g.end_date), new Date()));
-  }, [group]);
-
-  const topMembers = useMemo(() => {
-    if (!members || !checkins || !group) return [];
-    return members
-      .map((m) => {
-        const p = m.profiles as any;
-        const days = computeDaysActive(checkins, m.user_id);
-        return { userId: m.user_id, name: p?.display_name || "Sem nome", days };
-      })
-      .sort((a, b) => b.days - a.days)
-      .slice(0, 5);
-  }, [members, checkins, group]);
+    return { streak: streaks.current, daysActive: days, record: streaks.best };
+  }, [checkins, user]);
 
   if (isLoading) {
     return (
@@ -68,22 +46,21 @@ const Dashboard = () => {
     );
   }
 
-  if (!activeGroupId || !group) {
+  if (!groups || groups.length === 0) {
     return <Onboarding />;
   }
 
-  const groupAny = group as any;
-  const leaderName = profile?.display_name || "Líder";
+  const userName = profile?.display_name || "Você";
 
   return (
     <div className="min-h-screen bg-background">
-      <DashboardHeader groupName={group.name} />
+      <DashboardHeader userName={userName} />
 
       <div className="mx-auto max-w-md space-y-6 px-4 py-4">
-        <ChallengeInfoCard
-          leaderName={leaderName}
-          userName={profile?.display_name || "Você"}
-          daysRemaining={daysRemaining}
+        <HomeWelcome
+          streak={globalStats.streak}
+          daysActive={globalStats.daysActive}
+          record={globalStats.record}
         />
 
         <WorkoutStatusCard
@@ -91,31 +68,21 @@ const Dashboard = () => {
           onCheckin={() => setCheckinOpen(true)}
         />
 
-        {myStats && (
-          <ProgressSection current={myStats.days} total={myStats.goal} />
-        )}
-
-        {myStats && (
-          <StatsSection
-            streak={myStats.current}
-            daysActive={myStats.days}
-            record={myStats.best}
-          />
-        )}
+        <HomeChallengesList />
 
         {activeGroupId && <ActivityFeed groupId={activeGroupId} />}
-        <MiniRanking topMembers={topMembers} currentUserId={user?.id} />
       </div>
 
       <DashboardFAB onCheckin={() => setCheckinOpen(true)} />
 
-      <CheckinDialog
-        open={checkinOpen}
-        onOpenChange={setCheckinOpen}
-        groupId={activeGroupId}
-        alreadyCheckedIn={todayDone}
-      />
-      
+      {activeGroupId && (
+        <CheckinDialog
+          open={checkinOpen}
+          onOpenChange={setCheckinOpen}
+          groupId={activeGroupId}
+          alreadyCheckedIn={todayDone}
+        />
+      )}
     </div>
   );
 };

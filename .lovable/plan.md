@@ -1,18 +1,23 @@
 
 
-## Corrigir cor da barra de status para tema claro
+## Splash Screen — Olhos Neon Minimalistas com Zoom
 
-O problema: a `theme-color` no `index.html` e no manifest PWA está definida como `#0B1220` (azul escuro/preto), que era do tema antigo. E o `apple-mobile-web-app-status-bar-style` está como `black-translucent`. Isso faz a barra de status do celular ficar escura, destoando do app que agora é claro.
+Remover a imagem PNG e criar os olhos como **contorno neon SVG** (formato amendoado de olho de lobo) com animação de zoom in/out.
 
-### Alterações
+### Design
+- Dois olhos em SVG: contorno verde neon (`#22C55E`) com `stroke` apenas (sem fill), formato amendoado afiado
+- Pupila em fenda vertical como linha central
+- Glow via `filter: drop-shadow` verde neon
+- Fundo `#F3F4F6`
 
-1. **`index.html`** (linha 6-8):
-   - `theme-color`: de `#0B1220` para `#F3F4F6` (cinza claro do fundo do app)
-   - `apple-mobile-web-app-status-bar-style`: de `black-translucent` para `default` (barra clara com texto escuro)
+### Sequência de Animação
 
-2. **`vite.config.ts`** — manifest PWA (linhas 33-34):
-   - `theme_color`: de `#0B1220` para `#F3F4F6`
-   - `background_color`: de `#0B1220` para `#F3F4F6`
+1. **0-0.6s**: Olhos aparecem com fade in + scale de 0.5 para 1 (zoom in)
+2. **0.6-1.8s**: Olhos visíveis, fazem uma piscada (scaleY comprime e volta) — efeito piscante
+3. **1.8-2.6s**: Olhos retraem — zoom out (scale de 1 para 0.3) + fade out
+4. **2.6-3.4s**: App faz zoom in (a tela do splash faz scale de 0.3 para 1.2 e some) — sensação de "entrar" no app
+5. **3.4s**: `onFinish()` é chamado
 
-Isso sincroniza a barra de status com o tema claro do app, criando a experiência imersiva desejada.
+### Arquivo alterado
+1. **`src/components/SplashScreen.tsx`** — Reescrever: remover imagem PNG, criar componente SVG `NeonEyes` inline, nova sequência de animação zoom in → piscada → zoom out → app abre
 

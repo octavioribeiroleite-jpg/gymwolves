@@ -1,21 +1,26 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useCreateGroup } from "@/hooks/useGroupData";
 import { useActiveGroup } from "@/contexts/ActiveGroupContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Trophy, Users2, Camera, CalendarDays } from "lucide-react";
+import { Loader2, Trophy, Users2, Camera, CalendarDays, X } from "lucide-react";
 import { format, differenceInDays } from "date-fns";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import AppScaffold from "@/components/ds/AppScaffold";
 
 const CreateGroup = () => {
+  const { user } = useAuth();
   const createGroup = useCreateGroup();
   const { setActiveGroupId } = useActiveGroup();
   const navigate = useNavigate();
   const location = useLocation();
   const locState = location.state as any;
+  const bannerRef = useRef<HTMLInputElement>(null);
 
   const [step, setStep] = useState<"type" | "form" | "scoring">(locState?.step === "confirm" ? "form" : "type");
   const [name, setName] = useState(locState?.name || "");
@@ -27,6 +32,9 @@ const CreateGroup = () => {
   const [endDate, setEndDate] = useState(
     locState?.endDate || format(new Date(new Date().getFullYear(), 11, 31), "yyyy-MM-dd")
   );
+  const [bannerFile, setBannerFile] = useState<File | null>(null);
+  const [bannerPreview, setBannerPreview] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   // If returning from scoring select with a mode
   useEffect(() => {
@@ -38,14 +46,51 @@ const CreateGroup = () => {
 
   const daysDiff = startDate && endDate ? differenceInDays(new Date(endDate), new Date(startDate)) : 0;
 
-  const handleCreate = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Imagem muito grande (máx 5MB)");
+      return;
+    }
+    setBannerFile(file);
+    setBannerPreview(URL.createObjectURL(file));
+  };
+
+  const clearBanner = () => {
+    setBannerFile(null);
+    setBannerPreview(null);
+    if (bannerRef.current) bannerRef.current.value = "";
+  };
+
+  const handleCreate = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    if (!user) return;
+
+    let bannerUrl: string | undefined;
+
+    if (bannerFile) {
+      setUploading(true);
+      const ext = bannerFile.name.split(".").pop();
+      const path = `${user.id}/banner_${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from("checkin-photos").upload(path, bannerFile);
+      if (error) {
+        toast.error("Erro ao enviar imagem do banner");
+        setUploading(false);
+        return;
+      }
+      const { data: urlData } = supabase.storage.from("checkin-photos").getPublicUrl(path);
+      bannerUrl = urlData.publicUrl;
+      setUploading(false);
+    }
+
     createGroup.mutate(
       {
         name: name.trim(),
         type,
         goalTotal: parseInt(goalTotal),
         ...(type === "challenge" ? { startDate, endDate } : {}),
+        bannerUrl,
       },
       {
         onSuccess: (group) => {
@@ -129,20 +174,38 @@ const CreateGroup = () => {
         <Button
           variant="ghost"
           className="text-primary font-bold text-body"
-          onClick={handleCreate}
-          disabled={!name.trim() || createGroup.isPending}
+          onClick={() => handleCreate()}
+          disabled={!name.trim() || createGroup.isPending || uploading}
         >
-          {createGroup.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Criar"}
+          {(createGroup.isPending || uploading) ? <Loader2 className="h-4 w-4 animate-spin" /> : "Criar"}
         </Button>
       }
     >
-      {/* Banner placeholder */}
-      <div className="relative rounded-[20px] surface-1 border border-subtle h-36 flex items-center justify-center overflow-hidden">
-        <div className="text-center">
-          <Camera className="h-6 w-6 mx-auto text-muted-foreground mb-1" />
-          <span className="text-small text-muted-foreground">Foto do banner</span>
-        </div>
-      </div>
+      {/* Banner upload */}
+      <input ref={bannerRef} type="file" accept="image/*" className="hidden" onChange={handleBannerChange} />
+      <button
+        type="button"
+        onClick={() => bannerRef.current?.click()}
+        className="relative w-full rounded-[20px] surface-1 border border-subtle h-36 flex items-center justify-center overflow-hidden cursor-pointer transition-colors hover:border-primary/30"
+      >
+        {bannerPreview ? (
+          <>
+            <img src={bannerPreview} alt="Banner" className="absolute inset-0 w-full h-full object-cover" />
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); clearBanner(); }}
+              className="absolute top-2 right-2 h-8 w-8 rounded-full bg-background/80 flex items-center justify-center z-10"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </>
+        ) : (
+          <div className="text-center">
+            <Camera className="h-6 w-6 mx-auto text-muted-foreground mb-1" />
+            <span className="text-small text-muted-foreground">Foto do banner</span>
+          </div>
+        )}
+      </button>
 
       <div className="space-y-4">
         <div className="space-y-2">
@@ -237,11 +300,11 @@ const CreateGroup = () => {
         </button>
 
         <Button
-          onClick={handleCreate}
+          onClick={() => handleCreate()}
           className="h-14 w-full rounded-[18px] text-body font-bold glow-primary"
-          disabled={!name.trim() || createGroup.isPending}
+          disabled={!name.trim() || createGroup.isPending || uploading}
         >
-          {createGroup.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          {(createGroup.isPending || uploading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Criar {type === "challenge" ? "desafio" : "clube"}
         </Button>
       </div>

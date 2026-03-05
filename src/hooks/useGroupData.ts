@@ -79,6 +79,7 @@ export const useCreateGroup = () => {
       startDate?: string;
       endDate?: string;
       goalTotal: number;
+      bannerUrl?: string;
     }) => {
       if (!user) throw new Error("Não autenticado");
       const { data: group, error } = await supabase
@@ -92,6 +93,7 @@ export const useCreateGroup = () => {
           type: params.type,
           goal_total: params.goalTotal,
           scoring_mode: "days_active",
+          ...(params.bannerUrl ? { banner_url: params.bannerUrl } as any : {}),
         } as any)
         .select()
         .single();

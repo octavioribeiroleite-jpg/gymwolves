@@ -1,0 +1,1 @@
+ALTER TABLE public.groups ADD COLUMN banner_url text;

@@ -412,6 +412,7 @@ export type Database = {
       }
       groups: {
         Row: {
+          banner_url: string | null
           created_at: string
           created_by: string
           end_date: string | null
@@ -425,6 +426,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          banner_url?: string | null
           created_at?: string
           created_by: string
           end_date?: string | null
@@ -438,6 +440,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          banner_url?: string | null
           created_at?: string
           created_by?: string
           end_date?: string | null

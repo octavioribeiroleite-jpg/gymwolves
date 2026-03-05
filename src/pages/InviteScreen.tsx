@@ -56,7 +56,7 @@ const InviteScreen = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header with avatar and days remaining */}
-      <header className="border-b border-subtle bg-background px-5 py-4">
+      <header className="bg-background px-5 py-4">
         <div className="mx-auto max-w-md">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -75,7 +75,7 @@ const InviteScreen = () => {
       </header>
 
       {/* Internal tabs */}
-      <div className="border-b border-subtle bg-background">
+      <div className="bg-background">
         <div className="mx-auto max-w-md flex">
           {(["detalhes", "classificacoes", "chat"] as const).map((t) => (
             <button

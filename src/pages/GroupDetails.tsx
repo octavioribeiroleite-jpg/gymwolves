@@ -91,7 +91,7 @@ const GroupDetails = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-xl">
+      <header className="sticky top-0 z-40 bg-background">
         <div className="mx-auto max-w-md px-5 py-4">
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 rounded-2xl" onClick={() => navigate(-1)}>
@@ -104,7 +104,7 @@ const GroupDetails = () => {
 
         {/* Tab bar */}
         <div className="mx-auto max-w-md px-5">
-          <div className="flex border-b border-subtle">
+          <div className="flex">
             {TABS.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.key;

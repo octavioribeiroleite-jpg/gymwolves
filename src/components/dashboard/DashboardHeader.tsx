@@ -8,7 +8,7 @@ interface DashboardHeaderProps {
 const DashboardHeader = ({ userName }: DashboardHeaderProps) => {
   const firstName = userName.split(" ")[0];
   return (
-    <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-xl">
+    <header className="sticky top-0 z-40 bg-background">
       <div className="mx-auto flex h-16 max-w-md items-center justify-between px-4">
         <SidebarMenu />
         <h1 className="text-[15px] font-bold truncate max-w-[200px]">

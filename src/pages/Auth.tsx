@@ -6,8 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Dumbbell, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import logo from "@/assets/logo.png";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -54,9 +55,7 @@ const Auth = () => {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
       <div className="mb-8 text-center">
-        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/15 glow-primary">
-          <Dumbbell className="h-8 w-8 text-primary" />
-        </div>
+        <img src={logo} alt="Ratos de Academia" className="mx-auto mb-4 h-24 w-24 object-contain" />
         <h1 className="font-display text-3xl font-bold">Ratos de Academia</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           {isLogin ? "Entre na sua conta" : "Crie sua conta"}

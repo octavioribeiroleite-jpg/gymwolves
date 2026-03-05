@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useCreateCheckin, hasCheckedInToday } from "@/hooks/useCheckins";
+import { useCreateCheckin } from "@/hooks/useCheckins";
 import {
   Dialog,
   DialogContent,
@@ -41,13 +41,13 @@ const CheckinDialog = ({ open, onOpenChange, groupId, alreadyCheckedIn }: Checki
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="mx-4 max-w-sm rounded-2xl border-0 bg-card">
+      <DialogContent className="mx-4 max-w-sm rounded-3xl border-0 bg-card">
         <DialogHeader>
-          <DialogTitle className="font-display text-lg">Registrar Check-in</DialogTitle>
+          <DialogTitle className="font-display text-title-section">Registrar Check-in</DialogTitle>
         </DialogHeader>
 
         {alreadyCheckedIn && (
-          <div className="flex items-start gap-2 rounded-xl bg-primary/10 p-3 text-sm">
+          <div className="flex items-start gap-2 rounded-2xl bg-primary/10 p-3 text-sm">
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
             <p className="text-muted-foreground">
               Hoje já conta como <strong className="text-foreground">1 dia</strong>. 
@@ -64,7 +64,7 @@ const CheckinDialog = ({ open, onOpenChange, groupId, alreadyCheckedIn }: Checki
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               required
-              className="h-12 rounded-xl border-0 bg-secondary"
+              className="h-12 rounded-2xl border-0 bg-secondary"
             />
           </div>
           <div className="space-y-2">
@@ -73,7 +73,7 @@ const CheckinDialog = ({ open, onOpenChange, groupId, alreadyCheckedIn }: Checki
               placeholder="Como foi o treino?"
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              className="min-h-[80px] rounded-xl border-0 bg-secondary resize-none"
+              className="min-h-[80px] rounded-2xl border-0 bg-secondary resize-none"
             />
           </div>
           <Button

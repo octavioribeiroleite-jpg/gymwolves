@@ -2,85 +2,61 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap');
 
 @layer base {
   :root {
-    --background: 222 47% 11%;
-    --foreground: 210 40% 98%;
+    /* ─── Background & Surface ─── */
+    --background: 216 40% 6%;          /* #0B0F14 */
+    --foreground: 0 0% 100%;           /* #FFFFFF */
 
-    --card: 217 33% 17%;
-    --card-foreground: 210 40% 98%;
+    --surface: 215 35% 11%;            /* #121A24 */
+    --card: 216 30% 15%;               /* #182232 */
+    --card-foreground: 0 0% 100%;
 
-    --popover: 217 33% 17%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 216 30% 15%;
+    --popover-foreground: 0 0% 100%;
 
-    --primary: 142 71% 45%;
-    --primary-foreground: 222 47% 11%;
-
-    --secondary: 217 33% 22%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217 33% 22%;
-    --muted-foreground: 215 20% 55%;
-
-    --accent: 142 71% 45%;
-    --accent-foreground: 222 47% 11%;
-
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 210 40% 98%;
-
-    --success: 142 71% 45%;
-    --success-foreground: 222 47% 11%;
-
-    --border: 217 33% 25%;
-    --input: 217 33% 25%;
-    --ring: 142 71% 45%;
-
-    --radius: 1rem;
-
-    --sidebar-background: 222 47% 11%;
-    --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 142 71% 45%;
-    --sidebar-primary-foreground: 222 47% 11%;
-    --sidebar-accent: 217 33% 22%;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 217 33% 25%;
-    --sidebar-ring: 142 71% 45%;
-  }
-
-  /* Dark mode is the default — light override for completeness */
-  .light {
-    --background: 0 0% 98%;
-    --foreground: 222 47% 11%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
-
-    --primary: 142 71% 45%;
+    /* ─── Primary (Green Neon) ─── */
+    --primary: 142 71% 45%;            /* #22C55E */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222 47% 11%;
+    /* ─── Secondary ─── */
+    --secondary: 215 25% 18%;          /* #1E293B */
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
+    /* ─── Muted ─── */
+    --muted: 215 25% 18%;
+    --muted-foreground: 215 16% 63%;   /* #94A3B8 */
 
+    /* ─── Accent ─── */
     --accent: 142 71% 45%;
     --accent-foreground: 0 0% 100%;
 
+    /* ─── Destructive ─── */
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
+    /* ─── Success ─── */
     --success: 142 71% 45%;
     --success-foreground: 0 0% 100%;
 
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
+    /* ─── Border / Input / Ring ─── */
+    --border: 215 25% 22%;
+    --input: 215 25% 18%;
     --ring: 142 71% 45%;
+
+    --radius: 1.125rem;
+
+    /* ─── Sidebar ─── */
+    --sidebar-background: 216 40% 6%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 142 71% 45%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 215 25% 18%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 215 25% 22%;
+    --sidebar-ring: 142 71% 45%;
   }
 }
 
@@ -90,12 +66,14 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply bg-background text-foreground antialiased;
     font-family: 'Inter', sans-serif;
+    font-size: 16px;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Bebas Neue', 'Anton', sans-serif;
+    letter-spacing: 0.04em;
   }
 }
 
@@ -113,6 +91,11 @@
   }
 
   .gradient-card {
-    background: linear-gradient(180deg, hsl(217 33% 19%), hsl(217 33% 15%));
+    background: linear-gradient(180deg, hsl(216 30% 17%), hsl(216 30% 13%));
+  }
+
+  .font-display {
+    font-family: 'Bebas Neue', 'Anton', sans-serif;
+    letter-spacing: 0.04em;
   }
 }

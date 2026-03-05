@@ -15,7 +15,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ["Inter", "sans-serif"],
-        display: ["Space Grotesk", "sans-serif"],
+        display: ["Bebas Neue", "Anton", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -23,6 +23,7 @@ export default {
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        surface: "hsl(var(--surface))",
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
@@ -70,6 +71,14 @@ export default {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        "2xl": "1.125rem",
+        "3xl": "1.5rem",
+      },
+      fontSize: {
+        "title-lg": ["1.75rem", { lineHeight: "1.2", fontWeight: "600" }],
+        "title-section": ["1.375rem", { lineHeight: "1.3", fontWeight: "600" }],
+        "body": ["1rem", { lineHeight: "1.5" }],
+        "description": ["0.875rem", { lineHeight: "1.5" }],
       },
       keyframes: {
         "accordion-down": {

@@ -27,8 +27,12 @@ import PwaInstallPrompt from "./components/PwaInstallPrompt";
 const queryClient = new QueryClient();
 
 const App = () => {
-  const [splashDone, setSplashDone] = useState(false);
-  const handleSplashFinish = useCallback(() => setSplashDone(true), []);
+  const alreadyShown = sessionStorage.getItem("splash_shown") === "1";
+  const [splashDone, setSplashDone] = useState(alreadyShown);
+  const handleSplashFinish = useCallback(() => {
+    sessionStorage.setItem("splash_shown", "1");
+    setSplashDone(true);
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

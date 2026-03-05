@@ -128,6 +128,24 @@ export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
                   filter: "blur(6px)",
                 }}
               />
+              {/* LED Pupil */}
+              <motion.div
+                className="absolute rounded-full"
+                style={{
+                  top: "15%",
+                  left: "50%",
+                  marginLeft: -2,
+                  width: 4,
+                  height: "70%",
+                  backgroundColor: "#fff",
+                  boxShadow: `0 0 8px ${NEON}, 0 0 20px ${NEON}, 0 0 40px ${NEON}`,
+                }}
+                animate={{
+                  opacity: phase >= 2 && phase <= 4 ? 1 : 0,
+                  scaleY: phase >= 2 && phase <= 4 ? 1 : 0,
+                }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+              />
             </motion.div>
 
             {/* Right eye */}
@@ -163,6 +181,24 @@ export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
                   background: "radial-gradient(ellipse at center, rgba(255,255,255,0.9) 0%, rgba(200,255,200,0.6) 40%, transparent 80%)",
                   filter: "blur(6px)",
                 }}
+              />
+              {/* LED Pupil */}
+              <motion.div
+                className="absolute rounded-full"
+                style={{
+                  top: "15%",
+                  left: "50%",
+                  marginLeft: -2,
+                  width: 4,
+                  height: "70%",
+                  backgroundColor: "#fff",
+                  boxShadow: `0 0 8px ${NEON}, 0 0 20px ${NEON}, 0 0 40px ${NEON}`,
+                }}
+                animate={{
+                  opacity: phase >= 2 && phase <= 4 ? 1 : 0,
+                  scaleY: phase >= 2 && phase <= 4 ? 1 : 0,
+                }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
               />
             </motion.div>
           </div>

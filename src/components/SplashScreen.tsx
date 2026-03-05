@@ -74,77 +74,21 @@ function WolfEyes({ visible }: { visible: boolean }) {
   );
 }
 
-function WolfMouth({ visible }: { visible: boolean }) {
-  return (
-    <motion.div
-      className="absolute left-1/2 z-10 -translate-x-1/2"
-      style={{ top: "48%" }}
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: visible ? 1 : 0, scale: visible ? 1 : 0.7 }}
-      transition={{ duration: 0.5, ease: "easeInOut" }}
-    >
-      <svg width="80" height="36" viewBox="0 0 80 36" fill="none">
-        {/* Upper lip curve */}
-        <path
-          d="M10 18 Q20 8 40 12 Q60 8 70 18"
-          stroke="hsl(142 71% 45% / 0.6)"
-          strokeWidth="1.5"
-          fill="none"
-        />
-        {/* Lower lip curve */}
-        <path
-          d="M14 18 Q40 32 66 18"
-          stroke="hsl(142 71% 45% / 0.4)"
-          strokeWidth="1.5"
-          fill="none"
-        />
-        {/* Teeth - upper triangles */}
-        {[18, 28, 38, 48, 58].map((x, i) => (
-          <motion.polygon
-            key={`upper-${i}`}
-            points={`${x - 3},14 ${x + 3},14 ${x},22`}
-            fill="white"
-            style={{
-              filter: "drop-shadow(0 0 4px hsl(142 71% 45% / 0.4))",
-            }}
-            initial={{ opacity: 0 }}
-            animate={visible ? { opacity: [0, 0.9] } : { opacity: 0 }}
-            transition={{ duration: 0.3, delay: 0.1 + i * 0.06 }}
-          />
-        ))}
-        {/* Teeth - lower triangles (smaller) */}
-        {[24, 34, 44, 54].map((x, i) => (
-          <motion.polygon
-            key={`lower-${i}`}
-            points={`${x - 2.5},24 ${x + 2.5},24 ${x},18`}
-            fill="hsl(0 0% 90%)"
-            style={{
-              filter: "drop-shadow(0 0 3px hsl(142 71% 45% / 0.3))",
-            }}
-            initial={{ opacity: 0 }}
-            animate={visible ? { opacity: [0, 0.7] } : { opacity: 0 }}
-            transition={{ duration: 0.3, delay: 0.25 + i * 0.06 }}
-          />
-        ))}
-      </svg>
-    </motion.div>
-  );
-}
+
 
 export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
   const [phase, setPhase] = useState(0);
-  // 0: eyes appear, 1: mouth appears, 2: face fades → logo, 3: fade out
+  // 0: eyes appear, 1: face fades → logo, 2: fade out
 
   useEffect(() => {
-    const t1 = setTimeout(() => setPhase(1), 1200);
-    const t2 = setTimeout(() => setPhase(2), 2400);
-    const t3 = setTimeout(() => setPhase(3), 3600);
-    const t4 = setTimeout(() => onFinish(), 4100);
-    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); clearTimeout(t4); };
+    const t1 = setTimeout(() => setPhase(1), 1800);
+    const t2 = setTimeout(() => setPhase(2), 3200);
+    const t3 = setTimeout(() => onFinish(), 3700);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }, [onFinish]);
 
-  const showFace = phase < 2;
-  const showLogo = phase >= 2 && phase < 3;
+  const showFace = phase < 1;
+  const showLogo = phase >= 1 && phase < 2;
 
   return (
     <AnimatePresence>
@@ -153,7 +97,7 @@ export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
         className="fixed inset-0 z-[99999] flex flex-col items-center justify-center overflow-hidden"
         style={{ background: "hsl(218 50% 7%)" }}
         initial={{ opacity: 1 }}
-        animate={{ opacity: phase === 3 ? 0 : 1, y: phase === 3 ? -8 : 0 }}
+        animate={{ opacity: phase === 2 ? 0 : 1, y: phase === 2 ? -8 : 0 }}
         transition={{ duration: 0.5, ease: "easeInOut" }}
       >
         {/* Ambient glow */}
@@ -171,8 +115,8 @@ export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
         <Particles intense={phase >= 2} />
 
         {/* Wolf face */}
-        <WolfEyes visible={phase >= 0 && phase < 2} />
-        <WolfMouth visible={phase >= 1 && phase < 2} />
+        <WolfEyes visible={phase >= 0 && phase < 1} />
+        
 
         {/* Logo reveal */}
         <motion.div

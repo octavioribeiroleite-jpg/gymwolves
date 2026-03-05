@@ -1,20 +1,38 @@
 
 
-## Atualizar imagem de compartilhamento (OG Image)
+## Nova Animação da Splash Screen — Lobo Cinematográfico
 
-### Problema
-As meta tags `og:image` e `twitter:image` apontam para um screenshot antigo hospedado no R2. Quando o link é compartilhado no WhatsApp, aparece essa imagem antiga em vez da logo do app.
+### Conceito
+Sequência fluida em 3 fases: **olhos brilham no escuro → boca com dentes aparece abaixo → face se transforma na logo e abre o app**.
 
-### Solução
+### Alterações em `src/components/SplashScreen.tsx`
 
-Criar uma imagem OG personalizada (1200x630px) com fundo escuro `#0B1220` e a logo do GYM WOLVES centralizada, para ser usada como preview de compartilhamento. Alternativamente, usar a logo existente (`/logo.png`) diretamente.
+**Fase 1 (0s–1.2s) — Olhos do Lobo**
+- Tela escura total, apenas os dois olhos verdes surgem com glow pulsante
+- Olhos posicionados mais ao centro vertical (~45%)
 
-**Melhor abordagem**: Usar `/logo.png` já existente no projeto como OG image, referenciando com URL absoluta (`https://gymwolves.lovable.app/logo.png`).
+**Fase 2 (1.2s–2.4s) — Sorriso com Dentes**
+- Abaixo dos olhos, uma boca estilizada aparece com fade-in
+- Desenho minimalista usando SVG: arco curvado (sorriso) com "dentes" triangulares brancos
+- Glow sutil nos dentes (branco/verde)
+- Olhos continuam visíveis
 
-### Alterações em `index.html`
-- Atualizar `og:image` de URL do R2 para `https://gymwolves.lovable.app/logo.png`
-- Atualizar `twitter:image` igualmente
-- Mudar `twitter:card` de `summary_large_image` para `summary` (melhor para logos quadradas)
+**Fase 3 (2.4s–3.6s) — Revelação da Logo**
+- Olhos e boca fazem fade-out e scale-down juntos
+- Logo do GYM WOLVES faz scale-up suave no mesmo ponto central
+- Título e tagline surgem por baixo
+- Partículas intensificam brevemente
 
-> **Nota**: O WhatsApp pode cachear a imagem antiga por algum tempo. Para forçar atualização, pode-se usar ferramentas como o [Facebook Sharing Debugger](https://developers.facebook.com/tools/debug/).
+**Fase 4 (3.6s–4.1s) — Transição**
+- Tudo faz fade-out + slide-up para abrir o app
+
+### Detalhes técnicos
+- Componente `WolfMouth` novo com SVG inline (arco + triângulos para dentes)
+- Sistema de fases via `useState<number>` com `useEffect` + `setTimeout` encadeados
+- Todas as transições via `framer-motion` (`animate`, `initial`, `exit`)
+- Tempo total aumenta de ~3.9s para ~4.1s (sutil, mas mais cinematográfico)
+- Os olhos são reposicionados para não sobrepor a logo (ficam mais acima)
+
+### Resultado
+Animação sequencial e fluida: olhos brilham → sorriso predador aparece → face se dissolve na logo → app abre.
 

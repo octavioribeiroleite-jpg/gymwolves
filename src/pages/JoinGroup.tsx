@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useJoinChallengeByCode } from "@/hooks/useChallengeData";
-import { useActiveChallenge } from "@/contexts/ActiveChallengeContext";
+import { useJoinGroup } from "@/hooks/useGroupData";
+import { useActiveGroup } from "@/contexts/ActiveGroupContext";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,18 +9,18 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Loader2, LogIn } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
 
-const JoinChallenge = () => {
+const JoinGroup = () => {
   const [code, setCode] = useState("");
-  const joinChallenge = useJoinChallengeByCode();
-  const { setActiveChallengeId } = useActiveChallenge();
+  const joinGroup = useJoinGroup();
+  const { setActiveGroupId } = useActiveGroup();
   const navigate = useNavigate();
 
   const handleJoin = (e: React.FormEvent) => {
     e.preventDefault();
     if (!code.trim()) return;
-    joinChallenge.mutate(code.trim(), {
-      onSuccess: (challenge) => {
-        setActiveChallengeId(challenge.id);
+    joinGroup.mutate(code.trim(), {
+      onSuccess: (group) => {
+        setActiveGroupId(group.id);
         navigate("/");
       },
     });
@@ -43,7 +43,7 @@ const JoinChallenge = () => {
               <LogIn className="h-8 w-8 text-primary" />
             </div>
             <p className="mb-4 text-center text-sm text-muted-foreground">
-              Insira o código de convite que você recebeu para entrar em um desafio.
+              Insira o código de convite para entrar em um grupo.
             </p>
             <form onSubmit={handleJoin} className="space-y-4">
               <div className="space-y-2">
@@ -56,9 +56,9 @@ const JoinChallenge = () => {
                   className="h-12 rounded-xl border-0 bg-secondary font-mono text-center text-lg tracking-[0.3em]"
                 />
               </div>
-              <Button type="submit" className="h-14 w-full rounded-2xl text-base font-semibold glow-primary" disabled={joinChallenge.isPending}>
-                {joinChallenge.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Entrar no Desafio
+              <Button type="submit" className="h-14 w-full rounded-2xl text-base font-semibold glow-primary" disabled={joinGroup.isPending}>
+                {joinGroup.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Entrar no Grupo
               </Button>
             </form>
           </CardContent>
@@ -69,4 +69,4 @@ const JoinChallenge = () => {
   );
 };
 
-export default JoinChallenge;
+export default JoinGroup;

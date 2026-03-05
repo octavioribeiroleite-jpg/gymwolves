@@ -1,8 +1,8 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/useProfile";
-import { useUserGroups, useGroupMembers } from "@/hooks/useGroup";
-import { useGroupChallenges } from "@/hooks/useChallenge";
-import { useWorkoutLogs, computeStreaks } from "@/hooks/useWorkoutLogs";
+import { useActiveGroup } from "@/contexts/ActiveGroupContext";
+import { useGroupDetail, useGroupMembers } from "@/hooks/useGroupData";
+import { useGroupCheckins, computeDaysActive, computeStreaks } from "@/hooks/useCheckins";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Flame, Target, Trophy, LogOut, Users, Settings, Loader2 } from "lucide-react";
@@ -13,23 +13,18 @@ import { useMemo } from "react";
 const Profile = () => {
   const { user, signOut } = useAuth();
   const { data: profile } = useProfile();
-  const { data: groups } = useUserGroups();
-  const group = groups?.[0];
-  const { data: members } = useGroupMembers(group?.id);
-  const { data: challenges } = useGroupChallenges(group?.id);
-  const challenge = challenges?.[0];
-  const { data: logs } = useWorkoutLogs(challenge?.id);
+  const { activeGroupId } = useActiveGroup();
+  const { data: group } = useGroupDetail(activeGroupId || undefined);
+  const { data: checkins } = useGroupCheckins(activeGroupId || undefined);
 
   const myStats = useMemo(() => {
-    if (!logs || !user || !challenge) return null;
-    const userLogs = logs.filter((l) => l.user_id === user.id);
-    const dates = userLogs.map((l) => l.workout_date);
-    const streaks = computeStreaks(dates);
-    const pct = challenge.goal_days_per_user > 0
-      ? Math.round((dates.length / challenge.goal_days_per_user) * 100)
-      : 0;
-    return { days: dates.length, goal: challenge.goal_days_per_user, pct: Math.min(pct, 100), ...streaks };
-  }, [logs, user, challenge]);
+    if (!checkins || !user || !group) return null;
+    const days = computeDaysActive(checkins, user.id);
+    const streaks = computeStreaks(checkins, user.id);
+    const goal = (group as any).goal_total || 200;
+    const pct = goal > 0 ? Math.min(Math.round((days / goal) * 100), 100) : 0;
+    return { days, goal, pct, ...streaks };
+  }, [checkins, user, group]);
 
   const initials = (profile?.display_name || "U")
     .split(" ")
@@ -47,7 +42,6 @@ const Profile = () => {
       </header>
 
       <div className="mx-auto max-w-md space-y-4 p-4">
-        {/* Avatar & name */}
         <div className="flex flex-col items-center py-4">
           <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-primary/15 text-2xl font-bold text-primary font-display">
             {initials}
@@ -56,7 +50,6 @@ const Profile = () => {
           <p className="text-sm text-muted-foreground">{user?.email}</p>
         </div>
 
-        {/* Stats */}
         {myStats && (
           <div className="grid grid-cols-3 gap-3">
             <Card className="border-0">
@@ -70,7 +63,7 @@ const Profile = () => {
               <CardContent className="flex flex-col items-center p-4">
                 <Target className="mb-1 h-5 w-5 text-primary" />
                 <span className="text-2xl font-bold font-display">{myStats.days}/{myStats.goal}</span>
-                <span className="text-[11px] text-muted-foreground">Treinos</span>
+                <span className="text-[11px] text-muted-foreground">Days Active</span>
               </CardContent>
             </Card>
             <Card className="border-0">
@@ -83,27 +76,25 @@ const Profile = () => {
           </div>
         )}
 
-        {/* Quick links */}
         <Card className="border-0">
           <CardContent className="divide-y divide-border p-0">
-            <Link to="/grupo" className="flex items-center gap-3 p-4 transition-colors hover:bg-secondary">
+            <Link to="/grupos" className="flex items-center gap-3 p-4 transition-colors hover:bg-secondary">
               <Users className="h-5 w-5 text-primary" />
               <div className="flex-1">
-                <p className="text-sm font-medium">Meu Grupo</p>
-                <p className="text-xs text-muted-foreground">{group?.name || "Nenhum grupo"}</p>
+                <p className="text-sm font-medium">Meus Grupos</p>
+                <p className="text-xs text-muted-foreground">{group?.name || "Nenhum grupo ativo"}</p>
               </div>
             </Link>
-            <Link to="/desafio" className="flex items-center gap-3 p-4 transition-colors hover:bg-secondary">
-              <Settings className="h-5 w-5 text-primary" />
+            <Link to="/ranking" className="flex items-center gap-3 p-4 transition-colors hover:bg-secondary">
+              <Trophy className="h-5 w-5 text-primary" />
               <div className="flex-1">
-                <p className="text-sm font-medium">Desafios</p>
-                <p className="text-xs text-muted-foreground">Gerenciar desafios</p>
+                <p className="text-sm font-medium">Ranking</p>
+                <p className="text-xs text-muted-foreground">Ver posição no grupo</p>
               </div>
             </Link>
           </CardContent>
         </Card>
 
-        {/* Sign out */}
         <Button
           variant="outline"
           onClick={signOut}

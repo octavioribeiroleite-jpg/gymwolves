@@ -1,10 +1,10 @@
-import { Home, Calendar, Trophy, User, Swords } from "lucide-react";
+import { Home, Calendar, Trophy, User, Users } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const items = [
   { to: "/", icon: Home, label: "Home" },
-  { to: "/desafios", icon: Swords, label: "Desafios" },
+  { to: "/grupos", icon: Users, label: "Grupos" },
   { to: "/historico", icon: Calendar, label: "Histórico" },
   { to: "/ranking", icon: Trophy, label: "Ranking" },
   { to: "/perfil", icon: User, label: "Perfil" },
@@ -24,9 +24,7 @@ const BottomNav = () => {
               to={to}
               className={cn(
                 "flex flex-col items-center gap-0.5 px-3 py-2 text-[11px] transition-all duration-200",
-                active
-                  ? "text-primary"
-                  : "text-muted-foreground hover:text-foreground"
+                active ? "text-primary" : "text-muted-foreground hover:text-foreground"
               )}
             >
               <div className={cn(

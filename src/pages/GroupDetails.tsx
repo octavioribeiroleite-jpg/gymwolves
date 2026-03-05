@@ -1,12 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { useActiveChallenge } from "@/contexts/ActiveChallengeContext";
-import {
-  useChallengeDetail,
-  useChallengeParticipants,
-  useRemoveParticipant,
-  useLeaveChallenge,
-} from "@/hooks/useChallengeData";
+import { useActiveGroup } from "@/contexts/ActiveGroupContext";
+import { useGroupDetail, useGroupMembers, useRemoveMember, useLeaveGroup } from "@/hooks/useGroupData";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, CalendarDays, Copy, Loader2, LogOut, Target, Trash2, Trophy, Users } from "lucide-react";
@@ -15,40 +10,41 @@ import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 import BottomNav from "@/components/BottomNav";
 
-const ChallengeDetails = () => {
+const GroupDetails = () => {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { setActiveChallengeId } = useActiveChallenge();
-  const { data: challenge, isLoading } = useChallengeDetail(id);
-  const { data: participants } = useChallengeParticipants(id);
-  const removeParticipant = useRemoveParticipant();
-  const leaveChallenge = useLeaveChallenge();
+  const { setActiveGroupId } = useActiveGroup();
+  const { data: group, isLoading } = useGroupDetail(id);
+  const { data: members } = useGroupMembers(id);
+  const removeMember = useRemoveMember();
+  const leaveGroup = useLeaveGroup();
 
-  const isOwner = challenge?.created_by === user?.id;
+  const isAdmin = group?.created_by === user?.id;
+  const groupAny = group as any;
 
   const handleLeave = () => {
     if (!id) return;
-    if (confirm("Tem certeza que deseja sair deste desafio?")) {
-      leaveChallenge.mutate(id, {
+    if (confirm("Tem certeza que deseja sair deste grupo?")) {
+      leaveGroup.mutate(id, {
         onSuccess: () => {
-          setActiveChallengeId(null);
-          navigate("/desafios");
+          setActiveGroupId(null);
+          navigate("/grupos");
         },
       });
     }
   };
 
-  const handleRemove = (participantId: string, name: string) => {
+  const handleRemove = (memberId: string, name: string) => {
     if (!id) return;
-    if (confirm(`Remover ${name} do desafio?`)) {
-      removeParticipant.mutate({ participantId, challengeId: id });
+    if (confirm(`Remover ${name} do grupo?`)) {
+      removeMember.mutate({ memberId, groupId: id });
     }
   };
 
   const copyCode = () => {
-    if (challenge?.invite_code) {
-      navigator.clipboard.writeText(challenge.invite_code);
+    if (group?.invite_code) {
+      navigator.clipboard.writeText(group.invite_code);
       toast.success("Código copiado!");
     }
   };
@@ -68,35 +64,38 @@ const ChallengeDetails = () => {
           <Button variant="ghost" size="icon" className="h-8 w-8 rounded-xl" onClick={() => navigate(-1)}>
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <h1 className="font-display text-xl font-bold">Detalhes do Desafio</h1>
+          <h1 className="font-display text-xl font-bold">Detalhes do Grupo</h1>
         </div>
       </header>
       <div className="mx-auto max-w-md space-y-4 p-4">
-        {/* Challenge info */}
         <Card className="border-0">
           <CardContent className="space-y-3 p-5">
             <div className="flex items-center gap-2">
               <Trophy className="h-5 w-5 text-primary" />
-              <h2 className="font-display text-lg font-bold">{challenge?.name}</h2>
+              <h2 className="font-display text-lg font-bold">{group?.name}</h2>
             </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <CalendarDays className="h-4 w-4" />
-              {challenge && format(new Date(challenge.start_date), "dd MMM yyyy", { locale: ptBR })} — {challenge && format(new Date(challenge.end_date), "dd MMM yyyy", { locale: ptBR })}
-            </div>
+            {groupAny?.start_date && groupAny?.end_date && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <CalendarDays className="h-4 w-4" />
+                {format(new Date(groupAny.start_date), "dd MMM yyyy", { locale: ptBR })} — {format(new Date(groupAny.end_date), "dd MMM yyyy", { locale: ptBR })}
+              </div>
+            )}
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Target className="h-4 w-4" />
-              Meta: <strong className="text-foreground">{challenge?.goal_days_per_user} dias</strong>
+              Meta: <strong className="text-foreground">{groupAny?.goal_total || 200} dias</strong>
+            </div>
+            <div className="text-xs text-muted-foreground">
+              Tipo: {groupAny?.type === "challenge" ? "Desafio" : "Clube"} · Scoring: Days Active
             </div>
           </CardContent>
         </Card>
 
-        {/* Invite code */}
         <Card className="border-0">
           <CardContent className="p-5">
             <p className="mb-2 text-xs text-muted-foreground">Código de convite</p>
             <div className="flex items-center gap-2">
               <code className="flex-1 rounded-xl bg-secondary px-4 py-3 text-center font-mono text-lg font-bold tracking-[0.3em] text-primary">
-                {challenge?.invite_code}
+                {group?.invite_code}
               </code>
               <Button variant="outline" size="icon" onClick={copyCode} className="h-12 w-12 rounded-xl border-0 bg-secondary">
                 <Copy className="h-4 w-4" />
@@ -105,34 +104,32 @@ const ChallengeDetails = () => {
           </CardContent>
         </Card>
 
-        {/* Participants */}
         <Card className="border-0">
           <CardContent className="p-5">
             <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold font-display">
-              <Users className="h-4 w-4 text-primary" /> Participantes ({participants?.length ?? 0})
+              <Users className="h-4 w-4 text-primary" /> Membros ({members?.length ?? 0})
             </h3>
             <div className="space-y-2">
-              {participants?.map((p) => {
-                const profile = p.profiles as any;
-                const isSelf = p.user_id === user?.id;
+              {members?.map((m) => {
+                const profile = m.profiles as any;
+                const isSelf = m.user_id === user?.id;
+                const memberRole = (m as any).role;
                 return (
-                  <div key={p.id} className="flex items-center justify-between rounded-xl bg-secondary px-4 py-3">
-                    <div>
-                      <span className="font-medium">
-                        {profile?.display_name || "Sem nome"}
-                        {isSelf && <span className="ml-1 text-xs text-muted-foreground">(você)</span>}
-                      </span>
-                    </div>
+                  <div key={m.id} className="flex items-center justify-between rounded-xl bg-secondary px-4 py-3">
+                    <span className="font-medium">
+                      {profile?.display_name || "Sem nome"}
+                      {isSelf && <span className="ml-1 text-xs text-muted-foreground">(você)</span>}
+                    </span>
                     <div className="flex items-center gap-2">
-                      {p.role === "owner" && (
-                        <span className="rounded-lg bg-primary/15 px-2 py-0.5 text-xs font-medium text-primary">Dono</span>
+                      {memberRole === "admin" && (
+                        <span className="rounded-lg bg-primary/15 px-2 py-0.5 text-xs font-medium text-primary">Admin</span>
                       )}
-                      {isOwner && !isSelf && (
+                      {isAdmin && !isSelf && (
                         <Button
                           variant="ghost"
                           size="icon"
                           className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                          onClick={() => handleRemove(p.id, profile?.display_name || "participante")}
+                          onClick={() => handleRemove(m.id, profile?.display_name || "membro")}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -145,15 +142,14 @@ const ChallengeDetails = () => {
           </CardContent>
         </Card>
 
-        {/* Leave */}
         <Button
           variant="outline"
           onClick={handleLeave}
           className="h-14 w-full rounded-2xl border-destructive/30 text-destructive hover:bg-destructive/10"
-          disabled={leaveChallenge.isPending}
+          disabled={leaveGroup.isPending}
         >
-          {leaveChallenge.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <LogOut className="mr-2 h-4 w-4" />}
-          Sair do Desafio
+          {leaveGroup.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <LogOut className="mr-2 h-4 w-4" />}
+          Sair do Grupo
         </Button>
       </div>
       <BottomNav />
@@ -161,4 +157,4 @@ const ChallengeDetails = () => {
   );
 };
 
-export default ChallengeDetails;
+export default GroupDetails;

@@ -5,16 +5,16 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { ActiveChallengeProvider } from "@/contexts/ActiveChallengeContext";
+import { ActiveGroupProvider } from "@/contexts/ActiveGroupContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import SplashScreen from "./components/SplashScreen";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
-import ChallengeList from "./pages/ChallengeList";
-import CreateChallenge from "./pages/CreateChallenge";
-import JoinChallenge from "./pages/JoinChallenge";
+import GroupList from "./pages/GroupList";
+import CreateGroup from "./pages/CreateGroup";
+import JoinGroup from "./pages/JoinGroup";
 import InviteScreen from "./pages/InviteScreen";
-import ChallengeDetails from "./pages/ChallengeDetails";
+import GroupDetails from "./pages/GroupDetails";
 import History from "./pages/History";
 import Ranking from "./pages/Ranking";
 import Profile from "./pages/Profile";
@@ -36,21 +36,21 @@ const App = () => {
         {splashDone && <PwaInstallPrompt />}
         <BrowserRouter>
           <AuthProvider>
-            <ActiveChallengeProvider>
+            <ActiveGroupProvider>
               <Routes>
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-                <Route path="/desafios" element={<ProtectedRoute><ChallengeList /></ProtectedRoute>} />
-                <Route path="/desafios/criar" element={<ProtectedRoute><CreateChallenge /></ProtectedRoute>} />
-                <Route path="/desafios/entrar" element={<ProtectedRoute><JoinChallenge /></ProtectedRoute>} />
-                <Route path="/desafios/:id/convidar" element={<ProtectedRoute><InviteScreen /></ProtectedRoute>} />
-                <Route path="/desafios/:id/detalhes" element={<ProtectedRoute><ChallengeDetails /></ProtectedRoute>} />
+                <Route path="/grupos" element={<ProtectedRoute><GroupList /></ProtectedRoute>} />
+                <Route path="/grupos/criar" element={<ProtectedRoute><CreateGroup /></ProtectedRoute>} />
+                <Route path="/grupos/entrar" element={<ProtectedRoute><JoinGroup /></ProtectedRoute>} />
+                <Route path="/grupos/:id/convidar" element={<ProtectedRoute><InviteScreen /></ProtectedRoute>} />
+                <Route path="/grupos/:id/detalhes" element={<ProtectedRoute><GroupDetails /></ProtectedRoute>} />
                 <Route path="/historico" element={<ProtectedRoute><History /></ProtectedRoute>} />
                 <Route path="/ranking" element={<ProtectedRoute><Ranking /></ProtectedRoute>} />
                 <Route path="/perfil" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
-            </ActiveChallengeProvider>
+            </ActiveGroupProvider>
           </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>

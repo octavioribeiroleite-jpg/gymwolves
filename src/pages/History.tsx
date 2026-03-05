@@ -1,8 +1,8 @@
 import { useState, useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useActiveChallenge } from "@/contexts/ActiveChallengeContext";
-import { useChallengeDetail, useChallengeParticipants } from "@/hooks/useChallengeData";
-import { useWorkoutLogs } from "@/hooks/useWorkoutLogs";
+import { useActiveGroup } from "@/contexts/ActiveGroupContext";
+import { useGroupDetail, useGroupMembers } from "@/hooks/useGroupData";
+import { useGroupCheckins, getUserDates } from "@/hooks/useCheckins";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
@@ -13,22 +13,20 @@ import BottomNav from "@/components/BottomNav";
 
 const History = () => {
   const { user } = useAuth();
-  const { activeChallengeId } = useActiveChallenge();
-  const { data: challenge } = useChallengeDetail(activeChallengeId || undefined);
-  const { data: participants } = useChallengeParticipants(activeChallengeId || undefined);
-  const { data: logs, isLoading } = useWorkoutLogs(activeChallengeId || undefined);
+  const { activeGroupId } = useActiveGroup();
+  const { data: group } = useGroupDetail(activeGroupId || undefined);
+  const { data: members } = useGroupMembers(activeGroupId || undefined);
+  const { data: checkins, isLoading } = useGroupCheckins(activeGroupId || undefined);
 
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
-  const activeUserId = selectedUserId || user?.id || participants?.[0]?.user_id;
+  const activeUserId = selectedUserId || user?.id || members?.[0]?.user_id;
 
   const userDates = useMemo(() => {
-    if (!logs || !activeUserId) return new Set<string>();
-    return new Set(
-      logs.filter((l) => l.user_id === activeUserId).map((l) => l.workout_date)
-    );
-  }, [logs, activeUserId]);
+    if (!checkins || !activeUserId) return new Set<string>();
+    return getUserDates(checkins, activeUserId);
+  }, [checkins, activeUserId]);
 
   const days = useMemo(() => {
     const start = startOfMonth(currentMonth);
@@ -59,23 +57,22 @@ const History = () => {
       <header className="sticky top-0 z-40 border-b border-border/50 bg-background/95 px-4 py-4 backdrop-blur-xl">
         <div className="mx-auto max-w-md">
           <h1 className="font-display text-xl font-bold">Histórico</h1>
-          <p className="text-xs text-muted-foreground">{challenge?.name || "Nenhum desafio ativo"}</p>
+          <p className="text-xs text-muted-foreground">{group?.name || "Nenhum grupo ativo"}</p>
         </div>
       </header>
 
       <div className="mx-auto max-w-md space-y-4 p-4">
-        {/* Member selector */}
-        {participants && participants.length > 1 && (
+        {members && members.length > 1 && (
           <div className="flex gap-2 overflow-x-auto">
-            {participants.map((p) => {
-              const profile = p.profiles as any;
+            {members.map((m) => {
+              const profile = m.profiles as any;
               return (
                 <button
-                  key={p.user_id}
-                  onClick={() => setSelectedUserId(p.user_id)}
+                  key={m.user_id}
+                  onClick={() => setSelectedUserId(m.user_id)}
                   className={cn(
                     "shrink-0 rounded-xl px-4 py-2 text-sm font-medium transition-all",
-                    activeUserId === p.user_id
+                    activeUserId === m.user_id
                       ? "bg-primary text-primary-foreground glow-primary"
                       : "bg-card text-muted-foreground hover:bg-secondary"
                   )}
@@ -87,7 +84,6 @@ const History = () => {
           </div>
         )}
 
-        {/* Calendar */}
         <Card className="border-0">
           <CardContent className="p-5">
             <div className="mb-4 flex items-center justify-between">

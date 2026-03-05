@@ -55,7 +55,7 @@ const Auth = () => {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
       <div className="mb-8 text-center">
-        <img src={logo} alt="Ratos de Academia" className="mx-auto mb-4 h-24 w-24 object-contain" />
+        <img src={logo} alt="Ratos de Academia" className="mx-auto mb-4 h-48 w-48 object-contain" />
         <h1 className="font-display text-3xl font-bold">Ratos de Academia</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           {isLogin ? "Entre na sua conta" : "Crie sua conta"}

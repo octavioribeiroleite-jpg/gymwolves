@@ -7,7 +7,7 @@ export default {
   theme: {
     container: {
       center: true,
-      padding: "1.25rem",
+      padding: "1rem",
       screens: {
         "2xl": "1400px",
       },
@@ -69,12 +69,17 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        medal: {
+          gold: "hsl(var(--medal-gold))",
+          silver: "hsl(var(--medal-silver))",
+          bronze: "hsl(var(--medal-bronze))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
-        "2xl": "1.25rem",
+        "2xl": "1rem",
         "3xl": "1.5rem",
       },
       spacing: {
@@ -82,10 +87,10 @@ export default {
         "ds-lg": "20px",
       },
       fontSize: {
-        "h1": ["28px", { lineHeight: "1.15", fontWeight: "700", letterSpacing: "-0.2px" }],
-        "h2": ["18px", { lineHeight: "1.35", fontWeight: "700" }],
-        "subtitle": ["15px", { lineHeight: "1.4", fontWeight: "500" }],
-        "body": ["15px", { lineHeight: "1.5", fontWeight: "500" }],
+        "h1": ["22px", { lineHeight: "1.2", fontWeight: "600", letterSpacing: "-0.2px" }],
+        "h2": ["18px", { lineHeight: "1.35", fontWeight: "600" }],
+        "subtitle": ["13px", { lineHeight: "1.4", fontWeight: "500" }],
+        "body": ["14px", { lineHeight: "1.5", fontWeight: "400" }],
         "small": ["13px", { lineHeight: "1.4", fontWeight: "500" }],
         "caption": ["12px", { lineHeight: "1.3", fontWeight: "500" }],
       },

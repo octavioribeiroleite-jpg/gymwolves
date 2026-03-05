@@ -1,75 +1,33 @@
 
 
-## Tema Claro — Migração Visual Completa
+## Splash Screen — Rosto de Lobo Neon + Fundo Cinza
 
-Migrar todo o app de tema escuro para tema claro, atualizando apenas tokens CSS e ajustes visuais pontuais. Nenhuma mudança de estrutura, lógica ou navegação.
+### Mudanças
 
-### 1. Variáveis CSS (`src/index.css`)
+**1. Fundo da Splash** — Trocar `#1C1C1E` por `#F3F4F6` (mesmo cinza claro do app). O título "GYM WOLVES" e tagline passam a ser escuros para manter contraste. As partículas e glows verdes ficam mais sutis no fundo claro.
 
-Atualizar todos os tokens:
+**2. Rosto de lobo neon (SVG inline animado com framer-motion)**
 
-| Token | Atual (dark) | Novo (light) | Hex |
-|-------|-------------|--------------|-----|
-| `--background` | `240 6% 12%` | `220 14% 96%` | #F3F4F6 |
-| `--foreground` | `0 0% 100%` | `220 39% 11%` | #111827 |
-| `--surface-1` / `--card` | `240 4% 18%` | `0 0% 100%` | #FFFFFF |
-| `--surface-2` | `240 3% 15%` | `210 20% 98%` | #F9FAFB |
-| `--card-foreground` | `0 0% 100%` | `220 39% 11%` | #111827 |
-| `--popover` | `240 4% 18%` | `0 0% 100%` | #FFFFFF |
-| `--popover-foreground` | `0 0% 100%` | `220 39% 11%` | #111827 |
-| `--secondary` | `240 4% 18%` | `210 20% 98%` | #F9FAFB |
-| `--secondary-foreground` | `0 0% 100%` | `220 39% 11%` | #111827 |
-| `--muted` | `240 4% 18%` | `210 20% 98%` | #F9FAFB |
-| `--muted-foreground` | `240 5% 63%` | `220 9% 46%` | #6B7280 |
-| `--accent` | `142 71% 45%` | `142 71% 45%` | (mantido) |
-| `--accent-foreground` | `0 0% 100%` | `0 0% 100%` | (mantido) |
-| `--border` | `240 3% 24%` | `220 13% 91%` | #E5E7EB |
-| `--input` | `240 3% 15%` | `213 27% 95%` | #F1F5F9 |
-| `--ring` | mantido | mantido | |
-| `--sidebar-background` | dark | `220 14% 96%` | #F3F4F6 |
-| `--sidebar-foreground` | white | `220 39% 11%` | #111827 |
-| `--sidebar-accent` | dark | `210 20% 98%` | #F9FAFB |
-| `--sidebar-accent-foreground` | white | `220 39% 11%` | #111827 |
-| `--sidebar-border` | dark | `220 13% 91%` | #E5E7EB |
-| `--text-tertiary` | `220 10% 42%` | `220 9% 64%` | #9CA3AF |
-| `--destructive-foreground` | white | white | (mantido) |
-| `--primary-foreground` | white | white | (mantido) |
+Criar um componente `WolfFace` usando SVG paths que desenham:
+- **Olhos** maiores e mais agressivos (formato amendoado/angular, ~40px largura cada), com pupilas verdes brilhantes e glow intenso
+- **Nariz** triangular estilizado abaixo dos olhos
+- **Contorno do focinho** — linhas neon verdes sutis traçando o formato do rosto (estilo lobisomem/predador)
+- Tudo em stroke verde `#22C55E` com `strokeWidth: 1.5-2px` e glow via filter `drop-shadow`
 
-Atualizar utilitários:
-- `.border-subtle` → `border-color: #E5E7EB`
-- `.gradient-card` → usar tons claros (#FFFFFF → #F9FAFB)
-- `.card-shadow` → `0 2px 8px rgba(0,0,0,0.06)` (mais leve)
-- `.glow-primary` → `0 10px 20px rgba(34,197,94,0.25)`
-- `.text-secondary-alpha` → `color: #6B7280`
-- `.text-tertiary-alpha` → `color: #9CA3AF`
+**3. Animação do rosto:**
+- **Fase 0 (0-0.8s)**: Olhos aparecem fechados (linha horizontal), depois abrem com animação de "blink reverso" — pálpebras se afastam revelando os olhos verdes brilhantes
+- **Fase 0.5 (0.5-1.5s)**: Contorno do focinho e nariz desenham-se progressivamente (stroke-dasharray animation)
+- **Fase 0.8 (0.8-1.8s)**: Olhos fazem uma piscada lenta e imponente (fecham e abrem devagar)
+- **Fase 1 (1.8s)**: Rosto faz fade out → logo aparece
 
-### 2. Splash Screen (`src/components/SplashScreen.tsx`)
+**4. Timing ajustado:**
+- 0-1.8s: Rosto do lobo neon com animação de olhos
+- 1.8-3.2s: Logo + título + tagline
+- 3.2-3.7s: Fade out
 
-- Manter fundo escuro `#1C1C1E` (splash é uma tela de impacto, funciona melhor escura)
-- Texto do título na splash já é branco, fica correto
+### Arquivo alterado
+1. **`src/components/SplashScreen.tsx`** — Reescrever `WolfEyes` como `WolfFace` com SVG paths neon, atualizar fundo para cinza claro, ajustar cores de texto
 
-### 3. Tela de Auth (`src/pages/Auth.tsx`)
-
-- O form container usa `surface-1` e `border-subtle` — vai herdar as novas cores automaticamente
-- O título grande "GYM WOLVES" usa `text-foreground` implícito → ficará `#111827` (escuro)
-- O fundo `bg-background` → ficará `#F3F4F6`
-
-### 4. Bottom Nav (`src/components/BottomNav.tsx`)
-
-- Usa `bg-background/95` e `border-subtle` → herda automaticamente
-- Badge `ring-background` → atualizará para o fundo claro
-
-### 5. Componentes que herdam automaticamente (sem edição)
-
-A maioria dos componentes usa tokens CSS (`bg-card`, `bg-background`, `text-foreground`, `text-muted-foreground`, `border-subtle`, `surface-1`, `surface-2`), então herdarão as novas cores sem alteração:
-- StatCard, AppScaffold, DashboardHeader, WorkoutStatusCard
-- Cards de ranking, feed, convite
-- Inputs (usam `bg-secondary` / `border-subtle`)
-- Botões (primário mantém verde com texto branco)
-- FAB (mantém verde)
-
-### Arquivos alterados
-1. **`src/index.css`** — paleta completa + utilitários
-
-Apenas 1 arquivo precisa ser editado. Toda a migração é via tokens CSS.
+### Resultado
+Splash com fundo cinza claro consistente com o app, e uma silhueta de lobo/lobisomem em neon verde que pisca de forma imponente antes de revelar a logo.
 

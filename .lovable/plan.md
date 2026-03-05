@@ -1,22 +1,26 @@
 
 
-## Situação Atual
+## Plano: Editar configurações do grupo (admin)
 
-- **Cíntia** (`3d5250ba`): 1 dia de check-in registrado
-- **Octávio** (`6c258b87`): 1 dia de check-in registrado
-- **Grupo**: "Cintia e Octávio" (`f7f6e216`)
+### O que será feito
 
-## Plano
+Adicionar um botão "Editar" na tela de detalhes do grupo, visível apenas para o criador/admin. Ao clicar, abre um Drawer (mobile) ou Dialog (desktop) com formulário para editar: nome, meta de treinos, datas de início/fim e sistema de pontuação.
 
-Inserir check-ins retroativos para completar os dias desejados:
+### Alterações
 
-- **Cíntia**: precisa de +46 check-ins (total = 47 dias), um por dia, retroativos a partir de ontem
-- **Octávio**: precisa de +40 check-ins (total = 41 dias), um por dia, retroativos a partir de ontem
+1. **`src/hooks/useGroupData.ts`** — Adicionar hook `useUpdateGroup` (mutation que faz `supabase.from("groups").update(...)` filtrando pelo `id` do grupo)
 
-Será feito via migração SQL com `generate_series` para criar um check-in por dia em datas consecutivas passadas, evitando duplicar a data que já existe.
+2. **`src/pages/GroupDetails.tsx`** — Adicionar:
+   - Verificação se o usuário logado é o `created_by` do grupo (admin)
+   - Botão "Editar" no header ou no card de info (visível só para admin)
+   - State para controlar abertura do modal de edição
+   - Componente `EditGroupDialog` inline ou importado
 
-### Detalhes técnicos
-- Inserção em `checkins` com `workout_type = 'musculacao'`, `title = 'Treino'`, `proof_type = 'manual'`
-- Datas geradas com `generate_series(CURRENT_DATE - interval 'N days', CURRENT_DATE - interval '1 day', '1 day')`
-- Exclui datas que já possuem check-in para evitar duplicatas
+3. **`src/components/EditGroupDialog.tsx`** (novo) — Drawer/Dialog responsivo com:
+   - Campos: nome, meta de treinos (`goal_total`), data início, data fim, sistema de pontuação
+   - Usa o hook `useUpdateGroup` para salvar
+   - Usa `useIsMobile` para alternar entre Drawer e Dialog
+
+### Segurança
+A tabela `groups` já permite `UPDATE` via RLS para membros do grupo. A verificação de `created_by` no frontend garante que só o criador veja o botão. Para segurança extra, podemos adicionar uma policy RLS que restringe UPDATE ao `created_by`.
 

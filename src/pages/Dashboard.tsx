@@ -6,7 +6,7 @@ import { useGroupCheckins, computeDaysActive, computeStreaks, hasCheckedInToday 
 import { useProfile } from "@/hooks/useProfile";
 import { Loader2 } from "lucide-react";
 import { differenceInDays } from "date-fns";
-import BottomNav from "@/components/BottomNav";
+
 import CheckinDialog from "@/components/CheckinDialog";
 import ActivityFeed from "@/components/ActivityFeed";
 import Onboarding from "./Onboarding";
@@ -76,7 +76,7 @@ const Dashboard = () => {
   const leaderName = profile?.display_name || "Líder";
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background">
       <DashboardHeader groupName={group.name} />
 
       <div className="mx-auto max-w-md space-y-6 px-4 py-4">
@@ -115,7 +115,7 @@ const Dashboard = () => {
         groupId={activeGroupId}
         alreadyCheckedIn={todayDone}
       />
-      <BottomNav />
+      
     </div>
   );
 };

@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import BottomNav from "@/components/BottomNav";
+
 import logo from "@/assets/logo.png";
 
 interface AppScaffoldProps {
@@ -19,7 +19,7 @@ const AppScaffold = ({ children, title, subtitle, showBack, headerRight, hideNav
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-40 border-b border-subtle bg-background/95 px-5 py-4 backdrop-blur-xl">
         <div className="mx-auto max-w-md">
           {showLogo && (
@@ -47,7 +47,7 @@ const AppScaffold = ({ children, title, subtitle, showBack, headerRight, hideNav
         {children}
       </div>
 
-      {!hideNav && <BottomNav />}
+      
     </div>
   );
 };

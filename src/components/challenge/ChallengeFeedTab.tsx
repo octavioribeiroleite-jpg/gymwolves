@@ -4,7 +4,6 @@ import { useChallengePosts, useUserLikes, useToggleLike } from "@/hooks/useChall
 import { Loader2, Plus, ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PostCard from "./PostCard";
-import CommentsSheet from "./CommentsSheet";
 import CreatePostDialog from "./CreatePostDialog";
 
 interface Props {
@@ -15,7 +14,6 @@ const ChallengeFeedTab = ({ challengeId }: Props) => {
   const { user } = useAuth();
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useChallengePosts(challengeId);
   const [createOpen, setCreateOpen] = useState(false);
-  const [commentPostId, setCommentPostId] = useState<string | null>(null);
 
   const allPosts = useMemo(() => {
     return data?.pages.flatMap((p) => p.data) || [];
@@ -48,8 +46,8 @@ const ChallengeFeedTab = ({ challengeId }: Props) => {
             post={post}
             isLiked={likedSet?.has(post.id) || false}
             onLike={() => toggleLike.mutate({ postId: post.id, isLiked: likedSet?.has(post.id) || false, challengeId })}
-            onComment={() => setCommentPostId(post.id)}
             currentUserId={user?.id}
+            challengeId={challengeId}
           />
         ))
       )}
@@ -78,13 +76,6 @@ const ChallengeFeedTab = ({ challengeId }: Props) => {
         challengeId={challengeId}
         open={createOpen}
         onOpenChange={setCreateOpen}
-      />
-
-      <CommentsSheet
-        postId={commentPostId}
-        challengeId={challengeId}
-        open={!!commentPostId}
-        onOpenChange={(open) => { if (!open) setCommentPostId(null); }}
       />
     </div>
   );

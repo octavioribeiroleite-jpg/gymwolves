@@ -25,8 +25,45 @@ import {
   Swords,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import logo from "@/assets/logo.png";
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+
+const itemVariants = {
+  hidden: { opacity: 0, x: -16 },
+  visible: (i: number) => ({
+    opacity: 1,
+    x: 0,
+    transition: { delay: i * 0.04, duration: 0.25, ease: "easeOut" },
+  }),
+};
+
+interface MenuItemProps {
+  icon: React.ElementType;
+  label: string;
+  action: () => void;
+  index: number;
+  iconClass?: string;
+}
+
+const MenuItem = ({ icon: Icon, label, action, index, iconClass = "text-primary" }: MenuItemProps) => (
+  <motion.button
+    custom={index}
+    variants={itemVariants}
+    initial="hidden"
+    animate="visible"
+    whileTap={{ scale: 0.96 }}
+    onClick={action}
+    className="flex w-full items-center gap-4 px-5 py-3.5 text-left transition-colors hover:bg-surface-1 active:bg-surface-2"
+  >
+    <Icon className={`h-5 w-5 ${iconClass}`} />
+    <span className="flex-1 text-[14px] font-medium">{label}</span>
+    <motion.span whileHover={{ x: 2 }} transition={{ duration: 0.15 }}>
+      <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
+    </motion.span>
+  </motion.button>
+);
 
 const SidebarMenu = () => {
   const { user, signOut } = useAuth();
@@ -74,6 +111,8 @@ const SidebarMenu = () => {
     { icon: Info, label: "Sobre", action: () => {} },
   ];
 
+  let globalIndex = 0;
+
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
@@ -81,10 +120,15 @@ const SidebarMenu = () => {
           <Menu className="h-5 w-5" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="w-[300px] border-r border-subtle bg-background p-0">
-        {/* Header */}
-        <div className="border-b border-subtle p-5">
-          <div className="flex items-center gap-3">
+      <SheetContent side="left" className="flex h-full w-[300px] flex-col border-r border-subtle bg-background p-0">
+        {/* Header — fixo */}
+        <div className="shrink-0 border-b border-subtle p-5">
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="flex items-center gap-3"
+          >
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/15 text-body font-bold text-primary">
               {initials}
             </div>
@@ -92,68 +136,64 @@ const SidebarMenu = () => {
               <p className="text-body font-bold truncate">{profile?.display_name || "Sem nome"}</p>
               <p className="text-small text-muted-foreground truncate">{user?.email}</p>
             </div>
-          </div>
+          </motion.div>
         </div>
 
-        {/* Navegação */}
-        <div className="py-2 border-b border-subtle">
-          <p className="px-5 py-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Navegação</p>
-          {navItems.map((item, i) => (
-            <button
-              key={`nav-${i}`}
-              onClick={item.action}
-              className="flex w-full items-center gap-4 px-5 py-3.5 text-left transition-colors hover:bg-surface-1 active:bg-surface-2"
-            >
-              <item.icon className="h-5 w-5 text-primary" />
-              <span className="flex-1 text-[14px] font-medium">{item.label}</span>
-              <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
-            </button>
-          ))}
-        </div>
-
-        {/* Desafio */}
-        {challengeItems.length > 0 && (
+        {/* Conteúdo rolável */}
+        <ScrollArea className="flex-1">
+          {/* Navegação */}
           <div className="py-2 border-b border-subtle">
-            <p className="px-5 py-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Desafio</p>
-            {challengeItems.map((item, i) => (
-              <button
-                key={`challenge-${i}`}
-                onClick={item.action}
-                className="flex w-full items-center gap-4 px-5 py-3.5 text-left transition-colors hover:bg-surface-1 active:bg-surface-2"
-              >
-                <item.icon className="h-5 w-5 text-primary" />
-                <span className="flex-1 text-[14px] font-medium">{item.label}</span>
-                <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
-              </button>
-            ))}
+            <p className="px-5 py-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Navegação</p>
+            {navItems.map((item, i) => {
+              const idx = globalIndex++;
+              return (
+                <MenuItem key={`nav-${i}`} icon={item.icon} label={item.label} action={item.action} index={idx} />
+              );
+            })}
           </div>
-        )}
 
-        {/* Geral */}
-        <div className="py-2">
-          <p className="px-5 py-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Geral</p>
-          {generalItems.map((item, i) => (
-            <button
-              key={`general-${i}`}
-              onClick={item.action}
-              className="flex w-full items-center gap-4 px-5 py-3.5 text-left transition-colors hover:bg-surface-1 active:bg-surface-2"
-            >
-              <item.icon className="h-5 w-5 text-muted-foreground" />
-              <span className="flex-1 text-[14px] font-medium">{item.label}</span>
-              <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
-            </button>
-          ))}
-        </div>
+          {/* Desafio */}
+          {challengeItems.length > 0 && (
+            <div className="py-2 border-b border-subtle">
+              <p className="px-5 py-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Desafio</p>
+              {challengeItems.map((item, i) => {
+                const idx = globalIndex++;
+                return (
+                  <MenuItem key={`challenge-${i}`} icon={item.icon} label={item.label} action={item.action} index={idx} />
+                );
+              })}
+            </div>
+          )}
 
-        {/* Logout */}
-        <div className="border-t border-subtle p-4">
-          <button
+          {/* Geral */}
+          <div className="py-2">
+            <p className="px-5 py-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Geral</p>
+            {generalItems.map((item, i) => {
+              const idx = globalIndex++;
+              return (
+                <MenuItem
+                  key={`general-${i}`}
+                  icon={item.icon}
+                  label={item.label}
+                  action={item.action}
+                  index={idx}
+                  iconClass="text-muted-foreground"
+                />
+              );
+            })}
+          </div>
+        </ScrollArea>
+
+        {/* Logout — fixo */}
+        <div className="shrink-0 border-t border-subtle p-4">
+          <motion.button
+            whileTap={{ scale: 0.96 }}
             onClick={() => { setOpen(false); signOut(); }}
             className="flex w-full items-center gap-4 rounded-[16px] px-4 py-3 text-left transition-colors hover:bg-destructive/10"
           >
             <LogOut className="h-5 w-5 text-destructive" />
             <span className="text-body font-medium text-destructive">Sair da conta</span>
-          </button>
+          </motion.button>
         </div>
       </SheetContent>
     </Sheet>

@@ -59,7 +59,7 @@ const Auth = () => {
           <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground">
             <Dumbbell className="h-6 w-6" />
           </div>
-          <CardTitle className="font-display text-2xl">Contador de Treinos</CardTitle>
+          <CardTitle className="font-display text-2xl">Ratos de Academia</CardTitle>
           <CardDescription>
             {isLogin ? "Entre na sua conta" : "Crie sua conta"}
           </CardDescription>

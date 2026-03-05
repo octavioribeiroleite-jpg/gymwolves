@@ -23,6 +23,7 @@ import CompletedChallenges from "./pages/CompletedChallenges";
 import Devices from "./pages/Devices";
 import NotFound from "./pages/NotFound";
 import PwaInstallPrompt from "./components/PwaInstallPrompt";
+import PwaReinstallBanner from "./components/PwaReinstallBanner";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +42,7 @@ const App = () => {
         <Sonner />
         {!splashDone && <SplashScreen onFinish={handleSplashFinish} />}
         {splashDone && <PwaInstallPrompt />}
+        {splashDone && <PwaReinstallBanner />}
         <BrowserRouter>
           <AuthProvider>
             <ActiveGroupProvider>

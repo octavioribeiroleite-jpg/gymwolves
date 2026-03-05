@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ImagePlus, Loader2, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCreatePost } from "@/hooks/useChallengePosts";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
 interface Props {
@@ -14,6 +15,7 @@ interface Props {
 }
 
 const CreatePostDialog = ({ challengeId, open, onOpenChange }: Props) => {
+  const { user } = useAuth();
   const [caption, setCaption] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -43,7 +45,7 @@ const CreatePostDialog = ({ challengeId, open, onOpenChange }: Props) => {
     if (imageFile) {
       setUploading(true);
       const ext = imageFile.name.split(".").pop();
-      const path = `posts/${challengeId}/${Date.now()}.${ext}`;
+      const path = `${user!.id}/${challengeId}_${Date.now()}.${ext}`;
       const { error } = await supabase.storage.from("checkin-photos").upload(path, imageFile);
       if (error) {
         toast.error("Erro ao enviar imagem");

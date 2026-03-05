@@ -34,7 +34,7 @@ const HomeChallengesList = () => {
         <Button
           variant="outline"
           className="flex-1 rounded-2xl h-10 text-[13px]"
-          onClick={() => navigate("/create-group")}
+          onClick={() => navigate("/grupos/criar")}
         >
           <Plus className="h-4 w-4 mr-1" />
           Criar desafio
@@ -42,7 +42,7 @@ const HomeChallengesList = () => {
         <Button
           variant="outline"
           className="flex-1 rounded-2xl h-10 text-[13px]"
-          onClick={() => navigate("/join")}
+          onClick={() => navigate("/grupos/entrar")}
         >
           <LogIn className="h-4 w-4 mr-1" />
           Entrar com código

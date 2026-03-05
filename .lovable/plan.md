@@ -1,33 +1,28 @@
 
 
-## Splash Screen — Rosto de Lobo Neon + Fundo Cinza
+## Splash Screen — Olhos de Lobo (Imagem + Animação)
 
-### Mudanças
+Usar a imagem enviada pelo usuario como base da splash screen. Sem logo, sem titulo, sem tagline. Apenas os olhos com animacao de abertura e piscada.
 
-**1. Fundo da Splash** — Trocar `#1C1C1E` por `#F3F4F6` (mesmo cinza claro do app). O título "GYM WOLVES" e tagline passam a ser escuros para manter contraste. As partículas e glows verdes ficam mais sutis no fundo claro.
+### Abordagem
 
-**2. Rosto de lobo neon (SVG inline animado com framer-motion)**
+1. **Copiar a imagem** para `src/assets/wolf-eyes.png`
+2. **Reescrever `SplashScreen.tsx`** com animacao simples usando a imagem real:
+   - A imagem fica centralizada na tela com fundo `#F3F4F6`
+   - Animacao via `clipPath` ou `scaleY` para simular abertura dos olhos (uma faixa horizontal que expande verticalmente revelando a imagem)
+   - Glow verde pulsante ao redor via box-shadow animado
 
-Criar um componente `WolfFace` usando SVG paths que desenham:
-- **Olhos** maiores e mais agressivos (formato amendoado/angular, ~40px largura cada), com pupilas verdes brilhantes e glow intenso
-- **Nariz** triangular estilizado abaixo dos olhos
-- **Contorno do focinho** — linhas neon verdes sutis traçando o formato do rosto (estilo lobisomem/predador)
-- Tudo em stroke verde `#22C55E` com `strokeWidth: 1.5-2px` e glow via filter `drop-shadow`
+### Sequencia de Animacao (framer-motion)
 
-**3. Animação do rosto:**
-- **Fase 0 (0-0.8s)**: Olhos aparecem fechados (linha horizontal), depois abrem com animação de "blink reverso" — pálpebras se afastam revelando os olhos verdes brilhantes
-- **Fase 0.5 (0.5-1.5s)**: Contorno do focinho e nariz desenham-se progressivamente (stroke-dasharray animation)
-- **Fase 0.8 (0.8-1.8s)**: Olhos fazem uma piscada lenta e imponente (fecham e abrem devagar)
-- **Fase 1 (1.8s)**: Rosto faz fade out → logo aparece
-
-**4. Timing ajustado:**
-- 0-1.8s: Rosto do lobo neon com animação de olhos
-- 1.8-3.2s: Logo + título + tagline
-- 3.2-3.7s: Fade out
+1. **0-0.6s**: Tela cinza vazia, glow verde sutil aparece no centro
+2. **0.6-1.4s**: Olhos "abrem" — a imagem aparece via `clipPath: inset(45% 0 45% 0)` animando para `inset(0 0 0 0)`, simulando palpebras abrindo
+3. **1.4-2.4s**: Olhos abertos, glow pulsa. Piscada lenta (clipPath fecha parcialmente e reabre)
+4. **2.4-3.0s**: Olhos fecham (clipPath volta a fechar) + fade out
+5. **3.0-3.5s**: Tela limpa, app inicia (onFinish)
 
 ### Arquivo alterado
-1. **`src/components/SplashScreen.tsx`** — Reescrever `WolfEyes` como `WolfFace` com SVG paths neon, atualizar fundo para cinza claro, ajustar cores de texto
+1. **`src/components/SplashScreen.tsx`** — Reescrever completamente. Remover WolfFace SVG, Particles, logo, titulo, tagline. Usar apenas a imagem PNG com animacoes de clipPath
 
 ### Resultado
-Splash com fundo cinza claro consistente com o app, e uma silhueta de lobo/lobisomem em neon verde que pisca de forma imponente antes de revelar a logo.
+Splash minimalista: fundo cinza, os olhos verdes neon da imagem aparecem como se o lobo abrisse os olhos, pisca uma vez de forma imponente, depois fecha e o app inicia.
 

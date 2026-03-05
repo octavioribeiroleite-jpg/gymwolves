@@ -9,12 +9,12 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 const STORAGE_KEYS = {
-  installed: "gymwoves_pwa_installed",
-  snoozedAt: "gymwoves_pwa_snoozed_at",
+  installed: "gymwolves_pwa_installed",
+  snoozedAt: "gymwolves_pwa_snoozed_at",
 };
-const SESSION_KEY = "gymwoves_pwa_dismiss_count";
-const SNOOZE_DURATION = 24 * 60 * 60 * 1000; // 24h
-const REAPPEAR_DELAY = 4 * 60 * 1000; // 4min
+const SESSION_KEY = "gymwolves_pwa_dismiss_count";
+const SNOOZE_DURATION = 24 * 60 * 60 * 1000;
+const REAPPEAR_DELAY = 4 * 60 * 1000;
 const MAX_DISMISSALS = 3;
 
 function isStandalone() {
@@ -38,8 +38,8 @@ function setSessionDismissCount(n: number) {
 
 export default function PwaInstallPrompt() {
   const [open, setOpen] = useState(false);
+  const [tab, setTab] = useState<"android" | "ios">(isIos() ? "ios" : "android");
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [pressing, setPressing] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const shouldShow = useCallback(() => {
@@ -58,7 +58,6 @@ export default function PwaInstallPrompt() {
     }, REAPPEAR_DELAY);
   }, [shouldShow]);
 
-  // Capture beforeinstallprompt
   useEffect(() => {
     const handler = (e: Event) => {
       e.preventDefault();
@@ -68,25 +67,18 @@ export default function PwaInstallPrompt() {
     return () => window.removeEventListener("beforeinstallprompt", handler);
   }, []);
 
-  // Initial show — shorter delay for better UX
   useEffect(() => {
     const t = setTimeout(() => {
-      if (shouldShow()) {
-        setOpen(true);
-      }
+      if (shouldShow()) setOpen(true);
     }, 800);
     return () => clearTimeout(t);
   }, [shouldShow]);
 
-  // Cleanup timer
   useEffect(() => {
     return () => { if (timerRef.current) clearTimeout(timerRef.current); };
   }, []);
 
   const handleInstall = async () => {
-    setPressing(true);
-    setTimeout(() => setPressing(false), 200);
-
     if (deferredPrompt) {
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
@@ -97,7 +89,6 @@ export default function PwaInstallPrompt() {
         return;
       }
     }
-    // iOS "ENTENDI" — just close
     handleDismiss();
   };
 
@@ -121,34 +112,26 @@ export default function PwaInstallPrompt() {
   const ios = isIos();
   const showNativeInstall = !ios && !!deferredPrompt;
 
-  const chips = [
-    { icon: Zap, label: "Mais rápido" },
-    { icon: Smartphone, label: "Atalho na tela inicial" },
-    { icon: Wifi, label: "Funciona offline" },
-  ];
-
   return (
     <AnimatePresence>
       {open && (
         <>
-          {/* Backdrop */}
           <motion.div
             key="backdrop"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.28 }}
-            className="fixed inset-0 z-[9998]"
-            style={{ background: "rgba(0,0,0,0.7)" }}
+            transition={{ duration: 0.24 }}
+            className="fixed inset-0 z-[9998] backdrop-blur-sm"
+            style={{ background: "rgba(0,0,0,0.6)" }}
             onClick={handleDismiss}
           />
 
-          {/* Bottom sheet */}
           <motion.div
             key="sheet"
-            initial={{ y: "100%" }}
-            animate={{ y: 0 }}
-            exit={{ y: "100%" }}
+            initial={{ y: "100%", opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: "100%", opacity: 0 }}
             transition={{ type: "spring", damping: 28, stiffness: 340 }}
             drag="y"
             dragConstraints={{ top: 0 }}
@@ -156,17 +139,9 @@ export default function PwaInstallPrompt() {
             onDragEnd={handleDragEnd}
             className="fixed inset-x-0 bottom-0 z-[9999] mx-auto max-w-lg"
           >
-            <div
-              className="relative rounded-t-[28px] px-6 pb-8 pt-4"
-              style={{
-                background: "linear-gradient(180deg, #1A2030 0%, #0F1319 100%)",
-                boxShadow: "0 -8px 40px rgba(0,0,0,0.5)",
-              }}
-            >
-              {/* Drag handle */}
+            <div className="relative rounded-t-[24px] px-5 pb-8 pt-4 surface-2 border-t border-subtle">
               <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-muted-foreground/30" />
 
-              {/* Close button */}
               <button
                 onClick={handleDismiss}
                 className="absolute right-4 top-4 rounded-full p-1.5 text-muted-foreground transition-colors hover:text-foreground"
@@ -174,51 +149,31 @@ export default function PwaInstallPrompt() {
                 <X className="h-5 w-5" />
               </button>
 
-              {/* Logo with glow */}
+              {/* Logo */}
               <div className="flex justify-center">
-                <motion.div
-                  initial={{ scale: 0.92, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ delay: 0.1, duration: 0.4, type: "spring" }}
-                  className="relative"
-                >
-                  <div
-                    className="absolute inset-0 rounded-full"
-                    style={{
-                      background: "radial-gradient(circle, hsl(142 71% 45% / 0.12) 0%, transparent 70%)",
-                      transform: "scale(1.6)",
-                    }}
-                  />
-                  <img
-                    src={logo}
-                    alt="GYM WOVES"
-                    className="relative h-20 w-20 object-contain"
-                    style={{ filter: "drop-shadow(0 0 12px hsl(142 71% 45% / 0.25))" }}
-                  />
-                </motion.div>
+                <img
+                  src={logo}
+                  alt="GYM WOLVES"
+                  className="h-16 w-16 object-contain"
+                  style={{ filter: "drop-shadow(0 0 12px hsl(142 71% 45% / 0.25))" }}
+                />
               </div>
 
-              {/* Title */}
-              <h2
-                className="mt-3 text-center text-2xl font-bold uppercase tracking-wide text-foreground"
-                style={{ fontFamily: "'Anton', sans-serif" }}
-              >
-                Ative o modo matilha
-              </h2>
-
-              {/* Subtitle */}
-              <p className="mt-1.5 text-center text-sm leading-relaxed text-muted-foreground">
-                Instale o <span className="font-semibold text-foreground">GYM WOVES</span> e treine com mais foco.
-                Abre mais rápido e fica na sua tela inicial.
+              <h2 className="mt-3 text-center text-h2">Instalar o Gym Wolves</h2>
+              <p className="mt-1.5 text-center text-subtitle text-muted-foreground">
+                Instale para abrir mais rápido, usar em tela cheia e receber melhorias.
               </p>
 
               {/* Chips */}
               <div className="mt-4 flex flex-wrap justify-center gap-2">
-                {chips.map((chip) => (
+                {[
+                  { icon: Zap, label: "Mais rápido" },
+                  { icon: Smartphone, label: "Tela cheia" },
+                  { icon: Wifi, label: "Funciona offline" },
+                ].map((chip) => (
                   <span
                     key={chip.label}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 px-3 py-1.5 text-xs font-medium text-primary"
-                    style={{ background: "hsl(142 71% 45% / 0.08)" }}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 px-3 py-1.5 text-caption font-medium text-primary bg-primary/5"
                   >
                     <chip.icon className="h-3.5 w-3.5" />
                     {chip.label}
@@ -226,53 +181,54 @@ export default function PwaInstallPrompt() {
                 ))}
               </div>
 
-              {/* iOS instructions */}
-              {ios && (
-                <div className="mt-4 space-y-2.5 rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.04)" }}>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    Como instalar no iPhone
-                  </p>
-                  <div className="flex items-start gap-3">
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/15 text-xs font-bold text-primary">1</span>
-                    <p className="text-sm text-foreground/80">
-                      Toque em <Share className="inline h-4 w-4 text-primary" /> <span className="font-medium">Compartilhar</span>
-                    </p>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/15 text-xs font-bold text-primary">2</span>
-                    <p className="text-sm text-foreground/80">
-                      Toque em <PlusSquare className="inline h-4 w-4 text-primary" /> <span className="font-medium">Adicionar à Tela de Início</span>
-                    </p>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/15 text-xs font-bold text-primary">3</span>
-                    <p className="text-sm text-foreground/80">
-                      Confirme em <span className="font-medium">Adicionar</span>
-                    </p>
-                  </div>
-                </div>
-              )}
+              {/* Tabs */}
+              <div className="mt-4 flex rounded-[16px] bg-secondary p-1">
+                <button
+                  onClick={() => setTab("android")}
+                  className={`flex-1 rounded-xl py-2 text-caption font-medium transition-all ${tab === "android" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
+                >
+                  Android
+                </button>
+                <button
+                  onClick={() => setTab("ios")}
+                  className={`flex-1 rounded-xl py-2 text-caption font-medium transition-all ${tab === "ios" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
+                >
+                  iPhone
+                </button>
+              </div>
 
-              {/* Install button */}
-              <motion.button
+              {/* Content */}
+              <div className="mt-3 rounded-[16px] bg-secondary/50 p-4 space-y-2.5">
+                {tab === "android" ? (
+                  showNativeInstall ? (
+                    <p className="text-body text-muted-foreground">
+                      Toque em <strong className="text-foreground">"Instalar agora"</strong> abaixo para adicionar à tela inicial.
+                    </p>
+                  ) : (
+                    <>
+                      <Step n={1}>Toque no menu do navegador <strong className="text-foreground">(⋮)</strong></Step>
+                      <Step n={2}>Selecione <strong className="text-foreground">"Instalar aplicativo"</strong></Step>
+                    </>
+                  )
+                ) : (
+                  <>
+                    <Step n={1}>Toque em <Share className="inline h-4 w-4 text-primary" /> <strong className="text-foreground">Compartilhar</strong></Step>
+                    <Step n={2}>Toque em <PlusSquare className="inline h-4 w-4 text-primary" /> <strong className="text-foreground">Adicionar à Tela de Início</strong></Step>
+                    <Step n={3}>Confirme em <strong className="text-foreground">Adicionar</strong></Step>
+                  </>
+                )}
+              </div>
+
+              <button
                 onClick={handleInstall}
-                whileTap={{ scale: 0.98 }}
-                className="mt-5 h-14 w-full rounded-2xl text-base font-bold uppercase tracking-widest text-white transition-shadow"
-                style={{
-                  background: pressing
-                    ? "hsl(142 71% 50%)"
-                    : "#22C55E",
-                  boxShadow: "0 0 24px hsl(142 71% 45% / 0.35), 0 4px 12px rgba(0,0,0,0.3)",
-                  fontFamily: "'Anton', sans-serif",
-                }}
+                className="mt-5 h-14 w-full rounded-[18px] text-body font-bold text-primary-foreground bg-primary glow-primary transition-all active:scale-[0.98]"
               >
                 {showNativeInstall ? "INSTALAR AGORA" : "ENTENDI"}
-              </motion.button>
+              </button>
 
-              {/* Snooze */}
               <button
                 onClick={handleSnooze}
-                className="mt-3 w-full text-center text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                className="mt-3 w-full text-center text-subtitle font-medium text-muted-foreground transition-colors hover:text-foreground"
               >
                 Agora não
               </button>
@@ -281,5 +237,14 @@ export default function PwaInstallPrompt() {
         </>
       )}
     </AnimatePresence>
+  );
+}
+
+function Step({ n, children }: { n: number; children: React.ReactNode }) {
+  return (
+    <div className="flex items-start gap-3">
+      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/15 text-caption font-bold text-primary">{n}</span>
+      <p className="text-body text-muted-foreground">{children}</p>
+    </div>
   );
 }

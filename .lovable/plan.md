@@ -1,25 +1,28 @@
 
 
-## Problema
+## Comentários Inline Estilo Instagram
 
-A pupila aparece como linha horizontal porque o container pai do olho aplica `scaleY` (ex: 0.15 na piscada, valores variados nas outras fases). A pupila herda essa compressão vertical, achatando-a.
+Atualmente, ao clicar no ícone de comentários, abre um `Drawer` (bottom sheet). O estilo Instagram mostra os comentários diretamente abaixo do post, inline, com um campo de input para comentar sem sair do feed.
 
-## Solução
+### Alterações
 
-1. **Tirar a pupila de dentro do container do olho** — mover cada `motion.div` da pupila para fora do `motion.div` do olho, posicionando-a absolutamente no container `gap-12`. Assim ela não herda o `scaleY` do pai.
+**1. `src/components/challenge/PostCard.tsx`** — Expandir para mostrar comentários inline:
+- Ao clicar no ícone de comentários, fazer toggle de uma seção expandível abaixo das ações do post
+- Mostrar preview dos 2 últimos comentários sempre visíveis (como o Insta)
+- Quando expandido, mostrar todos os comentários + campo de input
+- Cada comentário: **nome em bold** + texto na mesma linha, com timestamp discreto
+- Input inline com botão "Publicar" no estilo Instagram (texto azul/primary)
+- Link "Ver todos os X comentários" quando há mais de 2
 
-2. **Melhorar o visual da pupila** — formato de fenda vertical de lobo mais realista:
-   - Largura: 6px (era 4px), altura: 28px (fixa, não percentual)
-   - `border-radius` elíptico (`3px / 14px`) para forma de amêndoa vertical
-   - Gradiente radial interno (branco no centro → verde neon nas bordas)
-   - `box-shadow` com múltiplas camadas para glow mais intenso e difuso
+**2. `src/components/challenge/ChallengeFeedTab.tsx`** e **`src/components/challenge/ChallengeGeneralTab.tsx`**:
+- Remover o `CommentsSheet` e o state `commentPostId`
+- O `onComment` no PostCard deixa de ser necessário como prop externa — a lógica fica interna ao PostCard
+- Passar `challengeId` ao PostCard para que ele possa buscar/enviar comentários
 
-3. **Animação independente da pupila**:
-   - Fases 2-4: visível com `scaleY: 1`
-   - Fase 5 (piscada): `scaleY: 0` e `opacity: 0` (some junto com a piscada)
-   - Fases 6-7: permanece oculta
+**3. `src/components/challenge/CommentsSheet.tsx`** — Pode ser removido ou mantido sem uso
 
-### Arquivo alterado
-
-**`src/components/SplashScreen.tsx`** — Reestruturar: mover as pupilas para fora dos containers dos olhos (ficam como siblings no flex container), com posicionamento absoluto centralizado sobre cada olho. Atualizar dimensões e estilo para fenda vertical mais realista.
+### Visual (como na referência)
+- Abaixo de likes/comments count: "Ver todos os X comentários" em cinza
+- Preview: `**Nome** texto do comentário` em uma linha
+- Input: campo com placeholder "Adicione um comentário..." e avatar do usuário logado à esquerda
 

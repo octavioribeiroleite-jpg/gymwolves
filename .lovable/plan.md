@@ -1,24 +1,34 @@
 
 
-## Plano: Ajustar FAB e melhorar Mini Ranking no Dashboard
+## Plano: Scroll e animações no menu lateral
 
-### 1. Reposicionar o FAB (botão verde "+")
+### Problemas
+1. O conteudo do menu lateral nao rola — quando ha muitos itens (especialmente com a secao Desafio visivel), o conteudo fica cortado embaixo.
+2. Nao ha feedback visual (animacao) ao clicar nos itens do menu.
 
-O FAB está com `bottom-[88px]` (posição pensada para a barra inferior que foi removida). Sem a barra, ele fica flutuando muito acima.
+### Solucao
 
-- Alterar posição para `bottom-6` (24px do fundo da tela)
-- Ajustar o menu de ações de `bottom-[140px]` para `bottom-24`
+**1. Adicionar scroll ao conteudo do menu**
+- Estruturar o `SheetContent` com layout flex vertical: header fixo no topo, area de scroll no meio (com `ScrollArea` do Radix), botao de logout fixo no fundo.
+- Isso garante que o header e o logout ficam sempre visiveis, e o conteudo do meio rola.
 
-### 2. Melhorar o Mini Ranking no Dashboard
+**2. Adicionar animacoes nos itens**
+- Usar `framer-motion` (ja instalado) para:
+  - **Stagger de entrada**: Itens aparecem em sequencia com fade+slide ao abrir o menu
+  - **Feedback de clique**: Efeito de `scale` (whileTap) nos botoes ao pressionar
+  - **Transicao suave** nos icones de chevron
 
-Inspirado na imagem de referência (Gym Rats), o ranking atual é funcional mas pode ser mais visual. Melhorias:
+### Arquivo afetado
+- `src/components/SidebarMenu.tsx`
 
-- **Pódio visual para top 3**: Em vez de uma lista simples, exibir os 3 primeiros em formato de pódio horizontal (1o no centro mais alto, 2o à esquerda, 3o à direita) com avatares circulares e medalhas
-- **Barra de progresso por membro**: Mostrar uma barra fina indicando o progresso relativo ao líder
-- **Destaque do usuário atual**: Se o usuário não está no top 3, mostrar sua posição separadamente abaixo do pódio com destaque verde
-- **Unidade de score visível**: Mostrar "X dias" ao lado do score para clareza
-
-### Arquivos afetados
-- `src/components/dashboard/DashboardFAB.tsx` — ajustar posições bottom
-- `src/components/dashboard/MiniRanking.tsx` — redesign com pódio visual e barras de progresso
+### Estrutura resultante
+```text
+SheetContent (flex col, h-full)
+├── Header (fixo, shrink-0)
+├── ScrollArea (flex-1, overflow auto)
+│   ├── Navegacao (motion stagger)
+│   ├── Desafio (motion stagger)
+│   └── Geral (motion stagger)
+└── Logout (fixo, shrink-0)
+```
 

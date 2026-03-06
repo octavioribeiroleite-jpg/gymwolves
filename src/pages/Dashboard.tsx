@@ -3,7 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useActiveGroup } from "@/contexts/ActiveGroupContext";
 import { useUserGroups } from "@/hooks/useGroupData";
 import { useProfile } from "@/hooks/useProfile";
-import { useGroupCheckins, computeDaysActive, computeStreaks, hasCheckedInToday } from "@/hooks/useCheckins";
+import { useGroupCheckins, computeDaysActive, computeStreaks, hasCheckedInToday, useDeleteTodayCheckins } from "@/hooks/useCheckins";
 import { useUserActiveChallenges } from "@/hooks/useUserChallenges";
 import { Loader2 } from "lucide-react";
 

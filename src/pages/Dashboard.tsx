@@ -68,6 +68,8 @@ const Dashboard = () => {
         <WorkoutStatusCard
           todayDone={todayDone}
           onCheckin={() => setCheckinOpen(true)}
+          onDelete={() => deleteTodayCheckins.mutate()}
+          isDeleting={deleteTodayCheckins.isPending}
         />
 
         <HomeChallengesList />

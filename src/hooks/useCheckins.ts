@@ -211,6 +211,26 @@ export const computeStreaks = (checkins: any[], userId: string) => {
   return { current, best };
 };
 
+// ── Fetch checkins for the user across ALL their groups ──
+export const useAllUserCheckins = (groupIds: string[] | undefined) => {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ["all-user-checkins", user?.id, groupIds],
+    queryFn: async () => {
+      if (!user || !groupIds || !groupIds.length) return [];
+      const { data, error } = await supabase
+        .from("checkins")
+        .select("*")
+        .eq("user_id", user.id)
+        .in("group_id", groupIds)
+        .order("checkin_at", { ascending: true });
+      if (error) throw error;
+      return data as any[];
+    },
+    enabled: !!user && !!groupIds && groupIds.length > 0,
+  });
+};
+
 // ── Check if user checked in today ──
 export const hasCheckedInToday = (checkins: any[], userId: string): boolean => {
   const today = format(new Date(), "yyyy-MM-dd");

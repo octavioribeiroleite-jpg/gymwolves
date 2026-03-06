@@ -221,6 +221,29 @@ export const hasCheckedInToday = (checkins: any[], userId: string): boolean => {
   );
 };
 
+// ── Check if user has checked in today (any group) ──
+export const useHasCheckedInToday = () => {
+  const { user } = useAuth();
+  const today = format(new Date(), "yyyy-MM-dd");
+  const tomorrow = format(new Date(Date.now() + 86400000), "yyyy-MM-dd");
+
+  return useQuery({
+    queryKey: ["checkins-today", user?.id, today],
+    queryFn: async () => {
+      if (!user) return false;
+      const { count, error } = await supabase
+        .from("checkins")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .gte("checkin_at", today)
+        .lt("checkin_at", tomorrow);
+      if (error) throw error;
+      return (count ?? 0) > 0;
+    },
+    enabled: !!user,
+  });
+};
+
 // ── Delete all of today's checkins + workout_logs for the user ──
 export const useDeleteTodayCheckins = () => {
   const { user } = useAuth();

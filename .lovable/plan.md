@@ -1,34 +1,34 @@
 
 
-## Plano: Aviso de Reinstalação para Atualizar Ícone
+## Plano: Check-in da Home registra em todos os desafios
 
-### Conceito
+### Problema atual
 
-Criar um componente `PwaReinstallBanner` que aparece **apenas para quem já tem o app instalado em modo standalone** e está com a versão antiga. Usa um número de versão salvo no `localStorage` para detectar se o usuário precisa reinstalar.
+O check-in da tela Home está vinculado apenas ao `activeGroupId` (um único grupo). Quando o usuário registra um treino, ele só é salvo nesse grupo, ignorando os outros desafios em que participa.
 
-### Como funciona
+### Solução
 
-1. Definir uma constante `APP_ICON_VERSION` no código (ex: `"2"`)
-2. Quando o app abre em modo standalone, comparar com o valor salvo em `localStorage`
-3. Se for diferente (ou não existir), exibir um banner/pop-up:
-   - **Título**: "Nova identidade visual!"
-   - **Mensagem**: "Reinstale o app para atualizar o ícone na tela inicial"
-   - **Passos**: Desinstalar o app → Acessar o site → Instalar novamente
-   - **Botão "Lembrar depois"**: salva snooze de 24h
-   - **Botão "Já reinstalei"**: salva a versão atual e fecha
-4. Futuras mudanças de ícone: basta incrementar `APP_ICON_VERSION`
+Modificar o fluxo para que, ao fazer check-in pela Home, o treino seja registrado automaticamente em **todos os desafios ativos** do usuário. Isso envolve:
 
-### Alterações
+1. **Criar hook `useUserActiveChallenges`** — busca todos os desafios ativos em que o usuário participa (via `challenge_participants` + `challenges` com status `active`)
+
+2. **Modificar `useCreateCheckin`** — adicionar uma variante que aceita múltiplos `groupId`s/`challengeId`s e insere registros em batch:
+   - Inserir um `checkin` para cada grupo associado aos desafios ativos
+   - Inserir um `workout_log` para cada desafio ativo
+   - Tudo numa única mutação
+
+3. **Atualizar `Dashboard.tsx`** — em vez de passar apenas `activeGroupId` ao `CheckinDialog`, passar a lista de todos os desafios/grupos ativos do usuário
+
+4. **Atualizar `CheckinDialog.tsx`** — quando chamado da Home, usar a mutação em batch que registra em todos os desafios de uma vez. Mostrar feedback tipo "Treino registrado em 3 desafios! 💪"
+
+5. **Invalidar queries** — após o check-in em batch, invalidar as queries de checkins de todos os grupos afetados para atualizar a UI
+
+### Alterações por arquivo
 
 | Arquivo | O que muda |
 |---|---|
-| `src/components/PwaReinstallBanner.tsx` | **Novo** — componente com o banner de reinstalação, só visível em standalone + versão desatualizada |
-| `src/App.tsx` | Adicionar `<PwaReinstallBanner />` junto aos outros componentes globais |
-
-### Detalhes do banner
-
-- Aparece como bottom sheet (similar ao `PwaInstallPrompt`)
-- Instruções específicas por plataforma (Android: segurar ícone → desinstalar; iOS: segurar → remover app)
-- Link para copiar URL do app para facilitar o acesso após desinstalar
-- Só aparece em modo standalone (quem tem o app instalado)
+| `src/hooks/useUserChallenges.ts` | **Novo** — hook para buscar todos os desafios ativos do usuário |
+| `src/hooks/useCheckins.ts` | Adicionar mutação `useCreateCheckinAll` que insere em múltiplos grupos/desafios |
+| `src/pages/Dashboard.tsx` | Passar lista de desafios ativos ao CheckinDialog |
+| `src/components/CheckinDialog.tsx` | Suportar modo "todos os desafios" com inserção em batch e feedback adequado |
 

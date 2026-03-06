@@ -52,7 +52,7 @@ export const useCreateCheckin = () => {
           workout_type: params.workoutType || "musculacao",
           checkin_at: new Date().toISOString(),
           duration_min: params.durationMin ? Math.round(params.durationMin) : null,
-          calories: params.calories || null,
+          calories: params.calories ? Math.round(params.calories) : null,
           distance_km: params.distanceKm || null,
           steps: params.steps || null,
         } as any)

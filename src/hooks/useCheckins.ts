@@ -34,6 +34,10 @@ export const useCreateCheckin = () => {
       note?: string;
       workoutType?: string;
       proofUrl?: string;
+      durationMin?: number;
+      calories?: number;
+      distanceKm?: number;
+      steps?: number;
     }) => {
       if (!user) throw new Error("Não autenticado");
       const { data, error } = await supabase
@@ -47,6 +51,10 @@ export const useCreateCheckin = () => {
           proof_url: params.proofUrl || null,
           workout_type: params.workoutType || "musculacao",
           checkin_at: new Date().toISOString(),
+          duration_min: params.durationMin || null,
+          calories: params.calories || null,
+          distance_km: params.distanceKm || null,
+          steps: params.steps || null,
         } as any)
         .select()
         .single();
@@ -73,6 +81,10 @@ export const useCreateCheckinAll = () => {
       note?: string;
       workoutType?: string;
       proofUrl?: string;
+      durationMin?: number;
+      calories?: number;
+      distanceKm?: number;
+      steps?: number;
     }) => {
       if (!user) throw new Error("Não autenticado");
       if (!params.challenges.length) throw new Error("Nenhum desafio ativo");
@@ -94,6 +106,10 @@ export const useCreateCheckinAll = () => {
           proof_url: params.proofUrl || null,
           workout_type: params.workoutType || "musculacao",
           checkin_at: now,
+          duration_min: params.durationMin || null,
+          calories: params.calories || null,
+          distance_km: params.distanceKm || null,
+          steps: params.steps || null,
         }) as any)
       );
       if (checkinError) throw checkinError;

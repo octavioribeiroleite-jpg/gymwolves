@@ -48,11 +48,14 @@ interface Props {
   onDone: () => void;
 }
 
-type Step = "type" | "intensity" | "duration" | "photo" | "analyzing" | "confirm";
+type Step = "photo" | "type" | "intensity" | "duration" | "analyzing" | "confirm";
+
+const MANUAL_STEPS: Step[] = ["type", "intensity", "duration"];
 
 const CheckinFullWizard = ({ groupId, alreadyCheckedIn, activeChallenges, onBack, onDone }: Props) => {
   const { user } = useAuth();
-  const [step, setStep] = useState<Step>("type");
+  const [step, setStep] = useState<Step>("photo");
+  const [skippedPhoto, setSkippedPhoto] = useState(false);
   const [workoutType, setWorkoutType] = useState("musculacao");
   const [intensity, setIntensity] = useState("moderado");
   const [durationMin, setDurationMin] = useState(30);
@@ -189,9 +192,12 @@ const CheckinFullWizard = ({ groupId, alreadyCheckedIn, activeChallenges, onBack
     );
   }
 
+  const visibleSteps: Step[] = skippedPhoto ? ["type", "intensity", "duration"] : ["photo"];
+  const allSteps: Step[] = skippedPhoto ? ["photo", "type", "intensity", "duration"] : ["photo"];
+
   return (
     <div className="space-y-4">
-      {alreadyCheckedIn && step === "type" && (
+      {alreadyCheckedIn && step === "photo" && (
         <div className="flex items-start gap-2 rounded-[16px] bg-primary/10 p-3 text-body">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
           <p className="text-muted-foreground">
@@ -201,17 +207,80 @@ const CheckinFullWizard = ({ groupId, alreadyCheckedIn, activeChallenges, onBack
       )}
 
       {/* Step indicator */}
-      <div className="flex items-center gap-1.5 justify-center">
-        {["type", "intensity", "duration", "photo"].map((s, i) => (
-          <div
-            key={s}
-            className={cn(
-              "h-1.5 rounded-full transition-all",
-              s === step ? "w-6 bg-primary" : i < ["type", "intensity", "duration", "photo"].indexOf(step) ? "w-3 bg-primary/40" : "w-3 bg-secondary"
-            )}
-          />
-        ))}
-      </div>
+      {!["analyzing", "confirm"].includes(step) && (
+        <div className="flex items-center gap-1.5 justify-center">
+          {visibleSteps.map((s, i) => (
+            <div
+              key={s}
+              className={cn(
+                "h-1.5 rounded-full transition-all",
+                s === step ? "w-6 bg-primary" : i < visibleSteps.indexOf(step) ? "w-3 bg-primary/40" : "w-3 bg-secondary"
+              )}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* STEP: Photo (first step) */}
+      {step === "photo" && (
+        <div className="space-y-3">
+          <Label className="text-caption font-medium text-muted-foreground">
+            Tem um print do treino?
+          </Label>
+          <p className="text-[12px] text-muted-foreground">
+            Envie um print do seu app de fitness e a IA vai extrair os dados automaticamente!
+          </p>
+
+          {photoPreview ? (
+            <div className="relative rounded-[16px] overflow-hidden">
+              <img src={photoPreview} alt="Preview" className="w-full h-40 object-cover" />
+              <button
+                type="button"
+                onClick={removePhoto}
+                className="absolute top-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-background/80 backdrop-blur-sm"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => fileRef.current?.click()}
+                className="flex items-center justify-center gap-2 rounded-[16px] border-2 border-dashed border-subtle bg-secondary/50 py-5 text-muted-foreground transition-colors hover:border-primary/40"
+              >
+                <Camera className="h-5 w-5" />
+                Câmera
+              </button>
+              <button
+                type="button"
+                onClick={() => galleryRef.current?.click()}
+                className="flex items-center justify-center gap-2 rounded-[16px] border-2 border-dashed border-subtle bg-secondary/50 py-5 text-muted-foreground transition-colors hover:border-primary/40"
+              >
+                <ImagePlus className="h-5 w-5" />
+                Galeria
+              </button>
+            </div>
+          )}
+
+          <input ref={fileRef} type="file" accept="image/*" capture="environment" onChange={handlePhotoSelect} className="hidden" />
+          <input ref={galleryRef} type="file" accept="image/*" onChange={handlePhotoSelect} className="hidden" />
+
+          {photoPreview ? (
+            <Button onClick={analyzeWorkout} className="h-12 w-full rounded-[16px] font-semibold glow-primary">
+              Analisar com IA 🤖
+            </Button>
+          ) : (
+            <Button
+              variant="outline"
+              onClick={() => { setSkippedPhoto(true); setStep("type"); }}
+              className="h-12 w-full rounded-[16px]"
+            >
+              Preencher manualmente <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          )}
+        </div>
+      )}
 
       {/* STEP: Type */}
       {step === "type" && (
@@ -235,12 +304,14 @@ const CheckinFullWizard = ({ groupId, alreadyCheckedIn, activeChallenges, onBack
               </button>
             ))}
           </div>
-          <Button
-            onClick={() => setStep("intensity")}
-            className="h-12 w-full rounded-[16px] font-semibold"
-          >
-            Próximo <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => { setSkippedPhoto(false); setStep("photo"); }} className="h-12 flex-1 rounded-[16px]">
+              <ChevronLeft className="mr-1 h-4 w-4" /> Voltar
+            </Button>
+            <Button onClick={() => setStep("intensity")} className="h-12 flex-1 rounded-[16px] font-semibold">
+              Próximo <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
         </div>
       )}
 
@@ -313,62 +384,6 @@ const CheckinFullWizard = ({ groupId, alreadyCheckedIn, activeChallenges, onBack
           </div>
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => setStep("intensity")} className="h-12 flex-1 rounded-[16px]">
-              <ChevronLeft className="mr-1 h-4 w-4" /> Voltar
-            </Button>
-            <Button onClick={() => setStep("photo")} className="h-12 flex-1 rounded-[16px] font-semibold">
-              Próximo <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {/* STEP: Photo */}
-      {step === "photo" && (
-        <div className="space-y-3">
-          <Label className="text-caption font-medium text-muted-foreground">
-            Foto ou print do app (opcional)
-          </Label>
-          <p className="text-[12px] text-muted-foreground">
-            Envie um print do seu app de fitness e a IA vai extrair os dados automaticamente!
-          </p>
-
-          {photoPreview ? (
-            <div className="relative rounded-[16px] overflow-hidden">
-              <img src={photoPreview} alt="Preview" className="w-full h-40 object-cover" />
-              <button
-                type="button"
-                onClick={removePhoto}
-                className="absolute top-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-background/80 backdrop-blur-sm"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => fileRef.current?.click()}
-                className="flex items-center justify-center gap-2 rounded-[16px] border-2 border-dashed border-subtle bg-secondary/50 py-5 text-muted-foreground transition-colors hover:border-primary/40"
-              >
-                <Camera className="h-5 w-5" />
-                Câmera
-              </button>
-              <button
-                type="button"
-                onClick={() => galleryRef.current?.click()}
-                className="flex items-center justify-center gap-2 rounded-[16px] border-2 border-dashed border-subtle bg-secondary/50 py-5 text-muted-foreground transition-colors hover:border-primary/40"
-              >
-                <ImagePlus className="h-5 w-5" />
-                Galeria
-              </button>
-            </div>
-          )}
-
-          <input ref={fileRef} type="file" accept="image/*" capture="environment" onChange={handlePhotoSelect} className="hidden" />
-          <input ref={galleryRef} type="file" accept="image/*" onChange={handlePhotoSelect} className="hidden" />
-
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => setStep("duration")} className="h-12 flex-1 rounded-[16px]">
               <ChevronLeft className="mr-1 h-4 w-4" /> Voltar
             </Button>
             <Button onClick={analyzeWorkout} className="h-12 flex-1 rounded-[16px] font-semibold glow-primary">

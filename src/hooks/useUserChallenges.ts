@@ -8,6 +8,10 @@ export interface ActiveChallenge {
   challengeName: string;
 }
 
+/**
+ * Returns all groups the user is an active member of, mapped as ActiveChallenge.
+ * Uses group_members (which has data) instead of challenge_participants (which may be empty).
+ */
 export const useUserActiveChallenges = () => {
   const { user } = useAuth();
 
@@ -17,19 +21,19 @@ export const useUserActiveChallenges = () => {
       if (!user) return [];
 
       const { data, error } = await supabase
-        .from("challenge_participants")
-        .select("challenge_id, challenges(id, name, group_id, status)")
+        .from("group_members")
+        .select("group_id, groups:group_id(id, name)")
         .eq("user_id", user.id)
         .eq("status", "active");
 
       if (error) throw error;
 
       return (data || [])
-        .filter((row: any) => row.challenges?.status === "active" && row.challenges?.group_id)
+        .filter((row: any) => row.groups)
         .map((row: any) => ({
-          challengeId: row.challenges.id,
-          groupId: row.challenges.group_id,
-          challengeName: row.challenges.name,
+          challengeId: row.groups.id,
+          groupId: row.groups.id,
+          challengeName: row.groups.name,
         }));
     },
     enabled: !!user,

@@ -27,7 +27,7 @@ import CheckinFullWizard from "@/components/checkin/CheckinFullWizard";
 interface CheckinDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  groupId: string;
+  groupId?: string;
   alreadyCheckedIn: boolean;
   activeChallenges?: ActiveChallenge[];
 }
@@ -35,6 +35,7 @@ interface CheckinDialogProps {
 type Mode = null | "quick" | "full";
 
 const CheckinDialog = ({ open, onOpenChange, groupId, alreadyCheckedIn, activeChallenges }: CheckinDialogProps) => {
+  const resolvedGroupId = groupId || activeChallenges?.[0]?.groupId || "";
   const isMobile = useIsMobile();
   const [mode, setMode] = useState<Mode>(null);
 

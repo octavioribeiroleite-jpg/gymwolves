@@ -3,7 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useActiveGroup } from "@/contexts/ActiveGroupContext";
 import { useUserGroups } from "@/hooks/useGroupData";
 import { useProfile } from "@/hooks/useProfile";
-import { useGroupCheckins, computeDaysActive, computeStreaks, hasCheckedInToday, useDeleteTodayCheckins } from "@/hooks/useCheckins";
+import { useGroupCheckins, computeDaysActive, computeStreaks, useHasCheckedInToday, useDeleteTodayCheckins } from "@/hooks/useCheckins";
 import { useUserActiveChallenges } from "@/hooks/useUserChallenges";
 import { Loader2 } from "lucide-react";
 
@@ -25,13 +25,8 @@ const Dashboard = () => {
   const { data: profile } = useProfile();
   const { data: checkins } = useGroupCheckins(activeGroupId || undefined);
   const { data: activeChallenges } = useUserActiveChallenges();
+  const { data: todayDone = false } = useHasCheckedInToday();
   const deleteTodayCheckins = useDeleteTodayCheckins();
-  // Aggregate stats across all groups - for now use active group checkins
-  // TODO: aggregate from all groups when we have a multi-group checkins hook
-  const todayDone = useMemo(
-    () => (checkins && user ? hasCheckedInToday(checkins, user.id) : false),
-    [checkins, user]
-  );
 
   const globalStats = useMemo(() => {
     if (!checkins || !user) return { streak: 0, daysActive: 0, record: 0 };
@@ -53,6 +48,9 @@ const Dashboard = () => {
   }
 
   const userName = profile?.display_name || "Você";
+
+  // Fallback groupId: activeGroupId or first group from activeChallenges
+  const fallbackGroupId = activeGroupId || activeChallenges?.[0]?.groupId;
 
   return (
     <div className="min-h-screen bg-background">
@@ -79,15 +77,13 @@ const Dashboard = () => {
 
       <DashboardFAB onCheckin={() => setCheckinOpen(true)} />
 
-      {activeGroupId && (
-        <CheckinDialog
-          open={checkinOpen}
-          onOpenChange={setCheckinOpen}
-          groupId={activeGroupId}
-          alreadyCheckedIn={todayDone}
-          activeChallenges={activeChallenges}
-        />
-      )}
+      <CheckinDialog
+        open={checkinOpen}
+        onOpenChange={setCheckinOpen}
+        groupId={fallbackGroupId}
+        alreadyCheckedIn={todayDone}
+        activeChallenges={activeChallenges}
+      />
     </div>
   );
 };

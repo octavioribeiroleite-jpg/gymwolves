@@ -1,7 +1,8 @@
 import { useState, useRef } from "react";
-import { useCreateCheckin } from "@/hooks/useCheckins";
+import { useCreateCheckin, useCreateCheckinAll } from "@/hooks/useCheckins";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { ActiveChallenge } from "@/hooks/useUserChallenges";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Dialog,
@@ -38,9 +39,10 @@ interface CheckinDialogProps {
   onOpenChange: (open: boolean) => void;
   groupId: string;
   alreadyCheckedIn: boolean;
+  activeChallenges?: ActiveChallenge[];
 }
 
-const CheckinDialog = ({ open, onOpenChange, groupId, alreadyCheckedIn }: CheckinDialogProps) => {
+const CheckinDialog = ({ open, onOpenChange, groupId, alreadyCheckedIn, activeChallenges }: CheckinDialogProps) => {
   const { user } = useAuth();
   const isMobile = useIsMobile();
   const [title, setTitle] = useState("Treino");
@@ -52,6 +54,7 @@ const CheckinDialog = ({ open, onOpenChange, groupId, alreadyCheckedIn }: Checki
   const fileRef = useRef<HTMLInputElement>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
   const createCheckin = useCreateCheckin();
+  const createCheckinAll = useCreateCheckinAll();
 
   const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -91,28 +94,42 @@ const CheckinDialog = ({ open, onOpenChange, groupId, alreadyCheckedIn }: Checki
     if (!title.trim()) return;
 
     const proofUrl = await uploadPhoto();
+    const hasBatch = activeChallenges && activeChallenges.length > 0;
 
-    createCheckin.mutate(
-      {
-        groupId,
-        title: title.trim(),
-        note: note.trim() || undefined,
-        workoutType,
-        proofUrl: proofUrl || undefined,
-      },
-      {
-        onSuccess: () => {
-          setTitle("Treino");
-          setNote("");
-          setWorkoutType("musculacao");
-          removePhoto();
-          onOpenChange(false);
+    const onDone = () => {
+      setTitle("Treino");
+      setNote("");
+      setWorkoutType("musculacao");
+      removePhoto();
+      onOpenChange(false);
+    };
+
+    if (hasBatch) {
+      createCheckinAll.mutate(
+        {
+          challenges: activeChallenges,
+          title: title.trim(),
+          note: note.trim() || undefined,
+          workoutType,
+          proofUrl: proofUrl || undefined,
         },
-      }
-    );
+        { onSuccess: onDone }
+      );
+    } else {
+      createCheckin.mutate(
+        {
+          groupId,
+          title: title.trim(),
+          note: note.trim() || undefined,
+          workoutType,
+          proofUrl: proofUrl || undefined,
+        },
+        { onSuccess: onDone }
+      );
+    }
   };
 
-  const isPending = createCheckin.isPending || uploading;
+  const isPending = createCheckin.isPending || createCheckinAll.isPending || uploading;
 
   const formContent = (
     <>

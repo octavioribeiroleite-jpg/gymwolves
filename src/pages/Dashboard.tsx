@@ -4,6 +4,7 @@ import { useActiveGroup } from "@/contexts/ActiveGroupContext";
 import { useUserGroups } from "@/hooks/useGroupData";
 import { useProfile } from "@/hooks/useProfile";
 import { useGroupCheckins, computeDaysActive, computeStreaks, hasCheckedInToday } from "@/hooks/useCheckins";
+import { useUserActiveChallenges } from "@/hooks/useUserChallenges";
 import { Loader2 } from "lucide-react";
 
 import CheckinDialog from "@/components/CheckinDialog";
@@ -23,6 +24,7 @@ const Dashboard = () => {
   const { data: groups, isLoading } = useUserGroups();
   const { data: profile } = useProfile();
   const { data: checkins } = useGroupCheckins(activeGroupId || undefined);
+  const { data: activeChallenges } = useUserActiveChallenges();
 
   // Aggregate stats across all groups - for now use active group checkins
   // TODO: aggregate from all groups when we have a multi-group checkins hook
@@ -81,6 +83,7 @@ const Dashboard = () => {
           onOpenChange={setCheckinOpen}
           groupId={activeGroupId}
           alreadyCheckedIn={todayDone}
+          activeChallenges={activeChallenges}
         />
       )}
     </div>

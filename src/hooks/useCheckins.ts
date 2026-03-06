@@ -61,6 +61,66 @@ export const useCreateCheckin = () => {
   });
 };
 
+// ── Create checkins in ALL active challenges (batch) ──
+export const useCreateCheckinAll = () => {
+  const { user } = useAuth();
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (params: {
+      challenges: { challengeId: string; groupId: string }[];
+      title: string;
+      note?: string;
+      workoutType?: string;
+      proofUrl?: string;
+    }) => {
+      if (!user) throw new Error("Não autenticado");
+      if (!params.challenges.length) throw new Error("Nenhum desafio ativo");
+
+      const now = new Date().toISOString();
+      const today = format(new Date(), "yyyy-MM-dd");
+
+      // Unique group IDs to avoid duplicate checkins for same group
+      const uniqueGroups = [...new Set(params.challenges.map((c) => c.groupId))];
+
+      // Insert checkins for each unique group
+      const { error: checkinError } = await supabase.from("checkins").insert(
+        uniqueGroups.map((groupId) => ({
+          group_id: groupId,
+          user_id: user.id,
+          title: params.title,
+          note: params.note || null,
+          proof_type: params.proofUrl ? "photo" : "manual",
+          proof_url: params.proofUrl || null,
+          workout_type: params.workoutType || "musculacao",
+          checkin_at: now,
+        }) as any)
+      );
+      if (checkinError) throw checkinError;
+
+      // Insert workout_logs for each challenge
+      const { error: logError } = await supabase.from("workout_logs").insert(
+        params.challenges.map((c) => ({
+          challenge_id: c.challengeId,
+          user_id: user.id,
+          workout_date: today,
+        }))
+      );
+      if (logError) throw logError;
+
+      return { groupIds: uniqueGroups, count: params.challenges.length };
+    },
+    onSuccess: (result) => {
+      result.groupIds.forEach((gid) => {
+        qc.invalidateQueries({ queryKey: ["checkins", gid] });
+      });
+      qc.invalidateQueries({ queryKey: ["workout-logs"] });
+      toast.success(`Treino registrado em ${result.count} desafio${result.count > 1 ? "s" : ""}! 💪`);
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+};
+
 // ── Delete a checkin ──
 export const useDeleteCheckin = () => {
   const qc = useQueryClient();

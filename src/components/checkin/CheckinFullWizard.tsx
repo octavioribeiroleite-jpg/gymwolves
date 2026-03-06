@@ -6,7 +6,7 @@ import { ActiveChallenge } from "@/hooks/useUserChallenges";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { AlertTriangle, Loader2, Camera, ImagePlus, X, ArrowRight, ChevronLeft } from "lucide-react";
+import { AlertTriangle, Camera, ImagePlus, X, ArrowRight, ChevronLeft, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import AILoadingAnimation from "@/components/checkin/AILoadingAnimation";
 import CheckinConfirmation from "@/components/checkin/CheckinConfirmation";
@@ -50,7 +50,7 @@ interface Props {
 
 type Step = "photo" | "type" | "intensity" | "duration" | "analyzing" | "confirm";
 
-const MANUAL_STEPS: Step[] = ["type", "intensity", "duration"];
+const MAX_PHOTOS = 5;
 
 const CheckinFullWizard = ({ groupId, alreadyCheckedIn, activeChallenges, onBack, onDone }: Props) => {
   const { user } = useAuth();
@@ -59,31 +59,41 @@ const CheckinFullWizard = ({ groupId, alreadyCheckedIn, activeChallenges, onBack
   const [workoutType, setWorkoutType] = useState("musculacao");
   const [intensity, setIntensity] = useState("moderado");
   const [durationMin, setDurationMin] = useState(30);
-  const [photo, setPhoto] = useState<File | null>(null);
-  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [photos, setPhotos] = useState<File[]>([]);
+  const [photoPreviews, setPhotoPreviews] = useState<string[]>([]);
   const [analysis, setAnalysis] = useState<WorkoutAnalysis | null>(null);
   const [aiError, setAiError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
+  const addMoreRef = useRef<HTMLInputElement>(null);
 
   const createCheckin = useCreateCheckin();
   const createCheckinAll = useCreateCheckinAll();
 
   const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setPhoto(file);
-    const reader = new FileReader();
-    reader.onloadend = () => setPhotoPreview(reader.result as string);
-    reader.readAsDataURL(file);
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+
+    const remaining = MAX_PHOTOS - photos.length;
+    const toAdd = files.slice(0, remaining);
+
+    toAdd.forEach((file) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPhotos((prev) => [...prev, file]);
+        setPhotoPreviews((prev) => [...prev, reader.result as string]);
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // Reset input so same file can be selected again
+    e.target.value = "";
   };
 
-  const removePhoto = () => {
-    setPhoto(null);
-    setPhotoPreview(null);
-    if (fileRef.current) fileRef.current.value = "";
-    if (galleryRef.current) galleryRef.current.value = "";
+  const removePhoto = (index: number) => {
+    setPhotos((prev) => prev.filter((_, i) => i !== index));
+    setPhotoPreviews((prev) => prev.filter((_, i) => i !== index));
   };
 
   const analyzeWorkout = async () => {
@@ -93,8 +103,12 @@ const CheckinFullWizard = ({ groupId, alreadyCheckedIn, activeChallenges, onBack
     try {
       let body: any;
 
-      if (photo && photoPreview) {
-        body = { mode: "image", imageBase64: photoPreview };
+      if (photos.length > 0 && photoPreviews.length > 0) {
+        // Send single or multiple images
+        body = {
+          mode: "image",
+          imageBase64: photoPreviews.length === 1 ? photoPreviews[0] : photoPreviews,
+        };
       } else {
         body = { mode: "manual", workoutType, intensity, durationMin };
       }
@@ -106,8 +120,8 @@ const CheckinFullWizard = ({ groupId, alreadyCheckedIn, activeChallenges, onBack
 
       setAnalysis({
         workout_type: data.workout_type || workoutType,
-        duration_min: data.duration_min || durationMin,
-        calories: data.calories || 0,
+        duration_min: data.duration_min ? Math.round(data.duration_min) : durationMin,
+        calories: data.calories ? Math.round(data.calories) : 0,
         heart_rate: data.heart_rate,
         distance_km: data.distance_km,
         steps: data.steps,
@@ -127,12 +141,14 @@ const CheckinFullWizard = ({ groupId, alreadyCheckedIn, activeChallenges, onBack
   };
 
   const uploadPhoto = async (): Promise<string | null> => {
-    if (!photo || !user) return null;
+    if (!photos.length || !user) return null;
     setUploading(true);
     try {
-      const ext = photo.name.split(".").pop();
+      // Upload only the first photo as proof
+      const file = photos[0];
+      const ext = file.name.split(".").pop();
       const path = `${user.id}/${Date.now()}.${ext}`;
-      const { error } = await supabase.storage.from("checkin-photos").upload(path, photo);
+      const { error } = await supabase.storage.from("checkin-photos").upload(path, file);
       if (error) throw error;
       const { data } = supabase.storage.from("checkin-photos").getPublicUrl(path);
       return data.publicUrl;
@@ -193,7 +209,6 @@ const CheckinFullWizard = ({ groupId, alreadyCheckedIn, activeChallenges, onBack
   }
 
   const visibleSteps: Step[] = skippedPhoto ? ["type", "intensity", "duration"] : ["photo"];
-  const allSteps: Step[] = skippedPhoto ? ["photo", "type", "intensity", "duration"] : ["photo"];
 
   return (
     <div className="space-y-4">
@@ -225,22 +240,53 @@ const CheckinFullWizard = ({ groupId, alreadyCheckedIn, activeChallenges, onBack
       {step === "photo" && (
         <div className="space-y-3">
           <Label className="text-caption font-medium text-muted-foreground">
-            Tem um print do treino?
+            Tem prints do treino?
           </Label>
           <p className="text-[12px] text-muted-foreground">
-            Envie um print do seu app de fitness e a IA vai extrair os dados automaticamente!
+            Envie um ou mais prints do seu app de fitness e a IA vai extrair os dados automaticamente!
           </p>
 
-          {photoPreview ? (
-            <div className="relative rounded-[16px] overflow-hidden">
-              <img src={photoPreview} alt="Preview" className="w-full max-h-[60vh] object-contain" />
-              <button
-                type="button"
-                onClick={removePhoto}
-                className="absolute top-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-background/80 backdrop-blur-sm"
-              >
-                <X className="h-4 w-4" />
-              </button>
+          {photoPreviews.length > 0 ? (
+            <div className="space-y-2">
+              <div className={cn(
+                "grid gap-2",
+                photoPreviews.length === 1 ? "grid-cols-1" : "grid-cols-2"
+              )}>
+                {photoPreviews.map((preview, idx) => (
+                  <div key={idx} className="relative rounded-[16px] overflow-hidden bg-secondary">
+                    <img
+                      src={preview}
+                      alt={`Preview ${idx + 1}`}
+                      className={cn(
+                        "w-full object-contain",
+                        photoPreviews.length === 1 ? "max-h-[50vh]" : "max-h-[30vh]"
+                      )}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removePhoto(idx)}
+                      className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center rounded-full bg-background/80 backdrop-blur-sm"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ))}
+
+                {/* Add more button */}
+                {photos.length < MAX_PHOTOS && (
+                  <button
+                    type="button"
+                    onClick={() => addMoreRef.current?.click()}
+                    className="flex flex-col items-center justify-center gap-1.5 rounded-[16px] border-2 border-dashed border-subtle bg-secondary/50 py-8 text-muted-foreground transition-colors hover:border-primary/40"
+                  >
+                    <Plus className="h-6 w-6" />
+                    <span className="text-[11px] font-medium">Adicionar mais</span>
+                  </button>
+                )}
+              </div>
+              <p className="text-[11px] text-muted-foreground text-center">
+                {photos.length}/{MAX_PHOTOS} fotos
+              </p>
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-2">
@@ -264,9 +310,10 @@ const CheckinFullWizard = ({ groupId, alreadyCheckedIn, activeChallenges, onBack
           )}
 
           <input ref={fileRef} type="file" accept="image/*" capture="environment" onChange={handlePhotoSelect} className="hidden" />
-          <input ref={galleryRef} type="file" accept="image/*" onChange={handlePhotoSelect} className="hidden" />
+          <input ref={galleryRef} type="file" accept="image/*" multiple onChange={handlePhotoSelect} className="hidden" />
+          <input ref={addMoreRef} type="file" accept="image/*" multiple onChange={handlePhotoSelect} className="hidden" />
 
-          {photoPreview ? (
+          {photoPreviews.length > 0 ? (
             <Button onClick={analyzeWorkout} className="h-12 w-full rounded-[16px] font-semibold glow-primary">
               Analisar com IA 🤖
             </Button>

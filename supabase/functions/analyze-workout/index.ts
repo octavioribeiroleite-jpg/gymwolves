@@ -20,23 +20,29 @@ serve(async (req) => {
     let messages: any[];
 
     if (mode === "image" && imageBase64) {
+      // Support single string or array of strings
+      const images: string[] = Array.isArray(imageBase64) ? imageBase64 : [imageBase64];
+
+      const imageContent = images.map((img: string) => ({
+        type: "image_url",
+        image_url: { url: img },
+      }));
+
+      const textPart = images.length > 1
+        ? `Analyze these ${images.length} fitness app screenshots together. They may show different metrics from the same workout (e.g. calories on one screen, heart rate on another). Combine all data into a single workout analysis.`
+        : "Analyze this fitness app screenshot and extract all workout data you can find.";
+
       messages = [
         {
           role: "system",
           content:
-            "You are a fitness data extraction assistant. Analyze the screenshot from a fitness/health app and extract workout data. Always respond using the provided tool. Extract whatever data you can see: calories, duration, heart rate, distance, steps, workout type. If you can't determine a value, omit it. For workout_type use one of: musculacao, corrida, crossfit, natacao, ciclismo, yoga, luta, caminhada, aerobio, outro. For summary, write a brief description in Portuguese.",
+            "You are a fitness data extraction assistant. Analyze screenshots from fitness/health apps and extract workout data. Always respond using the provided tool. Extract whatever data you can see: calories, duration, heart rate, distance, steps, workout type. If multiple images are provided, combine the data from all of them into a single result. If you can't determine a value, omit it. For workout_type use one of: musculacao, corrida, crossfit, natacao, ciclismo, yoga, luta, caminhada, aerobio, outro. For summary, write a brief description in Portuguese.",
         },
         {
           role: "user",
           content: [
-            {
-              type: "text",
-              text: "Analyze this fitness app screenshot and extract all workout data you can find.",
-            },
-            {
-              type: "image_url",
-              image_url: { url: imageBase64 },
-            },
+            { type: "text", text: textPart },
+            ...imageContent,
           ],
         },
       ];

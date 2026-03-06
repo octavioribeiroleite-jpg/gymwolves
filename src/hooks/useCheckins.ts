@@ -220,3 +220,40 @@ export const hasCheckedInToday = (checkins: any[], userId: string): boolean => {
       format(new Date(c.checkin_at), "yyyy-MM-dd") === today
   );
 };
+
+// ── Delete all of today's checkins + workout_logs for the user ──
+export const useDeleteTodayCheckins = () => {
+  const { user } = useAuth();
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: async () => {
+      if (!user) throw new Error("Não autenticado");
+      const today = format(new Date(), "yyyy-MM-dd");
+      const tomorrow = format(new Date(Date.now() + 86400000), "yyyy-MM-dd");
+
+      // Delete today's checkins
+      const { error: checkinError } = await supabase
+        .from("checkins")
+        .delete()
+        .eq("user_id", user.id)
+        .gte("checkin_at", today)
+        .lt("checkin_at", tomorrow);
+      if (checkinError) throw checkinError;
+
+      // Delete today's workout_logs
+      const { error: logError } = await supabase
+        .from("workout_logs")
+        .delete()
+        .eq("user_id", user.id)
+        .eq("workout_date", today);
+      if (logError) throw logError;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["checkins"] });
+      qc.invalidateQueries({ queryKey: ["workout-logs"] });
+      toast.success("Treino removido");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+};

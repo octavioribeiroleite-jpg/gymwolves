@@ -233,7 +233,7 @@ const CheckinFullWizard = ({ groupId, alreadyCheckedIn, activeChallenges, onBack
 
           {photoPreview ? (
             <div className="relative rounded-[16px] overflow-hidden">
-              <img src={photoPreview} alt="Preview" className="w-full h-40 object-cover" />
+              <img src={photoPreview} alt="Preview" className="w-full max-h-[60vh] object-contain" />
               <button
                 type="button"
                 onClick={removePhoto}

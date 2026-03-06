@@ -3,7 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useActiveGroup } from "@/contexts/ActiveGroupContext";
 import { useUserGroups } from "@/hooks/useGroupData";
 import { useProfile } from "@/hooks/useProfile";
-import { useGroupCheckins, computeDaysActive, computeStreaks, hasCheckedInToday } from "@/hooks/useCheckins";
+import { useGroupCheckins, computeDaysActive, computeStreaks, hasCheckedInToday, useDeleteTodayCheckins } from "@/hooks/useCheckins";
 import { useUserActiveChallenges } from "@/hooks/useUserChallenges";
 import { Loader2 } from "lucide-react";
 
@@ -25,7 +25,7 @@ const Dashboard = () => {
   const { data: profile } = useProfile();
   const { data: checkins } = useGroupCheckins(activeGroupId || undefined);
   const { data: activeChallenges } = useUserActiveChallenges();
-
+  const deleteTodayCheckins = useDeleteTodayCheckins();
   // Aggregate stats across all groups - for now use active group checkins
   // TODO: aggregate from all groups when we have a multi-group checkins hook
   const todayDone = useMemo(
@@ -68,6 +68,8 @@ const Dashboard = () => {
         <WorkoutStatusCard
           todayDone={todayDone}
           onCheckin={() => setCheckinOpen(true)}
+          onDelete={() => deleteTodayCheckins.mutate()}
+          isDeleting={deleteTodayCheckins.isPending}
         />
 
         <HomeChallengesList />

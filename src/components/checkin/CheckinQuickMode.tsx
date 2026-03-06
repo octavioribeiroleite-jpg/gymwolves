@@ -1,8 +1,11 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useCreateCheckin, useCreateCheckinAll } from "@/hooks/useCheckins";
+import { useCreatePost } from "@/hooks/useChallengePosts";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { ActiveChallenge } from "@/hooks/useUserChallenges";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, Loader2 } from "lucide-react";
+import { AlertTriangle, Camera, Loader2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const WORKOUT_TYPES = [
@@ -27,34 +30,89 @@ interface Props {
 }
 
 const CheckinQuickMode = ({ groupId, alreadyCheckedIn, activeChallenges, onBack, onDone }: Props) => {
+  const { user } = useAuth();
   const [workoutType, setWorkoutType] = useState("musculacao");
+  const [photo, setPhoto] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
   const createCheckin = useCreateCheckin();
   const createCheckinAll = useCreateCheckinAll();
-  const isPending = createCheckin.isPending || createCheckinAll.isPending;
+  const createPost = useCreatePost();
+  const isPending = createCheckin.isPending || createCheckinAll.isPending || uploading;
 
   const selectedLabel = WORKOUT_TYPES.find((w) => w.value === workoutType)?.label || "Treino";
 
-  const handleSubmit = () => {
-    const hasBatch = activeChallenges && activeChallenges.length > 0;
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setPhoto(file);
+    setPhotoPreview(URL.createObjectURL(file));
+  };
 
-    if (hasBatch) {
-      createCheckinAll.mutate(
-        {
-          challenges: activeChallenges,
-          title: selectedLabel,
-          workoutType,
-        },
-        { onSuccess: onDone }
-      );
-    } else {
-      createCheckin.mutate(
-        {
-          groupId,
-          title: selectedLabel,
-          workoutType,
-        },
-        { onSuccess: onDone }
-      );
+  const removePhoto = () => {
+    setPhoto(null);
+    setPhotoPreview(null);
+    if (fileRef.current) fileRef.current.value = "";
+  };
+
+  const uploadPhoto = async (): Promise<string | null> => {
+    if (!photo || !user) return null;
+    const ext = photo.name.split(".").pop() || "jpg";
+    const path = `${user.id}/${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from("checkin-photos").upload(path, photo);
+    if (error) throw error;
+    const { data } = supabase.storage.from("checkin-photos").getPublicUrl(path);
+    return data.publicUrl;
+  };
+
+  const postToFeed = (photoUrl: string, groups: { groupId: string }[]) => {
+    const emoji = WORKOUT_TYPES.find((w) => w.value === workoutType)?.emoji || "⚡";
+    const caption = `${emoji} ${selectedLabel}`;
+    const uniqueGroupIds = [...new Set(groups.map((g) => g.groupId))];
+    uniqueGroupIds.forEach((gid) => {
+      createPost.mutate({ challengeId: gid, imageUrl: photoUrl, caption });
+    });
+  };
+
+  const handleSubmit = async () => {
+    setUploading(true);
+    try {
+      const photoUrl = await uploadPhoto();
+      const hasBatch = activeChallenges && activeChallenges.length > 0;
+
+      const onSuccess = () => {
+        if (photoUrl && activeChallenges && activeChallenges.length > 0) {
+          postToFeed(photoUrl, activeChallenges);
+        } else if (photoUrl && groupId) {
+          postToFeed(photoUrl, [{ groupId }]);
+        }
+        onDone();
+      };
+
+      if (hasBatch) {
+        createCheckinAll.mutate(
+          {
+            challenges: activeChallenges,
+            title: selectedLabel,
+            workoutType,
+            proofUrl: photoUrl || undefined,
+          },
+          { onSuccess }
+        );
+      } else {
+        createCheckin.mutate(
+          {
+            groupId,
+            title: selectedLabel,
+            workoutType,
+            proofUrl: photoUrl || undefined,
+          },
+          { onSuccess }
+        );
+      }
+    } catch {
+      setUploading(false);
     }
   };
 
@@ -88,6 +146,41 @@ const CheckinQuickMode = ({ groupId, alreadyCheckedIn, activeChallenges, onBack,
           </button>
         ))}
       </div>
+
+      {/* Photo upload */}
+      <input
+        ref={fileRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleFileChange}
+      />
+
+      {photoPreview ? (
+        <div className="relative">
+          <img
+            src={photoPreview}
+            alt="Preview"
+            className="h-40 w-full rounded-[16px] object-cover"
+          />
+          <button
+            type="button"
+            onClick={removePhoto}
+            className="absolute right-2 top-2 rounded-full bg-background/80 p-1.5 backdrop-blur-sm"
+          >
+            <X className="h-4 w-4 text-foreground" />
+          </button>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => fileRef.current?.click()}
+          className="flex w-full items-center justify-center gap-2 rounded-[16px] border-2 border-dashed border-subtle bg-secondary/50 py-4 text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
+        >
+          <Camera className="h-5 w-5" />
+          <span className="text-sm font-medium">Adicionar foto do treino</span>
+        </button>
+      )}
 
       <Button
         onClick={handleSubmit}

@@ -1,34 +1,69 @@
 
 
-## Plano: Check-in da Home registra em todos os desafios
+## Plano: Check-in Inteligente com IA (dois modos + animação de análise + confirmação)
 
-### Problema atual
+### Conceito
 
-O check-in da tela Home está vinculado apenas ao `activeGroupId` (um único grupo). Quando o usuário registra um treino, ele só é salvo nesse grupo, ignorando os outros desafios em que participa.
+Refatorar o `CheckinDialog` em um fluxo multi-step com dois modos e uma tela de confirmação antes de finalizar:
 
-### Solução
+```text
+┌─────────────────────────────┐
+│  Como registrar seu treino? │
+│                             │
+│  ⚡ Check-in Rápido          │
+│  📝 Modo Completo            │
+└─────────────────────────────┘
 
-Modificar o fluxo para que, ao fazer check-in pela Home, o treino seja registrado automaticamente em **todos os desafios ativos** do usuário. Isso envolve:
+── Check-in Rápido ──
+  Grid tipos → Confirmar
 
-1. **Criar hook `useUserActiveChallenges`** — busca todos os desafios ativos em que o usuário participa (via `challenge_participants` + `challenges` com status `active`)
+── Modo Completo ──
+  Passo 1: Tipo de treino
+  Passo 2: Intensidade (Leve/Moderado/Pesado)
+  Passo 3: Duração (minutos)
+  Passo 4: Foto opcional (câmera/galeria/print de app)
+     ↓
+  [IA analisa → animação de loading bonita]
+     ↓
+  Tela de Resumo/Confirmação
+  (calorias estimadas, tipo, duração, dados extraídos)
+  [Campos editáveis] + [Confirmar] ou [Voltar]
+     ↓
+  Salvar check-in
+```
 
-2. **Modificar `useCreateCheckin`** — adicionar uma variante que aceita múltiplos `groupId`s/`challengeId`s e insere registros em batch:
-   - Inserir um `checkin` para cada grupo associado aos desafios ativos
-   - Inserir um `workout_log` para cada desafio ativo
-   - Tudo numa única mutação
+### Animação de carregamento da IA
 
-3. **Atualizar `Dashboard.tsx`** — em vez de passar apenas `activeGroupId` ao `CheckinDialog`, passar a lista de todos os desafios/grupos ativos do usuário
+Enquanto a IA processa, exibir uma animação com framer-motion:
+- Ícone central pulsando (tipo radar/scan)
+- Textos rotativos: "Analisando treino...", "Calculando calorias...", "Quase lá..."
+- Barra de progresso animada (indeterminada)
+- Transição suave para a tela de resumo quando pronto
 
-4. **Atualizar `CheckinDialog.tsx`** — quando chamado da Home, usar a mutação em batch que registra em todos os desafios de uma vez. Mostrar feedback tipo "Treino registrado em 3 desafios! 💪"
+### Tela de confirmação
 
-5. **Invalidar queries** — após o check-in em batch, invalidar as queries de checkins de todos os grupos afetados para atualizar a UI
+Card visual com os dados retornados pela IA, todos editáveis:
+- Tipo de treino, duração, calorias estimadas, frequência cardíaca (se disponível)
+- Campos como inputs para o usuário poder corrigir
+- Botão "Confirmar e registrar" e botão "Voltar"
 
-### Alterações por arquivo
+### Alterações
 
 | Arquivo | O que muda |
 |---|---|
-| `src/hooks/useUserChallenges.ts` | **Novo** — hook para buscar todos os desafios ativos do usuário |
-| `src/hooks/useCheckins.ts` | Adicionar mutação `useCreateCheckinAll` que insere em múltiplos grupos/desafios |
-| `src/pages/Dashboard.tsx` | Passar lista de desafios ativos ao CheckinDialog |
-| `src/components/CheckinDialog.tsx` | Suportar modo "todos os desafios" com inserção em batch e feedback adequado |
+| `supabase/functions/analyze-workout/index.ts` | **Novo** -- Edge function usando Lovable AI (Gemini Flash) para calcular calorias (modo manual) e analisar prints de apps fitness (modo imagem). Retorna JSON estruturado via tool calling |
+| `src/components/CheckinDialog.tsx` | Refatorar para fluxo multi-step: tela de seleção de modo → rápido (grid+confirmar) ou completo (tipo→intensidade→duração→foto→IA→resumo editável→confirmar) |
+| `src/hooks/useCheckins.ts` | Adicionar campos `duration_min`, `calories`, `distance_km`, `steps` nos inserts das mutações |
+
+### Detalhes da Edge Function
+
+Recebe `{ mode: "manual"|"image", workoutType?, intensity?, durationMin?, imageBase64? }`.
+- **Modo manual**: Usa prompt para estimar calorias baseado no tipo+intensidade+duração
+- **Modo imagem**: Envia imagem em base64 ao Gemini (multimodal) para extrair dados do print
+- Retorna via tool calling: `{ workout_type, duration_min, calories, heart_rate?, distance_km?, steps?, summary }`
+- Trata erros 429/402 adequadamente
+
+### Sem alterações no banco
+
+A tabela `checkins` já possui as colunas `calories`, `duration_min`, `distance_km`, `steps` -- basta popular.
 

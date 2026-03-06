@@ -1,34 +1,33 @@
 
 
-## Plano: Check-in da Home registra em todos os desafios
+## Plano: Corrigir preview da foto + Adicionar opção de excluir check-in do dia
 
-### Problema atual
+### 1. Corrigir preview da foto (sem corte)
 
-O check-in da tela Home está vinculado apenas ao `activeGroupId` (um único grupo). Quando o usuário registra um treino, ele só é salvo nesse grupo, ignorando os outros desafios em que participa.
-
-### Solução
-
-Modificar o fluxo para que, ao fazer check-in pela Home, o treino seja registrado automaticamente em **todos os desafios ativos** do usuário. Isso envolve:
-
-1. **Criar hook `useUserActiveChallenges`** — busca todos os desafios ativos em que o usuário participa (via `challenge_participants` + `challenges` com status `active`)
-
-2. **Modificar `useCreateCheckin`** — adicionar uma variante que aceita múltiplos `groupId`s/`challengeId`s e insere registros em batch:
-   - Inserir um `checkin` para cada grupo associado aos desafios ativos
-   - Inserir um `workout_log` para cada desafio ativo
-   - Tudo numa única mutação
-
-3. **Atualizar `Dashboard.tsx`** — em vez de passar apenas `activeGroupId` ao `CheckinDialog`, passar a lista de todos os desafios/grupos ativos do usuário
-
-4. **Atualizar `CheckinDialog.tsx`** — quando chamado da Home, usar a mutação em batch que registra em todos os desafios de uma vez. Mostrar feedback tipo "Treino registrado em 3 desafios! 💪"
-
-5. **Invalidar queries** — após o check-in em batch, invalidar as queries de checkins de todos os grupos afetados para atualizar a UI
-
-### Alterações por arquivo
-
-| Arquivo | O que muda |
+| Arquivo | Alteração |
 |---|---|
-| `src/hooks/useUserChallenges.ts` | **Novo** — hook para buscar todos os desafios ativos do usuário |
-| `src/hooks/useCheckins.ts` | Adicionar mutação `useCreateCheckinAll` que insere em múltiplos grupos/desafios |
-| `src/pages/Dashboard.tsx` | Passar lista de desafios ativos ao CheckinDialog |
-| `src/components/CheckinDialog.tsx` | Suportar modo "todos os desafios" com inserção em batch e feedback adequado |
+| `src/components/checkin/CheckinFullWizard.tsx` | Linha 236: trocar `h-40 object-cover` por `max-h-[60vh] w-full object-contain` |
+
+### 2. Adicionar exclusão do check-in de hoje
+
+Quando o usuário já fez check-in hoje, o `WorkoutStatusCard` mostra "Treino concluído!". Vamos adicionar a possibilidade de desfazer:
+
+| Arquivo | Alteração |
+|---|---|
+| `src/components/dashboard/WorkoutStatusCard.tsx` | Adicionar botão "Desfazer" (ícone X ou Trash) que aparece quando `todayDone=true`. Ao clicar, abre um `AlertDialog` de confirmação ("Tem certeza que deseja remover o treino de hoje?"). Ao confirmar, chama `onDelete`. |
+| `src/pages/Dashboard.tsx` | Buscar o check-in de hoje nos `checkins` carregados, passar o `id` para o `WorkoutStatusCard`. Usar `useDeleteCheckin` para deletar o check-in e também deletar o `workout_log` correspondente do dia. |
+| `src/hooks/useCheckins.ts` | Criar hook `useDeleteTodayCheckins` que deleta todos os checkins do usuário de hoje em todos os grupos + deleta os `workout_logs` do dia. Invalida queries relevantes. |
+
+### Fluxo do usuário
+
+```text
+[Treino concluído! 💪]  ← toca no card
+   ↓
+AlertDialog: "Deseja remover o treino de hoje?"
+   [Cancelar]  [Remover]
+   ↓ (Remover)
+Deleta checkins de hoje + workout_logs do dia
+Toast: "Treino removido"
+Card volta para "Registrar treino"
+```
 

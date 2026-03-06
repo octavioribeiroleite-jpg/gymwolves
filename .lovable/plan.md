@@ -1,53 +1,34 @@
 
 
-## Diagnóstico: Contagens de treinos e check-in em todos os desafios
+## Plano: Check-in da Home registra em todos os desafios
 
-### Problema raiz identificado
+### Problema atual
 
-A query `useUserActiveChallenges` retorna `[]` (vazio) porque o usuário **não tem registros na tabela `challenge_participants`**. O app tem dois sistemas paralelos:
+O check-in da tela Home está vinculado apenas ao `activeGroupId` (um único grupo). Quando o usuário registra um treino, ele só é salvo nesse grupo, ignorando os outros desafios em que participa.
 
-1. **`groups` + `group_members`** — onde o usuário realmente está (2 grupos ativos)
-2. **`challenges` + `challenge_participants`** — tabela separada, vazia para este usuário
+### Solução
 
-Como `activeChallenges` é `[]`, o batch (`useCreateCheckinAll`) nunca executa. O fallback usa `createCheckin` com apenas 1 `groupId`, registrando o treino em apenas 1 grupo.
+Modificar o fluxo para que, ao fazer check-in pela Home, o treino seja registrado automaticamente em **todos os desafios ativos** do usuário. Isso envolve:
 
-### Problema nas métricas do Dashboard
+1. **Criar hook `useUserActiveChallenges`** — busca todos os desafios ativos em que o usuário participa (via `challenge_participants` + `challenges` com status `active`)
 
-`globalStats` usa `useGroupCheckins(activeGroupId)` que só carrega checkins de **um grupo**. As métricas (sequência, dias ativos, recorde) refletem apenas o grupo ativo, não o total real do usuário.
+2. **Modificar `useCreateCheckin`** — adicionar uma variante que aceita múltiplos `groupId`s/`challengeId`s e insere registros em batch:
+   - Inserir um `checkin` para cada grupo associado aos desafios ativos
+   - Inserir um `workout_log` para cada desafio ativo
+   - Tudo numa única mutação
 
-### Plano de correção
+3. **Atualizar `Dashboard.tsx`** — em vez de passar apenas `activeGroupId` ao `CheckinDialog`, passar a lista de todos os desafios/grupos ativos do usuário
 
-| Arquivo | Alteração |
+4. **Atualizar `CheckinDialog.tsx`** — quando chamado da Home, usar a mutação em batch que registra em todos os desafios de uma vez. Mostrar feedback tipo "Treino registrado em 3 desafios! 💪"
+
+5. **Invalidar queries** — após o check-in em batch, invalidar as queries de checkins de todos os grupos afetados para atualizar a UI
+
+### Alterações por arquivo
+
+| Arquivo | O que muda |
 |---|---|
-| `src/hooks/useUserChallenges.ts` | Refatorar `useUserActiveChallenges` para buscar os grupos do usuário via `group_members` (que funciona) em vez de depender de `challenge_participants` (que está vazio). Retornar `{ challengeId: group.id, groupId: group.id }` para cada grupo ativo. |
-| `src/pages/Dashboard.tsx` | Substituir a query de checkins de um único grupo por uma query que busca checkins do usuário em **todos os seus grupos**, para que as métricas globais (streak, dias ativos, recorde) sejam corretas. |
-| `src/hooks/useCheckins.ts` | Adicionar hook `useAllUserCheckins` que busca checkins do usuário em todos os seus grupos (usando os IDs dos grupos do `useUserGroups`). |
-
-### Fluxo corrigido
-
-```text
-Dashboard abre
-  ├─ useUserGroups → [grupo1, grupo2] (funciona!)
-  ├─ useUserActiveChallenges → usa group_members → [{groupId: g1}, {groupId: g2}]
-  ├─ useAllUserCheckins → checkins de TODOS os grupos
-  ├─ globalStats → streak/dias/recorde calculados sobre TODOS os checkins
-  └─ CheckinDialog → batch insere em TODOS os grupos
-```
-
-### Detalhes técnicos
-
-**`useUserActiveChallenges` refatorado:**
-- Buscar `group_members` do usuário com `status=active`
-- Para cada grupo, retornar como `ActiveChallenge` usando `group_id` tanto para `challengeId` quanto `groupId`
-- Isso garante que o batch funcione com os dados existentes
-
-**`useAllUserCheckins`:**
-- Recebe array de `groupId`s dos grupos do usuário
-- Faz query: `checkins.in('group_id', groupIds)` filtrado pelo `user_id`
-- Usado no Dashboard para calcular métricas globais
-
-**`useCreateCheckinAll`:**
-- Já funciona corretamente para inserir checkins em múltiplos grupos
-- Remover a parte que insere `workout_logs` (tabela `challenges` não está sendo usada)
-- Ou manter mas tratar erro silenciosamente se `challenge_participants` estiver vazio
+| `src/hooks/useUserChallenges.ts` | **Novo** — hook para buscar todos os desafios ativos do usuário |
+| `src/hooks/useCheckins.ts` | Adicionar mutação `useCreateCheckinAll` que insere em múltiplos grupos/desafios |
+| `src/pages/Dashboard.tsx` | Passar lista de desafios ativos ao CheckinDialog |
+| `src/components/CheckinDialog.tsx` | Suportar modo "todos os desafios" com inserção em batch e feedback adequado |
 

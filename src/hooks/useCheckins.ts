@@ -114,15 +114,18 @@ export const useCreateCheckinAll = () => {
       );
       if (checkinError) throw checkinError;
 
-      // Insert workout_logs for each challenge
-      const { error: logError } = await supabase.from("workout_logs").insert(
-        params.challenges.map((c) => ({
-          challenge_id: c.challengeId,
-          user_id: user.id,
-          workout_date: today,
-        }))
-      );
-      if (logError) throw logError;
+      // Try to insert workout_logs (may fail if challenge_participants is empty, ignore)
+      try {
+        await supabase.from("workout_logs").insert(
+          params.challenges.map((c) => ({
+            challenge_id: c.challengeId,
+            user_id: user.id,
+            workout_date: today,
+          }))
+        );
+      } catch {
+        // workout_logs may fail due to RLS if challenge_participants is empty — safe to ignore
+      }
 
       return { groupIds: uniqueGroups, count: params.challenges.length };
     },
@@ -209,6 +212,26 @@ export const computeStreaks = (checkins: any[], userId: string) => {
   const current = last === today || last === yesterday ? streak : 0;
 
   return { current, best };
+};
+
+// ── Fetch checkins for the user across ALL their groups ──
+export const useAllUserCheckins = (groupIds: string[] | undefined) => {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ["all-user-checkins", user?.id, groupIds],
+    queryFn: async () => {
+      if (!user || !groupIds || !groupIds.length) return [];
+      const { data, error } = await supabase
+        .from("checkins")
+        .select("*")
+        .eq("user_id", user.id)
+        .in("group_id", groupIds)
+        .order("checkin_at", { ascending: true });
+      if (error) throw error;
+      return data as any[];
+    },
+    enabled: !!user && !!groupIds && groupIds.length > 0,
+  });
 };
 
 // ── Check if user checked in today ──

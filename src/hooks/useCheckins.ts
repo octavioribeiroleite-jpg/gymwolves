@@ -106,7 +106,7 @@ export const useCreateCheckinAll = () => {
           proof_url: params.proofUrl || null,
           workout_type: params.workoutType || "musculacao",
           checkin_at: now,
-          duration_min: params.durationMin || null,
+          duration_min: params.durationMin ? Math.round(params.durationMin) : null,
           calories: params.calories || null,
           distance_km: params.distanceKm || null,
           steps: params.steps || null,

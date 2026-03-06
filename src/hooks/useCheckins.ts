@@ -81,6 +81,10 @@ export const useCreateCheckinAll = () => {
       note?: string;
       workoutType?: string;
       proofUrl?: string;
+      durationMin?: number;
+      calories?: number;
+      distanceKm?: number;
+      steps?: number;
     }) => {
       if (!user) throw new Error("Não autenticado");
       if (!params.challenges.length) throw new Error("Nenhum desafio ativo");

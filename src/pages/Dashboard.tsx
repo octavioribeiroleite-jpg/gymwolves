@@ -3,7 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useActiveGroup } from "@/contexts/ActiveGroupContext";
 import { useUserGroups } from "@/hooks/useGroupData";
 import { useProfile } from "@/hooks/useProfile";
-import { useGroupCheckins, computeDaysActive, computeStreaks, useHasCheckedInToday, useDeleteTodayCheckins } from "@/hooks/useCheckins";
+import { useAllUserCheckins, computeDaysActive, computeStreaks, useHasCheckedInToday, useDeleteTodayCheckins } from "@/hooks/useCheckins";
 import { useUserActiveChallenges } from "@/hooks/useUserChallenges";
 import { Loader2 } from "lucide-react";
 
@@ -23,17 +23,20 @@ const Dashboard = () => {
 
   const { data: groups, isLoading } = useUserGroups();
   const { data: profile } = useProfile();
-  const { data: checkins } = useGroupCheckins(activeGroupId || undefined);
   const { data: activeChallenges } = useUserActiveChallenges();
   const { data: todayDone = false } = useHasCheckedInToday();
   const deleteTodayCheckins = useDeleteTodayCheckins();
 
+  // Get all group IDs for global checkin query
+  const allGroupIds = useMemo(() => groups?.map((g: any) => g.id) || [], [groups]);
+  const { data: allCheckins } = useAllUserCheckins(allGroupIds.length > 0 ? allGroupIds : undefined);
+
   const globalStats = useMemo(() => {
-    if (!checkins || !user) return { streak: 0, daysActive: 0, record: 0 };
-    const days = computeDaysActive(checkins, user.id);
-    const streaks = computeStreaks(checkins, user.id);
+    if (!allCheckins || !user) return { streak: 0, daysActive: 0, record: 0 };
+    const days = computeDaysActive(allCheckins, user.id);
+    const streaks = computeStreaks(allCheckins, user.id);
     return { streak: streaks.current, daysActive: days, record: streaks.best };
-  }, [checkins, user]);
+  }, [allCheckins, user]);
 
   if (isLoading) {
     return (
@@ -48,9 +51,6 @@ const Dashboard = () => {
   }
 
   const userName = profile?.display_name || "Você";
-
-  // Fallback groupId: activeGroupId or first group from activeChallenges
-  const fallbackGroupId = activeGroupId || activeChallenges?.[0]?.groupId;
 
   return (
     <div className="min-h-screen bg-background">
@@ -80,7 +80,6 @@ const Dashboard = () => {
       <CheckinDialog
         open={checkinOpen}
         onOpenChange={setCheckinOpen}
-        groupId={fallbackGroupId}
         alreadyCheckedIn={todayDone}
         activeChallenges={activeChallenges}
       />

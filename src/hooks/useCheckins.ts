@@ -51,8 +51,8 @@ export const useCreateCheckin = () => {
           proof_url: params.proofUrl || null,
           workout_type: params.workoutType || "musculacao",
           checkin_at: new Date().toISOString(),
-          duration_min: params.durationMin || null,
-          calories: params.calories || null,
+          duration_min: params.durationMin ? Math.round(params.durationMin) : null,
+          calories: params.calories ? Math.round(params.calories) : null,
           distance_km: params.distanceKm || null,
           steps: params.steps || null,
         } as any)
@@ -106,8 +106,8 @@ export const useCreateCheckinAll = () => {
           proof_url: params.proofUrl || null,
           workout_type: params.workoutType || "musculacao",
           checkin_at: now,
-          duration_min: params.durationMin || null,
-          calories: params.calories || null,
+          duration_min: params.durationMin ? Math.round(params.durationMin) : null,
+          calories: params.calories ? Math.round(params.calories) : null,
           distance_km: params.distanceKm || null,
           steps: params.steps || null,
         }) as any)

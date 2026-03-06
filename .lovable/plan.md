@@ -1,34 +1,34 @@
 
 
-## Plano: Corrigir erro de tipo na duração + Suporte a múltiplas fotos
+## Plano: Check-in da Home registra em todos os desafios
 
-### Problema 1: Erro "invalid input syntax for type integer: 36.76"
-A coluna `duration_min` na tabela `checkins` é do tipo `integer`, mas a IA retornou `36.76` (decimal). Precisamos arredondar o valor antes de inserir no banco.
+### Problema atual
 
-### Problema 2: Suporte a múltiplas fotos
-O usuário quer enviar mais de uma foto/print (ex: tela de calorias + tela de frequência cardíaca) para que a IA analise todos juntos e extraia o máximo de dados.
+O check-in da tela Home está vinculado apenas ao `activeGroupId` (um único grupo). Quando o usuário registra um treino, ele só é salvo nesse grupo, ignorando os outros desafios em que participa.
 
-### Alterações
+### Solução
+
+Modificar o fluxo para que, ao fazer check-in pela Home, o treino seja registrado automaticamente em **todos os desafios ativos** do usuário. Isso envolve:
+
+1. **Criar hook `useUserActiveChallenges`** — busca todos os desafios ativos em que o usuário participa (via `challenge_participants` + `challenges` com status `active`)
+
+2. **Modificar `useCreateCheckin`** — adicionar uma variante que aceita múltiplos `groupId`s/`challengeId`s e insere registros em batch:
+   - Inserir um `checkin` para cada grupo associado aos desafios ativos
+   - Inserir um `workout_log` para cada desafio ativo
+   - Tudo numa única mutação
+
+3. **Atualizar `Dashboard.tsx`** — em vez de passar apenas `activeGroupId` ao `CheckinDialog`, passar a lista de todos os desafios/grupos ativos do usuário
+
+4. **Atualizar `CheckinDialog.tsx`** — quando chamado da Home, usar a mutação em batch que registra em todos os desafios de uma vez. Mostrar feedback tipo "Treino registrado em 3 desafios! 💪"
+
+5. **Invalidar queries** — após o check-in em batch, invalidar as queries de checkins de todos os grupos afetados para atualizar a UI
+
+### Alterações por arquivo
 
 | Arquivo | O que muda |
 |---|---|
-| `src/hooks/useCheckins.ts` | Aplicar `Math.round()` no `duration_min` antes do insert (linhas 54, 109) para garantir que é inteiro |
-| `src/components/checkin/CheckinFullWizard.tsx` | Trocar estado `photo`/`photoPreview` de `File\|null` / `string\|null` para arrays `File[]` / `string[]`. Permitir adicionar múltiplas fotos (botão "+" após primeira foto). Exibir grid de previews com opção de remover cada uma individualmente. Enviar todas as imagens em base64 para a edge function. |
-| `supabase/functions/analyze-workout/index.ts` | Aceitar `imageBase64` como string OU array de strings. Montar mensagem com múltiplas `image_url` entries para que a IA analise todas as imagens juntas e extraia dados combinados. |
-| `src/components/checkin/CheckinConfirmation.tsx` | Arredondar `duration_min` no display (já editável, sem mudança estrutural) |
-
-### Fluxo com múltiplas fotos
-
-```text
-Passo 1: Foto/Print
-  [Câmera] [Galeria]
-  ↓ (seleciona 1ª foto)
-  [Preview 1] [+ Adicionar mais]
-  ↓ (seleciona 2ª foto)
-  [Preview 1] [Preview 2] [+ Adicionar mais]
-  ↓
-  [Analisar com IA 🤖]  ← envia todas as imagens
-```
-
-A IA recebe todas as imagens e combina os dados extraídos de cada uma num único resultado.
+| `src/hooks/useUserChallenges.ts` | **Novo** — hook para buscar todos os desafios ativos do usuário |
+| `src/hooks/useCheckins.ts` | Adicionar mutação `useCreateCheckinAll` que insere em múltiplos grupos/desafios |
+| `src/pages/Dashboard.tsx` | Passar lista de desafios ativos ao CheckinDialog |
+| `src/components/CheckinDialog.tsx` | Suportar modo "todos os desafios" com inserção em batch e feedback adequado |
 

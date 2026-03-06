@@ -79,7 +79,7 @@ const CheckinDialog = ({ open, onOpenChange, groupId, alreadyCheckedIn, activeCh
       {mode === null && modeSelector}
       {mode === "quick" && (
         <CheckinQuickMode
-          groupId={groupId}
+          groupId={resolvedGroupId}
           alreadyCheckedIn={alreadyCheckedIn}
           activeChallenges={activeChallenges}
           onBack={() => setMode(null)}
@@ -88,7 +88,7 @@ const CheckinDialog = ({ open, onOpenChange, groupId, alreadyCheckedIn, activeCh
       )}
       {mode === "full" && (
         <CheckinFullWizard
-          groupId={groupId}
+          groupId={resolvedGroupId}
           alreadyCheckedIn={alreadyCheckedIn}
           activeChallenges={activeChallenges}
           onBack={() => setMode(null)}

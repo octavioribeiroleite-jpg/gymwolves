@@ -48,11 +48,14 @@ interface Props {
   onDone: () => void;
 }
 
-type Step = "type" | "intensity" | "duration" | "photo" | "analyzing" | "confirm";
+type Step = "photo" | "type" | "intensity" | "duration" | "analyzing" | "confirm";
+
+const MANUAL_STEPS: Step[] = ["type", "intensity", "duration"];
 
 const CheckinFullWizard = ({ groupId, alreadyCheckedIn, activeChallenges, onBack, onDone }: Props) => {
   const { user } = useAuth();
-  const [step, setStep] = useState<Step>("type");
+  const [step, setStep] = useState<Step>("photo");
+  const [skippedPhoto, setSkippedPhoto] = useState(false);
   const [workoutType, setWorkoutType] = useState("musculacao");
   const [intensity, setIntensity] = useState("moderado");
   const [durationMin, setDurationMin] = useState(30);

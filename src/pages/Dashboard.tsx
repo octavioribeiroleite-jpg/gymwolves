@@ -25,7 +25,7 @@ const Dashboard = () => {
   const { data: profile } = useProfile();
   const { data: checkins } = useGroupCheckins(activeGroupId || undefined);
   const { data: activeChallenges } = useUserActiveChallenges();
-
+  const deleteTodayCheckins = useDeleteTodayCheckins();
   // Aggregate stats across all groups - for now use active group checkins
   // TODO: aggregate from all groups when we have a multi-group checkins hook
   const todayDone = useMemo(

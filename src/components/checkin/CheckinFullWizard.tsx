@@ -159,8 +159,30 @@ const CheckinFullWizard = ({ groupId, alreadyCheckedIn, activeChallenges, onBack
     }
   };
 
-  const handleConfirm = async (finalData: WorkoutAnalysis) => {
-    const proofUrl = await uploadPhoto();
+  const uploadFeedPhoto = async (file: File): Promise<string | null> => {
+    if (!user) return null;
+    try {
+      const ext = file.name.split(".").pop();
+      const path = `${user.id}/feed_${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from("checkin-photos").upload(path, file);
+      if (error) throw error;
+      const { data } = supabase.storage.from("checkin-photos").getPublicUrl(path);
+      return data.publicUrl;
+    } catch {
+      return null;
+    }
+  };
+
+  const handleConfirm = async (finalData: WorkoutAnalysis, feedPhoto?: File) => {
+    setUploading(true);
+    // Upload feed photo if provided, otherwise fall back to AI photo
+    let proofUrl: string | null = null;
+    if (feedPhoto) {
+      proofUrl = await uploadFeedPhoto(feedPhoto);
+    } else {
+      proofUrl = await uploadPhoto();
+    }
+
     const hasBatch = activeChallenges && activeChallenges.length > 0;
     const typeLabel = WORKOUT_TYPES.find((w) => w.value === finalData.workout_type)?.label || "Treino";
 
@@ -174,6 +196,8 @@ const CheckinFullWizard = ({ groupId, alreadyCheckedIn, activeChallenges, onBack
       note: finalData.summary,
       proofUrl: proofUrl || undefined,
     };
+
+    setUploading(false);
 
     if (hasBatch) {
       createCheckinAll.mutate(

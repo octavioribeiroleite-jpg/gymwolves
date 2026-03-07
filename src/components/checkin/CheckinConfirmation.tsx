@@ -144,13 +144,51 @@ const CheckinConfirmation = ({ analysis, aiError, isPending, onBack, onConfirm }
         )}
       </div>
 
+      {/* Feed photo section */}
+      <div className="space-y-2">
+        <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">
+          📸 Foto para o feed (opcional)
+        </Label>
+        {feedPhotoPreview ? (
+          <div className="relative rounded-[16px] overflow-hidden bg-secondary">
+            <img src={feedPhotoPreview} alt="Feed" className="w-full max-h-[40vh] object-contain" />
+            <button
+              type="button"
+              onClick={removeFeedPhoto}
+              className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center rounded-full bg-background/80 backdrop-blur-sm"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => feedCameraRef.current?.click()}
+              className="flex items-center justify-center gap-2 rounded-[16px] border-2 border-dashed border-subtle bg-secondary/50 py-4 text-muted-foreground text-[13px] transition-colors hover:border-primary/40"
+            >
+              <Camera className="h-4 w-4" /> Câmera
+            </button>
+            <button
+              type="button"
+              onClick={() => feedGalleryRef.current?.click()}
+              className="flex items-center justify-center gap-2 rounded-[16px] border-2 border-dashed border-subtle bg-secondary/50 py-4 text-muted-foreground text-[13px] transition-colors hover:border-primary/40"
+            >
+              <ImagePlus className="h-4 w-4" /> Galeria
+            </button>
+          </div>
+        )}
+        <input ref={feedCameraRef} type="file" accept="image/*" capture="environment" onChange={handleFeedPhoto} className="hidden" />
+        <input ref={feedGalleryRef} type="file" accept="image/*" onChange={handleFeedPhoto} className="hidden" />
+      </div>
+
       {/* Actions */}
       <div className="flex gap-2 pt-1">
         <Button variant="outline" onClick={onBack} className="h-12 flex-1 rounded-[16px]">
           <ChevronLeft className="mr-1 h-4 w-4" /> Voltar
         </Button>
         <Button
-          onClick={() => onConfirm(data)}
+          onClick={() => onConfirm(data, feedPhoto || undefined)}
           className="h-12 flex-1 rounded-[16px] font-bold glow-primary"
           disabled={isPending}
         >

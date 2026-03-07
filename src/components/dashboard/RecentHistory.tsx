@@ -123,6 +123,15 @@ const RecentHistory = ({ checkins }: RecentHistoryProps) => {
                   </div>
                 </div>
 
+                {/* Proof photo */}
+                {c.proof_url && (
+                  <div className="px-5 pt-4">
+                    <div className="rounded-2xl overflow-hidden bg-secondary">
+                      <img src={c.proof_url} alt="Treino" className="w-full max-h-[50vh] object-contain" />
+                    </div>
+                  </div>
+                )}
+
                 {/* Details grid */}
                 <div className="px-5 pt-5">
                   <div className="grid grid-cols-2 gap-4">

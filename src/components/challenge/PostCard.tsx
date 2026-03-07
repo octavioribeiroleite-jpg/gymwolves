@@ -105,10 +105,10 @@ const PostCard = ({ post, isLiked, onLike, currentUserId, challengeId, onEdit, o
           )}
         </div>
 
-        {/* Image */}
+        {/* Image — full, uncropped like Instagram */}
         {signedImageUrl && (
-          <div className="w-full aspect-square bg-secondary">
-            <img src={signedImageUrl} alt="" className="h-full w-full object-cover" />
+          <div className="w-full bg-secondary">
+            <img src={signedImageUrl} alt="" className="w-full object-contain max-h-[70vh]" />
           </div>
         )}
 

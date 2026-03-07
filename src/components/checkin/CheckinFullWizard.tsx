@@ -144,14 +144,8 @@ const CheckinFullWizard = ({ groupId, alreadyCheckedIn, activeChallenges, onBack
     if (!photos.length || !user) return null;
     setUploading(true);
     try {
-      // Upload only the first photo as proof
-      const file = photos[0];
-      const ext = file.name.split(".").pop();
-      const path = `${user.id}/${Date.now()}.${ext}`;
-      const { error } = await supabase.storage.from("checkin-photos").upload(path, file);
-      if (error) throw error;
-      const { data } = supabase.storage.from("checkin-photos").getPublicUrl(path);
-      return data.publicUrl;
+      const path = await uploadToStorage(photos[0], user.id);
+      return path;
     } catch {
       return null;
     } finally {
@@ -162,12 +156,7 @@ const CheckinFullWizard = ({ groupId, alreadyCheckedIn, activeChallenges, onBack
   const uploadFeedPhoto = async (file: File): Promise<string | null> => {
     if (!user) return null;
     try {
-      const ext = file.name.split(".").pop();
-      const path = `${user.id}/feed_${Date.now()}.${ext}`;
-      const { error } = await supabase.storage.from("checkin-photos").upload(path, file);
-      if (error) throw error;
-      const { data } = supabase.storage.from("checkin-photos").getPublicUrl(path);
-      return data.publicUrl;
+      return await uploadToStorage(file, user.id, "feed_");
     } catch {
       return null;
     }

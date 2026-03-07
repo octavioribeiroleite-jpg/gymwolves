@@ -62,9 +62,15 @@ const RecentHistory = ({ checkins }: RecentHistoryProps) => {
                 onClick={() => setSelectedCheckin(c)}
                 className="flex w-full items-center gap-2.5 rounded-xl surface-1 border border-subtle px-3 py-2.5 card-shadow text-left transition-default hover:border-primary/20 active:scale-[0.98]"
               >
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10">
-                  <Icon className="h-4 w-4 text-primary" strokeWidth={2} />
-                </div>
+                {c.proof_url ? (
+                  <div className="h-11 w-11 shrink-0 rounded-xl overflow-hidden bg-secondary">
+                    <img src={c.proof_url} alt="" className="h-full w-full object-cover" />
+                  </div>
+                ) : (
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                    <Icon className="h-4 w-4 text-primary" strokeWidth={2} />
+                  </div>
+                )}
                 <div className="flex-1 min-w-0">
                   <p className="text-[13px] font-semibold truncate leading-tight">{c.title || "Treino"}</p>
                   <p className="text-[11px] text-muted-foreground leading-tight mt-0.5">

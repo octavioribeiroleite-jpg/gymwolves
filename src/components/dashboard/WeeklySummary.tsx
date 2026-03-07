@@ -32,7 +32,7 @@ const WeeklySummary = ({ checkins }: WeeklySummaryProps) => {
       <h3 className="text-[13px] font-semibold text-muted-foreground uppercase tracking-wide px-1">
         Resumo da semana
       </h3>
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-3 gap-2">
         <StatCard icon={Timer} value={`${stats.totalMin}`} label="minutos" />
         <StatCard icon={Flame} value={formatCal(stats.totalCal)} label="calorias" />
         <StatCard icon={Dumbbell} value={stats.count} label="treinos" />

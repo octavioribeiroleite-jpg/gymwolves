@@ -79,6 +79,7 @@ const WeeklySummary = ({ checkins }: WeeklySummaryProps) => {
         </div>
       </div>
     </div>
+    </div>
   );
 };
 

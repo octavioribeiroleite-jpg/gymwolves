@@ -72,6 +72,7 @@ const CheckinFullWizard = ({ groupId, alreadyCheckedIn, activeChallenges, onBack
 
   const createCheckin = useCreateCheckin();
   const createCheckinAll = useCreateCheckinAll();
+  const createPost = useCreatePost();
 
   const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);

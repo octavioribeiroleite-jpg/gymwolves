@@ -58,12 +58,7 @@ const CheckinQuickMode = ({ groupId, alreadyCheckedIn, activeChallenges, onBack,
 
   const uploadPhoto = async (): Promise<string | null> => {
     if (!photo || !user) return null;
-    const ext = photo.name.split(".").pop() || "jpg";
-    const path = `${user.id}/${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from("checkin-photos").upload(path, photo);
-    if (error) throw error;
-    const { data } = supabase.storage.from("checkin-photos").getPublicUrl(path);
-    return data.publicUrl;
+    return await uploadToStorage(photo, user.id);
   };
 
   const postToFeed = (photoUrl: string, groups: { groupId: string }[]) => {

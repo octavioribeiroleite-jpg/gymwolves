@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Timer, Flame, Dumbbell, Footprints } from "lucide-react";
+import { Timer, Flame, Dumbbell } from "lucide-react";
 import { startOfWeek, endOfWeek, isWithinInterval, parseISO } from "date-fns";
 
 interface WeeklySummaryProps {
@@ -24,68 +24,55 @@ const WeeklySummary = ({ checkins }: WeeklySummaryProps) => {
     return { totalMin, totalCal, count };
   }, [checkins]);
 
-  const formatCal = (cal: number) => (cal >= 1000 ? `${(cal / 1000).toFixed(1)}k` : String(cal));
-
-  // Ring progress (goal: 7 workouts/week)
   const goal = 7;
   const progress = Math.min(stats.count / goal, 1);
+  const circumference = 2 * Math.PI * 34;
 
   return (
-    <div className="rounded-2xl surface-2 border border-subtle p-4 card-shadow">
+    <div className="rounded-2xl surface-2 border border-subtle px-4 py-3 card-shadow">
       <div className="flex items-center justify-between">
-        {/* Left: metrics list */}
-        <div className="space-y-3">
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-500">
-              <Dumbbell className="h-4 w-4 text-white" strokeWidth={2.5} />
+        <div className="space-y-2">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-500">
+              <Dumbbell className="h-3.5 w-3.5 text-white" strokeWidth={2.5} />
             </div>
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-[22px] font-bold leading-none">{stats.count}</span>
-              <span className="text-[14px] text-muted-foreground">treinos</span>
-            </div>
+            <span className="text-[17px] font-bold leading-none">{stats.count}</span>
+            <span className="text-[12px] text-muted-foreground -ml-1">treinos</span>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-500">
-              <Timer className="h-4 w-4 text-white" strokeWidth={2.5} />
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-500">
+              <Timer className="h-3.5 w-3.5 text-white" strokeWidth={2.5} />
             </div>
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-[22px] font-bold leading-none">{stats.totalMin}</span>
-              <span className="text-[14px] text-muted-foreground">min</span>
-            </div>
+            <span className="text-[17px] font-bold leading-none">{stats.totalMin}</span>
+            <span className="text-[12px] text-muted-foreground -ml-1">min</span>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-rose-500">
-              <Flame className="h-4 w-4 text-white" strokeWidth={2.5} />
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-rose-500">
+              <Flame className="h-3.5 w-3.5 text-white" strokeWidth={2.5} />
             </div>
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-[22px] font-bold leading-none">{formatCal(stats.totalCal)}</span>
-              <span className="text-[14px] text-muted-foreground">kcal</span>
-            </div>
+            <span className="text-[17px] font-bold leading-none">{stats.totalCal}</span>
+            <span className="text-[12px] text-muted-foreground -ml-1">kcal</span>
           </div>
         </div>
 
-        {/* Right: ring progress */}
-        <div className="relative flex items-center justify-center w-[100px] h-[100px] shrink-0">
-          <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
-            {/* Track */}
-            <circle cx="50" cy="50" r="40" fill="none" stroke="hsl(var(--border))" strokeWidth="8" />
-            {/* Progress */}
+        <div className="relative flex items-center justify-center w-[76px] h-[76px] shrink-0">
+          <svg viewBox="0 0 80 80" className="w-full h-full -rotate-90">
+            <circle cx="40" cy="40" r="34" fill="none" stroke="hsl(var(--border))" strokeWidth="6" />
             <circle
-              cx="50" cy="50" r="40"
+              cx="40" cy="40" r="34"
               fill="none"
               stroke="hsl(var(--primary))"
-              strokeWidth="8"
+              strokeWidth="6"
               strokeLinecap="round"
-              strokeDasharray={`${2 * Math.PI * 40}`}
-              strokeDashoffset={`${2 * Math.PI * 40 * (1 - progress)}`}
+              strokeDasharray={`${circumference}`}
+              strokeDashoffset={`${circumference * (1 - progress)}`}
               className="transition-all duration-700 ease-out"
             />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-[18px] font-bold leading-none">{stats.count}/{goal}</span>
-            <span className="text-[9px] text-muted-foreground mt-0.5">meta</span>
+            <span className="text-[14px] font-bold leading-none">{stats.count}/{goal}</span>
           </div>
         </div>
       </div>

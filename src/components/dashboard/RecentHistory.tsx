@@ -28,9 +28,16 @@ const RecentHistory = ({ checkins }: RecentHistoryProps) => {
   const [selectedCheckin, setSelectedCheckin] = useState<any>(null);
 
   const recent = useMemo(() => {
-    return [...checkins]
-      .sort((a, b) => new Date(b.checkin_at).getTime() - new Date(a.checkin_at).getTime())
-      .slice(0, 5);
+    const sorted = [...checkins].sort((a, b) => new Date(b.checkin_at).getTime() - new Date(a.checkin_at).getTime());
+    // Deduplicate by date — keep only the first (most recent) checkin per day
+    const seenDates = new Set<string>();
+    const unique = sorted.filter((c) => {
+      const day = format(parseISO(c.checkin_at), "yyyy-MM-dd");
+      if (seenDates.has(day)) return false;
+      seenDates.add(day);
+      return true;
+    });
+    return unique.slice(0, 5);
   }, [checkins]);
 
   if (recent.length === 0) return null;

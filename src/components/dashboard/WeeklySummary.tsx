@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { Timer, Flame, Dumbbell } from "lucide-react";
-import { startOfWeek, endOfWeek, isWithinInterval, parseISO } from "date-fns";
+import { startOfWeek, endOfWeek, isWithinInterval, parseISO, format } from "date-fns";
 
 interface WeeklySummaryProps {
   checkins: any[];
@@ -17,9 +17,18 @@ const WeeklySummary = ({ checkins }: WeeklySummaryProps) => {
       return isWithinInterval(date, { start: weekStart, end: weekEnd });
     });
 
-    const totalMin = weekCheckins.reduce((sum, c) => sum + (c.duration_min || 0), 0);
-    const totalCal = weekCheckins.reduce((sum, c) => sum + (c.calories || 0), 0);
-    const count = weekCheckins.length;
+    // Deduplicate by date — keep only the first checkin per day
+    const seenDates = new Set<string>();
+    const uniqueCheckins = weekCheckins.filter((c) => {
+      const day = format(parseISO(c.checkin_at), "yyyy-MM-dd");
+      if (seenDates.has(day)) return false;
+      seenDates.add(day);
+      return true;
+    });
+
+    const totalMin = uniqueCheckins.reduce((sum, c) => sum + (c.duration_min || 0), 0);
+    const totalCal = uniqueCheckins.reduce((sum, c) => sum + (c.calories || 0), 0);
+    const count = uniqueCheckins.length;
 
     return { totalMin, totalCal, count };
   }, [checkins]);

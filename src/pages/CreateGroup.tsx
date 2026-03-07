@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Loader2, Trophy, Users2, Camera, CalendarDays, X } from "lucide-react";
 import { format, differenceInDays } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
+import { uploadToStorage } from "@/lib/storage";
 import { toast } from "sonner";
 import AppScaffold from "@/components/ds/AppScaffold";
 

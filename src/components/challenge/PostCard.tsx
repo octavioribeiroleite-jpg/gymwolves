@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { usePostComments, useAddComment } from "@/hooks/useChallengePosts";
+import { useSignedUrl } from "@/hooks/useSignedUrl";
 
 interface PostCardProps {
   post: any;

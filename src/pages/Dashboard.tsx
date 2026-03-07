@@ -104,6 +104,21 @@ const Dashboard = () => {
         alreadyCheckedIn={todayDone}
         activeChallenges={activeChallenges}
       />
+
+      <AlertDialog open={showExitDialog} onOpenChange={cancelExit}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Sair do app?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja sair do GymWolves?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={cancelExit}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmExit}>Sair</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

@@ -15,6 +15,8 @@ import WorkoutStatusCard from "@/components/dashboard/WorkoutStatusCard";
 import HomeWelcome from "@/components/dashboard/HomeWelcome";
 import HomeChallengesList from "@/components/dashboard/HomeChallengesList";
 import DashboardFAB from "@/components/dashboard/DashboardFAB";
+import WeeklySummary from "@/components/dashboard/WeeklySummary";
+import RecentHistory from "@/components/dashboard/RecentHistory";
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -69,6 +71,13 @@ const Dashboard = () => {
           onDelete={() => deleteTodayCheckins.mutate()}
           isDeleting={deleteTodayCheckins.isPending}
         />
+
+        {allCheckins && allCheckins.length > 0 && (
+          <>
+            <WeeklySummary checkins={allCheckins} />
+            <RecentHistory checkins={allCheckins} />
+          </>
+        )}
 
         <HomeChallengesList />
 

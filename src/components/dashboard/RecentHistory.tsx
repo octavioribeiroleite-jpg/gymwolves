@@ -3,6 +3,7 @@ import { formatDistanceToNow, parseISO, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Dumbbell, Footprints, Bike, Heart, Zap, ChevronRight, Timer, Flame, X } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { useSignedUrl } from "@/hooks/useSignedUrl";
 
 interface RecentHistoryProps {
   checkins: any[];

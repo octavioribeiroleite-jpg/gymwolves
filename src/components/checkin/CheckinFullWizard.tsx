@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { useCreateCheckin, useCreateCheckinAll } from "@/hooks/useCheckins";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { uploadToStorage } from "@/lib/storage";
 import { ActiveChallenge } from "@/hooks/useUserChallenges";
 import { Button } from "@/components/ui/button";

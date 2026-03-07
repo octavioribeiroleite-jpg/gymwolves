@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { motion } from "framer-motion";
-import { Loader2, ChevronLeft, AlertTriangle, Flame, Clock, Heart, MapPin, Footprints } from "lucide-react";
+import { Loader2, ChevronLeft, AlertTriangle, Flame, Clock, Heart, MapPin, Footprints, Camera, ImagePlus, X } from "lucide-react";
 import type { WorkoutAnalysis } from "./CheckinFullWizard";
 
 interface Props {
@@ -11,7 +11,7 @@ interface Props {
   aiError: string | null;
   isPending: boolean;
   onBack: () => void;
-  onConfirm: (data: WorkoutAnalysis) => void;
+  onConfirm: (data: WorkoutAnalysis, feedPhoto?: File) => void;
 }
 
 const CheckinConfirmation = ({ analysis, aiError, isPending, onBack, onConfirm }: Props) => {

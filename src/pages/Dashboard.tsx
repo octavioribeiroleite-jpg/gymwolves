@@ -33,6 +33,7 @@ const Dashboard = () => {
   const { user } = useAuth();
   const { activeGroupId } = useActiveGroup();
   const [checkinOpen, setCheckinOpen] = useState(false);
+  const { showExitDialog, confirmExit, cancelExit } = useBackHandler();
 
   const { data: groups, isLoading } = useUserGroups();
   const { data: profile } = useProfile();

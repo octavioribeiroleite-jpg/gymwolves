@@ -165,9 +165,32 @@ const CheckinFullWizard = ({ groupId, alreadyCheckedIn, activeChallenges, onBack
     }
   };
 
+  const buildFeedCaption = (finalData: WorkoutAnalysis) => {
+    const emoji = WORKOUT_TYPES.find((w) => w.value === finalData.workout_type)?.emoji || "⚡";
+    const typeLabel = WORKOUT_TYPES.find((w) => w.value === finalData.workout_type)?.label || "Treino";
+    let caption = `${emoji} ${typeLabel}`;
+    const stats: string[] = [];
+    if (finalData.calories && finalData.calories > 0) stats.push(`🔥 ${Math.round(finalData.calories)} kcal`);
+    if (finalData.duration_min && finalData.duration_min > 0) stats.push(`⏱ ${Math.round(finalData.duration_min)}min`);
+    if (finalData.distance_km && finalData.distance_km > 0) stats.push(`📍 ${finalData.distance_km}km`);
+    if (stats.length > 0) {
+      caption += ` · ${stats.join(" · ")}`;
+    } else {
+      caption += ` · Check-in do dia ✅`;
+    }
+    return caption;
+  };
+
+  const postToFeed = (photoUrl: string, finalData: WorkoutAnalysis, groups: { groupId: string }[]) => {
+    const caption = buildFeedCaption(finalData);
+    const uniqueGroupIds = [...new Set(groups.map((g) => g.groupId))];
+    uniqueGroupIds.forEach((gid) => {
+      createPost.mutate({ challengeId: gid, imageUrl: photoUrl, caption });
+    });
+  };
+
   const handleConfirm = async (finalData: WorkoutAnalysis, feedPhoto?: File) => {
     setUploading(true);
-    // Upload feed photo if provided, otherwise fall back to AI photo
     let proofUrl: string | null = null;
     if (feedPhoto) {
       proofUrl = await uploadFeedPhoto(feedPhoto);
@@ -191,15 +214,26 @@ const CheckinFullWizard = ({ groupId, alreadyCheckedIn, activeChallenges, onBack
 
     setUploading(false);
 
+    const onSuccess = () => {
+      if (proofUrl) {
+        if (hasBatch && activeChallenges) {
+          postToFeed(proofUrl, finalData, activeChallenges);
+        } else {
+          postToFeed(proofUrl, finalData, [{ groupId }]);
+        }
+      }
+      onDone();
+    };
+
     if (hasBatch) {
       createCheckinAll.mutate(
-        { challenges: activeChallenges, ...payload },
-        { onSuccess: onDone }
+        { challenges: activeChallenges!, ...payload },
+        { onSuccess }
       );
     } else {
       createCheckin.mutate(
         { groupId, ...payload },
-        { onSuccess: onDone }
+        { onSuccess }
       );
     }
   };

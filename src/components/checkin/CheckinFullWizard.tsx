@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { useCreateCheckin, useCreateCheckinAll } from "@/hooks/useCheckins";
+import { useCreatePost } from "@/hooks/useChallengePosts";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadToStorage } from "@/lib/storage";

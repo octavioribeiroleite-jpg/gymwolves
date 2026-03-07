@@ -25,6 +25,7 @@ const getInitials = (name: string) =>
 
 const PostCard = ({ post, isLiked, onLike, currentUserId, challengeId, onEdit, onDelete }: PostCardProps) => {
   const profile = post.profiles as any;
+  const signedImageUrl = useSignedUrl(post.image_url);
   const name = profile?.display_name || "Sem nome";
   const isAuthor = currentUserId && post.user_id === currentUserId;
   const [editOpen, setEditOpen] = useState(false);

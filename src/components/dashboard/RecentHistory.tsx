@@ -29,7 +29,7 @@ const RecentHistory = ({ checkins }: RecentHistoryProps) => {
       <h3 className="text-[13px] font-semibold text-muted-foreground uppercase tracking-wide px-1">
         Histórico recente
       </h3>
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         {recent.map((c) => {
           const Icon = workoutIcons[c.workout_type] || Zap;
           const meta: string[] = [];

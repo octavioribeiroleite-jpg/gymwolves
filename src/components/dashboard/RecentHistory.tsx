@@ -3,6 +3,7 @@ import { formatDistanceToNow, parseISO, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Dumbbell, Footprints, Bike, Heart, Zap, ChevronRight, Timer, Flame, X } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { useSignedUrl } from "@/hooks/useSignedUrl";
 
 interface RecentHistoryProps {
   checkins: any[];
@@ -64,32 +65,7 @@ const RecentHistory = ({ checkins }: RecentHistoryProps) => {
             if (c.calories) meta.push(`${c.calories} kcal`);
 
             return (
-              <button
-                key={c.id}
-                onClick={() => setSelectedCheckin(c)}
-                className="flex w-full items-center gap-2.5 rounded-xl surface-1 border border-subtle px-3 py-2.5 card-shadow text-left transition-default hover:border-primary/20 active:scale-[0.98]"
-              >
-                {c.proof_url ? (
-                  <div className="h-11 w-11 shrink-0 rounded-xl overflow-hidden bg-secondary">
-                    <img src={c.proof_url} alt="" className="h-full w-full object-cover" />
-                  </div>
-                ) : (
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10">
-                    <Icon className="h-4 w-4 text-primary" strokeWidth={2} />
-                  </div>
-                )}
-                <div className="flex-1 min-w-0">
-                  <p className="text-[13px] font-semibold truncate leading-tight">{c.title || "Treino"}</p>
-                  <p className="text-[11px] text-muted-foreground leading-tight mt-0.5">
-                    {meta.length > 0 ? meta.join(" · ") + " · " : ""}
-                    {formatDistanceToNow(parseISO(c.checkin_at), {
-                      addSuffix: true,
-                      locale: ptBR,
-                    })}
-                  </p>
-                </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground/40 shrink-0" />
-              </button>
+              <CheckinRow key={c.id} checkin={c} Icon={Icon} meta={meta} onClick={() => setSelectedCheckin(c)} />
             );
           })}
         </div>
@@ -131,13 +107,7 @@ const RecentHistory = ({ checkins }: RecentHistoryProps) => {
                 </div>
 
                 {/* Proof photo */}
-                {c.proof_url && (
-                  <div className="px-5 pt-4">
-                    <div className="rounded-2xl overflow-hidden bg-secondary">
-                      <img src={c.proof_url} alt="Treino" className="w-full max-h-[50vh] object-contain" />
-                    </div>
-                  </div>
-                )}
+                <ProofImage proofUrl={c.proof_url} />
 
                 {/* Details grid */}
                 <div className="px-5 pt-5">
@@ -208,5 +178,47 @@ const DetailItem = ({ icon: Icon, label, value, color }: DetailItemProps) => (
     </div>
   </div>
 );
+
+// Sub-component for checkin row with signed URL
+const CheckinRow = ({ checkin: c, Icon, meta, onClick }: { checkin: any; Icon: any; meta: string[]; onClick: () => void }) => {
+  const signedUrl = useSignedUrl(c.proof_url);
+  return (
+    <button
+      onClick={onClick}
+      className="flex w-full items-center gap-2.5 rounded-xl surface-1 border border-subtle px-3 py-2.5 card-shadow text-left transition-default hover:border-primary/20 active:scale-[0.98]"
+    >
+      {signedUrl ? (
+        <div className="h-11 w-11 shrink-0 rounded-xl overflow-hidden bg-secondary">
+          <img src={signedUrl} alt="" className="h-full w-full object-cover" />
+        </div>
+      ) : (
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10">
+          <Icon className="h-4 w-4 text-primary" strokeWidth={2} />
+        </div>
+      )}
+      <div className="flex-1 min-w-0">
+        <p className="text-[13px] font-semibold truncate leading-tight">{c.title || "Treino"}</p>
+        <p className="text-[11px] text-muted-foreground leading-tight mt-0.5">
+          {meta.length > 0 ? meta.join(" · ") + " · " : ""}
+          {formatDistanceToNow(parseISO(c.checkin_at), { addSuffix: true, locale: ptBR })}
+        </p>
+      </div>
+      <ChevronRight className="h-4 w-4 text-muted-foreground/40 shrink-0" />
+    </button>
+  );
+};
+
+// Sub-component for proof image with signed URL
+const ProofImage = ({ proofUrl }: { proofUrl: string | null }) => {
+  const signedUrl = useSignedUrl(proofUrl);
+  if (!signedUrl) return null;
+  return (
+    <div className="px-5 pt-4">
+      <div className="rounded-2xl overflow-hidden bg-secondary">
+        <img src={signedUrl} alt="Treino" className="w-full max-h-[50vh] object-contain" />
+      </div>
+    </div>
+  );
+};
 
 export default RecentHistory;

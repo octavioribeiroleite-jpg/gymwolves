@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ImagePlus, Loader2, X } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { uploadToStorage } from "@/lib/storage";
 import { useCreatePost } from "@/hooks/useChallengePosts";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -40,16 +40,13 @@ const CreatePostDialog = ({ challengeId, open, onOpenChange }: Props) => {
 
     if (imageFile) {
       setUploading(true);
-      const ext = imageFile.name.split(".").pop();
-      const path = `${user!.id}/${challengeId}_${Date.now()}.${ext}`;
-      const { error } = await supabase.storage.from("checkin-photos").upload(path, imageFile);
-      if (error) {
+      const path = await uploadToStorage(imageFile, user!.id, `${challengeId}_`);
+      if (!path) {
         toast.error("Erro ao enviar imagem");
         setUploading(false);
         return;
       }
-      const { data: urlData } = supabase.storage.from("checkin-photos").getPublicUrl(path);
-      imageUrl = urlData.publicUrl;
+      imageUrl = path;
       setUploading(false);
     }
 

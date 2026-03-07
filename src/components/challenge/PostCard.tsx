@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { usePostComments, useAddComment } from "@/hooks/useChallengePosts";
+import { useSignedUrl } from "@/hooks/useSignedUrl";
 
 interface PostCardProps {
   post: any;
@@ -24,6 +25,7 @@ const getInitials = (name: string) =>
 
 const PostCard = ({ post, isLiked, onLike, currentUserId, challengeId, onEdit, onDelete }: PostCardProps) => {
   const profile = post.profiles as any;
+  const signedImageUrl = useSignedUrl(post.image_url);
   const name = profile?.display_name || "Sem nome";
   const isAuthor = currentUserId && post.user_id === currentUserId;
   const [editOpen, setEditOpen] = useState(false);
@@ -104,9 +106,9 @@ const PostCard = ({ post, isLiked, onLike, currentUserId, challengeId, onEdit, o
         </div>
 
         {/* Image */}
-        {post.image_url && (
+        {signedImageUrl && (
           <div className="w-full aspect-square bg-secondary">
-            <img src={post.image_url} alt="" className="h-full w-full object-cover" />
+            <img src={signedImageUrl} alt="" className="h-full w-full object-cover" />
           </div>
         )}
 

@@ -29,7 +29,9 @@ const WeeklySummary = ({ checkins }: WeeklySummaryProps) => {
   const circumference = 2 * Math.PI * 34;
 
   return (
-    <div className="rounded-2xl surface-2 border border-subtle px-4 py-3 card-shadow">
+    <div className="space-y-2">
+      <h2 className="text-[13px] font-semibold uppercase tracking-wide text-muted-foreground">Resumo semanal</h2>
+      <div className="rounded-2xl surface-2 border border-subtle px-4 py-3 card-shadow">
       <div className="flex items-center justify-between">
         <div className="space-y-2">
           <div className="flex items-center gap-2.5">
@@ -76,6 +78,7 @@ const WeeklySummary = ({ checkins }: WeeklySummaryProps) => {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 };

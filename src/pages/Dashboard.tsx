@@ -5,6 +5,7 @@ import { useUserGroups } from "@/hooks/useGroupData";
 import { useProfile } from "@/hooks/useProfile";
 import { useAllUserCheckins, computeDaysActive, computeStreaks, useHasCheckedInToday, useDeleteTodayCheckins } from "@/hooks/useCheckins";
 import { useUserActiveChallenges } from "@/hooks/useUserChallenges";
+import { useBackHandler } from "@/hooks/useBackHandler";
 import { Loader2 } from "lucide-react";
 
 import CheckinDialog from "@/components/CheckinDialog";
@@ -17,11 +18,22 @@ import HomeChallengesList from "@/components/dashboard/HomeChallengesList";
 import DashboardFAB from "@/components/dashboard/DashboardFAB";
 import WeeklySummary from "@/components/dashboard/WeeklySummary";
 import RecentHistory from "@/components/dashboard/RecentHistory";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 
 const Dashboard = () => {
   const { user } = useAuth();
   const { activeGroupId } = useActiveGroup();
   const [checkinOpen, setCheckinOpen] = useState(false);
+  const { showExitDialog, confirmExit, cancelExit } = useBackHandler();
 
   const { data: groups, isLoading } = useUserGroups();
   const { data: profile } = useProfile();
@@ -92,6 +104,21 @@ const Dashboard = () => {
         alreadyCheckedIn={todayDone}
         activeChallenges={activeChallenges}
       />
+
+      <AlertDialog open={showExitDialog} onOpenChange={cancelExit}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Sair do app?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja sair do GymWolves?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={cancelExit}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmExit}>Sair</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

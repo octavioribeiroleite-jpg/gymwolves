@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { motion } from "framer-motion";
-import { Loader2, ChevronLeft, AlertTriangle, Flame, Clock, Heart, MapPin, Footprints } from "lucide-react";
+import { Loader2, ChevronLeft, AlertTriangle, Flame, Clock, Heart, MapPin, Footprints, Camera, ImagePlus, X } from "lucide-react";
 import type { WorkoutAnalysis } from "./CheckinFullWizard";
 
 interface Props {
@@ -11,14 +11,33 @@ interface Props {
   aiError: string | null;
   isPending: boolean;
   onBack: () => void;
-  onConfirm: (data: WorkoutAnalysis) => void;
+  onConfirm: (data: WorkoutAnalysis, feedPhoto?: File) => void;
 }
 
 const CheckinConfirmation = ({ analysis, aiError, isPending, onBack, onConfirm }: Props) => {
   const [data, setData] = useState<WorkoutAnalysis>({ ...analysis });
+  const [feedPhoto, setFeedPhoto] = useState<File | null>(null);
+  const [feedPhotoPreview, setFeedPhotoPreview] = useState<string | null>(null);
+  const feedCameraRef = useRef<HTMLInputElement>(null);
+  const feedGalleryRef = useRef<HTMLInputElement>(null);
 
   const update = (key: keyof WorkoutAnalysis, value: any) => {
     setData((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleFeedPhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setFeedPhoto(file);
+    const reader = new FileReader();
+    reader.onloadend = () => setFeedPhotoPreview(reader.result as string);
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
+
+  const removeFeedPhoto = () => {
+    setFeedPhoto(null);
+    setFeedPhotoPreview(null);
   };
 
   return (
@@ -125,13 +144,51 @@ const CheckinConfirmation = ({ analysis, aiError, isPending, onBack, onConfirm }
         )}
       </div>
 
+      {/* Feed photo section */}
+      <div className="space-y-2">
+        <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">
+          📸 Foto para o feed (opcional)
+        </Label>
+        {feedPhotoPreview ? (
+          <div className="relative rounded-[16px] overflow-hidden bg-secondary">
+            <img src={feedPhotoPreview} alt="Feed" className="w-full max-h-[40vh] object-contain" />
+            <button
+              type="button"
+              onClick={removeFeedPhoto}
+              className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center rounded-full bg-background/80 backdrop-blur-sm"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => feedCameraRef.current?.click()}
+              className="flex items-center justify-center gap-2 rounded-[16px] border-2 border-dashed border-subtle bg-secondary/50 py-4 text-muted-foreground text-[13px] transition-colors hover:border-primary/40"
+            >
+              <Camera className="h-4 w-4" /> Câmera
+            </button>
+            <button
+              type="button"
+              onClick={() => feedGalleryRef.current?.click()}
+              className="flex items-center justify-center gap-2 rounded-[16px] border-2 border-dashed border-subtle bg-secondary/50 py-4 text-muted-foreground text-[13px] transition-colors hover:border-primary/40"
+            >
+              <ImagePlus className="h-4 w-4" /> Galeria
+            </button>
+          </div>
+        )}
+        <input ref={feedCameraRef} type="file" accept="image/*" capture="environment" onChange={handleFeedPhoto} className="hidden" />
+        <input ref={feedGalleryRef} type="file" accept="image/*" onChange={handleFeedPhoto} className="hidden" />
+      </div>
+
       {/* Actions */}
       <div className="flex gap-2 pt-1">
         <Button variant="outline" onClick={onBack} className="h-12 flex-1 rounded-[16px]">
           <ChevronLeft className="mr-1 h-4 w-4" /> Voltar
         </Button>
         <Button
-          onClick={() => onConfirm(data)}
+          onClick={() => onConfirm(data, feedPhoto || undefined)}
           className="h-12 flex-1 rounded-[16px] font-bold glow-primary"
           disabled={isPending}
         >

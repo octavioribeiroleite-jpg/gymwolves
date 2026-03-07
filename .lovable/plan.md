@@ -1,34 +1,27 @@
 
 
-## Plano: Check-in da Home registra em todos os desafios
+## Plano: Corrigir vulnerabilidades de segurança
 
-### Problema atual
+O scan de segurança detectou 3 problemas. Vou resolver todos:
 
-O check-in da tela Home está vinculado apenas ao `activeGroupId` (um único grupo). Quando o usuário registra um treino, ele só é salvo nesse grupo, ignorando os outros desafios em que participa.
+### 1. Habilitar proteção contra senhas vazadas
+- Nas configurações de autenticação, habilitar o **Password HIBP Check** (leaked password protection)
+- Isso é feito via configurações de auth no painel do Lovable Cloud
 
-### Solução
+### 2. Proteger edge function `analyze-workout` (erro crítico)
+- **Arquivo:** `supabase/config.toml` — mudar `verify_jwt = false` para `verify_jwt = true`
+- O app já envia o token Bearer automaticamente, então não quebra nada
 
-Modificar o fluxo para que, ao fazer check-in pela Home, o treino seja registrado automaticamente em **todos os desafios ativos** do usuário. Isso envolve:
+### 3. Tornar bucket `checkin-photos` privado (warning)
+- **Migração SQL:** alterar o bucket para `public = false`, trocar a policy de SELECT para `authenticated` only
+- **Código:** nos componentes que exibem fotos (`RecentHistory`, `PostCard`, etc.), usar `createSignedUrl` ao invés de `getPublicUrl`
 
-1. **Criar hook `useUserActiveChallenges`** — busca todos os desafios ativos em que o usuário participa (via `challenge_participants` + `challenges` com status `active`)
+### Resumo de alterações
 
-2. **Modificar `useCreateCheckin`** — adicionar uma variante que aceita múltiplos `groupId`s/`challengeId`s e insere registros em batch:
-   - Inserir um `checkin` para cada grupo associado aos desafios ativos
-   - Inserir um `workout_log` para cada desafio ativo
-   - Tudo numa única mutação
-
-3. **Atualizar `Dashboard.tsx`** — em vez de passar apenas `activeGroupId` ao `CheckinDialog`, passar a lista de todos os desafios/grupos ativos do usuário
-
-4. **Atualizar `CheckinDialog.tsx`** — quando chamado da Home, usar a mutação em batch que registra em todos os desafios de uma vez. Mostrar feedback tipo "Treino registrado em 3 desafios! 💪"
-
-5. **Invalidar queries** — após o check-in em batch, invalidar as queries de checkins de todos os grupos afetados para atualizar a UI
-
-### Alterações por arquivo
-
-| Arquivo | O que muda |
+| Local | Mudança |
 |---|---|
-| `src/hooks/useUserChallenges.ts` | **Novo** — hook para buscar todos os desafios ativos do usuário |
-| `src/hooks/useCheckins.ts` | Adicionar mutação `useCreateCheckinAll` que insere em múltiplos grupos/desafios |
-| `src/pages/Dashboard.tsx` | Passar lista de desafios ativos ao CheckinDialog |
-| `src/components/CheckinDialog.tsx` | Suportar modo "todos os desafios" com inserção em batch e feedback adequado |
+| `supabase/config.toml` | `verify_jwt = true` |
+| Migração SQL | Bucket privado + policy atualizada |
+| Auth settings | Habilitar leaked password protection |
+| Componentes com fotos | Usar signed URLs |
 

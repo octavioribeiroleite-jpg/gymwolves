@@ -72,6 +72,13 @@ const Dashboard = () => {
           isDeleting={deleteTodayCheckins.isPending}
         />
 
+        {allCheckins && allCheckins.length > 0 && (
+          <>
+            <WeeklySummary checkins={allCheckins} />
+            <RecentHistory checkins={allCheckins} />
+          </>
+        )}
+
         <HomeChallengesList />
 
         {activeGroupId && <ActivityFeed groupId={activeGroupId} />}

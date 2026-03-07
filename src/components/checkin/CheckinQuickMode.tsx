@@ -62,9 +62,17 @@ const CheckinQuickMode = ({ groupId, alreadyCheckedIn, activeChallenges, onBack,
     return await uploadToStorage(photo, user.id);
   };
 
-  const postToFeed = (photoUrl: string, groups: { groupId: string }[]) => {
+  const postToFeed = (photoUrl: string, groups: { groupId: string }[], calories?: number, durationMin?: number) => {
     const emoji = WORKOUT_TYPES.find((w) => w.value === workoutType)?.emoji || "⚡";
-    const caption = `${emoji} ${selectedLabel}`;
+    let caption = `${emoji} ${selectedLabel}`;
+    const stats: string[] = [];
+    if (calories && calories > 0) stats.push(`🔥 ${calories} kcal`);
+    if (durationMin && durationMin > 0) stats.push(`⏱ ${durationMin}min`);
+    if (stats.length > 0) {
+      caption += ` · ${stats.join(" · ")}`;
+    } else {
+      caption += ` · Check-in do dia ✅`;
+    }
     const uniqueGroupIds = [...new Set(groups.map((g) => g.groupId))];
     uniqueGroupIds.forEach((gid) => {
       createPost.mutate({ challengeId: gid, imageUrl: photoUrl, caption });

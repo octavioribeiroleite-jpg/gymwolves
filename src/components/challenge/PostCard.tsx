@@ -127,10 +127,10 @@ const PostCard = ({ post, isLiked, onLike, currentUserId, challengeId, onEdit, o
 
           {/* Caption */}
           {post.caption && (
-            <p className="text-[14px]">
+            <div className="text-[14px]">
               <span className="font-bold mr-1.5">{name.split(" ")[0]}</span>
               {post.caption}
-            </p>
+            </div>
           )}
 
           {/* "Ver todos os X comentários" */}

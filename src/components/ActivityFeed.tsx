@@ -4,6 +4,7 @@ import { useGroupMembers } from "@/hooks/useGroupData";
 import SectionTitle from "@/components/ds/SectionTitle";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useSignedUrl } from "@/hooks/useSignedUrl";
 
 const WORKOUT_EMOJIS: Record<string, string> = {
   musculacao: "🏋️",

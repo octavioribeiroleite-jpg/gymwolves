@@ -16,9 +16,28 @@ interface Props {
 
 const CheckinConfirmation = ({ analysis, aiError, isPending, onBack, onConfirm }: Props) => {
   const [data, setData] = useState<WorkoutAnalysis>({ ...analysis });
+  const [feedPhoto, setFeedPhoto] = useState<File | null>(null);
+  const [feedPhotoPreview, setFeedPhotoPreview] = useState<string | null>(null);
+  const feedCameraRef = useRef<HTMLInputElement>(null);
+  const feedGalleryRef = useRef<HTMLInputElement>(null);
 
   const update = (key: keyof WorkoutAnalysis, value: any) => {
     setData((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleFeedPhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setFeedPhoto(file);
+    const reader = new FileReader();
+    reader.onloadend = () => setFeedPhotoPreview(reader.result as string);
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
+
+  const removeFeedPhoto = () => {
+    setFeedPhoto(null);
+    setFeedPhotoPreview(null);
   };
 
   return (

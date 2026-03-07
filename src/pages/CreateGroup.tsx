@@ -71,16 +71,13 @@ const CreateGroup = () => {
 
     if (bannerFile) {
       setUploading(true);
-      const ext = bannerFile.name.split(".").pop();
-      const path = `${user.id}/banner_${Date.now()}.${ext}`;
-      const { error } = await supabase.storage.from("checkin-photos").upload(path, bannerFile);
-      if (error) {
+      const path = await uploadToStorage(bannerFile, user.id, "banner_");
+      if (!path) {
         toast.error("Erro ao enviar imagem do banner");
         setUploading(false);
         return;
       }
-      const { data: urlData } = supabase.storage.from("checkin-photos").getPublicUrl(path);
-      bannerUrl = urlData.publicUrl;
+      bannerUrl = path;
       setUploading(false);
     }
 

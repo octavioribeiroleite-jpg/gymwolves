@@ -40,16 +40,13 @@ const CreatePostDialog = ({ challengeId, open, onOpenChange }: Props) => {
 
     if (imageFile) {
       setUploading(true);
-      const ext = imageFile.name.split(".").pop();
-      const path = `${user!.id}/${challengeId}_${Date.now()}.${ext}`;
-      const { error } = await supabase.storage.from("checkin-photos").upload(path, imageFile);
-      if (error) {
+      const path = await uploadToStorage(imageFile, user!.id, `${challengeId}_`);
+      if (!path) {
         toast.error("Erro ao enviar imagem");
         setUploading(false);
         return;
       }
-      const { data: urlData } = supabase.storage.from("checkin-photos").getPublicUrl(path);
-      imageUrl = urlData.publicUrl;
+      imageUrl = path;
       setUploading(false);
     }
 

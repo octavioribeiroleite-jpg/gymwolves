@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { useCreateCheckin, useCreateCheckinAll } from "@/hooks/useCheckins";
 import { useCreatePost } from "@/hooks/useChallengePosts";
 import { supabase } from "@/integrations/supabase/client";
+import { uploadToStorage } from "@/lib/storage";
 import { useAuth } from "@/contexts/AuthContext";
 import { ActiveChallenge } from "@/hooks/useUserChallenges";
 import { Button } from "@/components/ui/button";

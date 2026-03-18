@@ -268,7 +268,12 @@ const CheckinFullWizard = ({ groupId, alreadyCheckedIn, activeChallenges, onBack
 
   return (
     <div className="space-y-4">
-      {alreadyCheckedIn && step === "photo" && (
+      {/* Date picker */}
+      {(step === "photo" || step === "type") && (
+        <CheckinDatePicker selectedDate={selectedDate} onDateChange={setSelectedDate} />
+      )}
+
+      {alreadyCheckedIn && step === "photo" && isToday(selectedDate) && (
         <div className="flex items-start gap-2 rounded-[16px] bg-primary/10 p-3 text-body">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
           <p className="text-muted-foreground">

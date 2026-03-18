@@ -8,6 +8,8 @@ import { ActiveChallenge } from "@/hooks/useUserChallenges";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, Camera, Loader2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { isToday } from "date-fns";
+import CheckinDatePicker from "./CheckinDatePicker";
 
 const WORKOUT_TYPES = [
   { value: "musculacao", label: "Musculação", emoji: "🏋️" },

@@ -10,8 +10,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AlertTriangle, Camera, ImagePlus, X, ArrowRight, ChevronLeft, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { isToday } from "date-fns";
 import AILoadingAnimation from "@/components/checkin/AILoadingAnimation";
 import CheckinConfirmation from "@/components/checkin/CheckinConfirmation";
+import CheckinDatePicker from "./CheckinDatePicker";
 
 const WORKOUT_TYPES = [
   { value: "musculacao", label: "Musculação", emoji: "🏋️" },

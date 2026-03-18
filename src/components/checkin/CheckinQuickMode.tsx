@@ -97,6 +97,8 @@ const CheckinQuickMode = ({ groupId, alreadyCheckedIn, activeChallenges, onBack,
         onDone();
       };
 
+      const checkinDate = isToday(selectedDate) ? undefined : selectedDate;
+
       if (hasBatch) {
         createCheckinAll.mutate(
           {
@@ -104,6 +106,7 @@ const CheckinQuickMode = ({ groupId, alreadyCheckedIn, activeChallenges, onBack,
             title: selectedLabel,
             workoutType,
             proofUrl: photoUrl || undefined,
+            checkinDate,
           },
           { onSuccess }
         );
@@ -114,6 +117,7 @@ const CheckinQuickMode = ({ groupId, alreadyCheckedIn, activeChallenges, onBack,
             title: selectedLabel,
             workoutType,
             proofUrl: photoUrl || undefined,
+            checkinDate,
           },
           { onSuccess }
         );

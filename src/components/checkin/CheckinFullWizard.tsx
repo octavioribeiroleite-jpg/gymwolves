@@ -59,6 +59,7 @@ const MAX_PHOTOS = 5;
 const CheckinFullWizard = ({ groupId, alreadyCheckedIn, activeChallenges, onBack, onDone }: Props) => {
   const { user } = useAuth();
   const [step, setStep] = useState<Step>("photo");
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [skippedPhoto, setSkippedPhoto] = useState(false);
   const [workoutType, setWorkoutType] = useState("musculacao");
   const [intensity, setIntensity] = useState("moderado");

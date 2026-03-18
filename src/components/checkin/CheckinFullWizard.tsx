@@ -204,6 +204,8 @@ const CheckinFullWizard = ({ groupId, alreadyCheckedIn, activeChallenges, onBack
     const hasBatch = activeChallenges && activeChallenges.length > 0;
     const typeLabel = WORKOUT_TYPES.find((w) => w.value === finalData.workout_type)?.label || "Treino";
 
+    const checkinDate = isToday(selectedDate) ? undefined : selectedDate;
+
     const payload = {
       title: typeLabel,
       workoutType: finalData.workout_type,
@@ -213,6 +215,7 @@ const CheckinFullWizard = ({ groupId, alreadyCheckedIn, activeChallenges, onBack
       steps: finalData.steps,
       note: finalData.summary,
       proofUrl: proofUrl || undefined,
+      checkinDate,
     };
 
     setUploading(false);

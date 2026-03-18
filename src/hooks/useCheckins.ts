@@ -38,8 +38,12 @@ export const useCreateCheckin = () => {
       calories?: number;
       distanceKm?: number;
       steps?: number;
+      checkinDate?: Date;
     }) => {
       if (!user) throw new Error("Não autenticado");
+      const checkinAt = params.checkinDate
+        ? new Date(params.checkinDate.getFullYear(), params.checkinDate.getMonth(), params.checkinDate.getDate(), 12, 0, 0).toISOString()
+        : new Date().toISOString();
       const { data, error } = await supabase
         .from("checkins")
         .insert({
@@ -50,7 +54,7 @@ export const useCreateCheckin = () => {
           proof_type: params.proofUrl ? "photo" : "manual",
           proof_url: params.proofUrl || null,
           workout_type: params.workoutType || "musculacao",
-          checkin_at: new Date().toISOString(),
+          checkin_at: checkinAt,
           duration_min: params.durationMin ? Math.round(params.durationMin) : null,
           calories: params.calories ? Math.round(params.calories) : null,
           distance_km: params.distanceKm || null,

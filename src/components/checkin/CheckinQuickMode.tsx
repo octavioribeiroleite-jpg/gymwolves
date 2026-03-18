@@ -8,6 +8,8 @@ import { ActiveChallenge } from "@/hooks/useUserChallenges";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, Camera, Loader2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { isToday } from "date-fns";
+import CheckinDatePicker from "./CheckinDatePicker";
 
 const WORKOUT_TYPES = [
   { value: "musculacao", label: "Musculação", emoji: "🏋️" },
@@ -33,6 +35,7 @@ interface Props {
 const CheckinQuickMode = ({ groupId, alreadyCheckedIn, activeChallenges, onBack, onDone }: Props) => {
   const { user } = useAuth();
   const [workoutType, setWorkoutType] = useState("musculacao");
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -94,6 +97,8 @@ const CheckinQuickMode = ({ groupId, alreadyCheckedIn, activeChallenges, onBack,
         onDone();
       };
 
+      const checkinDate = isToday(selectedDate) ? undefined : selectedDate;
+
       if (hasBatch) {
         createCheckinAll.mutate(
           {
@@ -101,6 +106,7 @@ const CheckinQuickMode = ({ groupId, alreadyCheckedIn, activeChallenges, onBack,
             title: selectedLabel,
             workoutType,
             proofUrl: photoUrl || undefined,
+            checkinDate,
           },
           { onSuccess }
         );
@@ -111,6 +117,7 @@ const CheckinQuickMode = ({ groupId, alreadyCheckedIn, activeChallenges, onBack,
             title: selectedLabel,
             workoutType,
             proofUrl: photoUrl || undefined,
+            checkinDate,
           },
           { onSuccess }
         );
@@ -122,7 +129,10 @@ const CheckinQuickMode = ({ groupId, alreadyCheckedIn, activeChallenges, onBack,
 
   return (
     <div className="space-y-4">
-      {alreadyCheckedIn && (
+      {/* Date picker */}
+      <CheckinDatePicker selectedDate={selectedDate} onDateChange={setSelectedDate} />
+
+      {alreadyCheckedIn && isToday(selectedDate) && (
         <div className="flex items-start gap-2 rounded-[16px] bg-primary/10 p-3 text-body">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
           <p className="text-muted-foreground">

@@ -1,30 +1,34 @@
 
 
-## Plano: Check-in retroativo com seleção de data
+## Plano: Check-in da Home registra em todos os desafios
 
-### O que muda
+### Problema atual
 
-Adicionar um seletor de data opcional nos dois modos de check-in (Rápido e Completo), permitindo registrar treinos de dias anteriores.
+O check-in da tela Home está vinculado apenas ao `activeGroupId` (um único grupo). Quando o usuário registra um treino, ele só é salvo nesse grupo, ignorando os outros desafios em que participa.
 
-### Alterações
+### Solução
 
-**1. `src/hooks/useCheckins.ts`** — Aceitar parâmetro `checkinDate` opcional nos hooks `useCreateCheckin` e `useCreateCheckinAll`
-- Se fornecido, usar essa data no `checkin_at` e `workout_date` ao invés de `new Date()`
-- Validar que a data não é futura
+Modificar o fluxo para que, ao fazer check-in pela Home, o treino seja registrado automaticamente em **todos os desafios ativos** do usuário. Isso envolve:
 
-**2. `src/components/checkin/CheckinQuickMode.tsx`** — Adicionar seletor de data
-- Estado `selectedDate` (default: hoje)
-- Botão que abre um Popover com Calendar (shadcn) para selecionar data passada
-- Exibir data selecionada formatada; se for hoje, mostrar "Hoje"
-- Passar `checkinDate` para os hooks de criação
+1. **Criar hook `useUserActiveChallenges`** — busca todos os desafios ativos em que o usuário participa (via `challenge_participants` + `challenges` com status `active`)
 
-**3. `src/components/checkin/CheckinFullWizard.tsx`** — Mesmo seletor de data
-- Adicionar no início do wizard (step "photo") o mesmo componente de seleção de data
-- Propagar para `handleConfirm`
+2. **Modificar `useCreateCheckin`** — adicionar uma variante que aceita múltiplos `groupId`s/`challengeId`s e insere registros em batch:
+   - Inserir um `checkin` para cada grupo associado aos desafios ativos
+   - Inserir um `workout_log` para cada desafio ativo
+   - Tudo numa única mutação
 
-**4. `src/components/checkin/CheckinConfirmation.tsx`** — Exibir a data selecionada (se diferente de hoje) na tela de confirmação
+3. **Atualizar `Dashboard.tsx`** — em vez de passar apenas `activeGroupId` ao `CheckinDialog`, passar a lista de todos os desafios/grupos ativos do usuário
 
-### Componente de seleção de data
+4. **Atualizar `CheckinDialog.tsx`** — quando chamado da Home, usar a mutação em batch que registra em todos os desafios de uma vez. Mostrar feedback tipo "Treino registrado em 3 desafios! 💪"
 
-Um botão compacto com ícone de calendário + Popover com `Calendar` do shadcn. Restrição: `disabled={(date) => date > new Date()}` para impedir datas futuras. Estilo consistente com os cards existentes (rounded-[16px], bg-secondary).
+5. **Invalidar queries** — após o check-in em batch, invalidar as queries de checkins de todos os grupos afetados para atualizar a UI
+
+### Alterações por arquivo
+
+| Arquivo | O que muda |
+|---|---|
+| `src/hooks/useUserChallenges.ts` | **Novo** — hook para buscar todos os desafios ativos do usuário |
+| `src/hooks/useCheckins.ts` | Adicionar mutação `useCreateCheckinAll` que insere em múltiplos grupos/desafios |
+| `src/pages/Dashboard.tsx` | Passar lista de desafios ativos ao CheckinDialog |
+| `src/components/CheckinDialog.tsx` | Suportar modo "todos os desafios" com inserção em batch e feedback adequado |
 

@@ -10,8 +10,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AlertTriangle, Camera, ImagePlus, X, ArrowRight, ChevronLeft, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { isToday } from "date-fns";
 import AILoadingAnimation from "@/components/checkin/AILoadingAnimation";
 import CheckinConfirmation from "@/components/checkin/CheckinConfirmation";
+import CheckinDatePicker from "./CheckinDatePicker";
 
 const WORKOUT_TYPES = [
   { value: "musculacao", label: "Musculação", emoji: "🏋️" },
@@ -57,6 +59,7 @@ const MAX_PHOTOS = 5;
 const CheckinFullWizard = ({ groupId, alreadyCheckedIn, activeChallenges, onBack, onDone }: Props) => {
   const { user } = useAuth();
   const [step, setStep] = useState<Step>("photo");
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [skippedPhoto, setSkippedPhoto] = useState(false);
   const [workoutType, setWorkoutType] = useState("musculacao");
   const [intensity, setIntensity] = useState("moderado");
@@ -201,6 +204,8 @@ const CheckinFullWizard = ({ groupId, alreadyCheckedIn, activeChallenges, onBack
     const hasBatch = activeChallenges && activeChallenges.length > 0;
     const typeLabel = WORKOUT_TYPES.find((w) => w.value === finalData.workout_type)?.label || "Treino";
 
+    const checkinDate = isToday(selectedDate) ? undefined : selectedDate;
+
     const payload = {
       title: typeLabel,
       workoutType: finalData.workout_type,
@@ -210,6 +215,7 @@ const CheckinFullWizard = ({ groupId, alreadyCheckedIn, activeChallenges, onBack
       steps: finalData.steps,
       note: finalData.summary,
       proofUrl: proofUrl || undefined,
+      checkinDate,
     };
 
     setUploading(false);
@@ -262,7 +268,12 @@ const CheckinFullWizard = ({ groupId, alreadyCheckedIn, activeChallenges, onBack
 
   return (
     <div className="space-y-4">
-      {alreadyCheckedIn && step === "photo" && (
+      {/* Date picker */}
+      {(step === "photo" || step === "type") && (
+        <CheckinDatePicker selectedDate={selectedDate} onDateChange={setSelectedDate} />
+      )}
+
+      {alreadyCheckedIn && step === "photo" && isToday(selectedDate) && (
         <div className="flex items-start gap-2 rounded-[16px] bg-primary/10 p-3 text-body">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
           <p className="text-muted-foreground">

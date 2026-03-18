@@ -35,6 +35,7 @@ interface Props {
 const CheckinQuickMode = ({ groupId, alreadyCheckedIn, activeChallenges, onBack, onDone }: Props) => {
   const { user } = useAuth();
   const [workoutType, setWorkoutType] = useState("musculacao");
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);

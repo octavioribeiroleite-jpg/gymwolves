@@ -89,12 +89,17 @@ export const useCreateCheckinAll = () => {
       calories?: number;
       distanceKm?: number;
       steps?: number;
+      checkinDate?: Date;
     }) => {
       if (!user) throw new Error("Não autenticado");
       if (!params.challenges.length) throw new Error("Nenhum desafio ativo");
 
-      const now = new Date().toISOString();
-      const today = format(new Date(), "yyyy-MM-dd");
+      const checkinAt = params.checkinDate
+        ? new Date(params.checkinDate.getFullYear(), params.checkinDate.getMonth(), params.checkinDate.getDate(), 12, 0, 0).toISOString()
+        : new Date().toISOString();
+      const today = params.checkinDate
+        ? format(params.checkinDate, "yyyy-MM-dd")
+        : format(new Date(), "yyyy-MM-dd");
 
       // Unique group IDs to avoid duplicate checkins for same group
       const uniqueGroups = [...new Set(params.challenges.map((c) => c.groupId))];

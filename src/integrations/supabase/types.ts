@@ -462,6 +462,7 @@ export type Database = {
           display_name: string
           id: string
           updated_at: string
+          weekly_goal: number
         }
         Insert: {
           avatar_url?: string | null
@@ -469,6 +470,7 @@ export type Database = {
           display_name?: string
           id: string
           updated_at?: string
+          weekly_goal?: number
         }
         Update: {
           avatar_url?: string | null
@@ -476,6 +478,7 @@ export type Database = {
           display_name?: string
           id?: string
           updated_at?: string
+          weekly_goal?: number
         }
         Relationships: []
       }

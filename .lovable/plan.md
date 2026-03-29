@@ -1,52 +1,43 @@
 
 
-## Plano: Melhorar o Painel Inicial
+## Plano: Câmera + Legenda + Notificações no Check-in
 
-Analisei o Dashboard atual e identifiquei melhorias práticas para torná-lo mais completo, bonito e funcional.
+### 1. Modo Rápido: Abrir câmera (não só galeria) + legenda
 
-### Layout atual (de cima pra baixo)
-1. Header (Olá, Nome 👋)
-2. Suas métricas (Sequência / Dias ativos / Recorde)
-3. Card de status do treino (Registrar / Concluído)
-4. Resumo semanal (treinos, min, kcal + anel)
-5. Histórico recente (últimos 5)
-6. Meus Desafios (lista de cards)
-7. Feed de atividade
+**Arquivo: `CheckinQuickMode.tsx`**
+- Substituir o input único de galeria por dois botões: "Câmera" (com `capture="environment"`) e "Galeria" (sem capture), igual ao que já existe no Modo Completo
+- Adicionar campo de legenda (`Textarea`) abaixo da foto, com placeholder "Escreva uma legenda..." (opcional)
+- A legenda digitada substitui a legenda automática gerada no `postToFeed`
+- Se não tiver legenda, manter a lógica atual (emoji + stats ou "Check-in do dia ✅")
 
-### Melhorias propostas
+### 2. Modo Completo: Legenda na foto do feed
 
-**1. Saudação personalizada com motivação**
-- Trocar "Olá, Nome 👋" por mensagens contextuais baseadas no horário e na sequência
-  - Manhã: "Bom dia, Nome! ☀️"
-  - Se streak > 3: "🔥 5 dias seguidos! Continue assim!"
-  - Se não treinou hoje: "Bora treinar hoje?"
-- Arquivo: `DashboardHeader.tsx`
+**Arquivo: `CheckinConfirmation.tsx`**
+- Adicionar campo de legenda (`Textarea`) abaixo da seção "Foto para o feed"
+- Propagar a legenda para o `onConfirm` callback
+- Se o usuário não escrever legenda, usar a automática (stats)
 
-**2. Gráfico de atividade semanal (dots/heatmap)**
-- Adicionar uma fileira de 7 bolinhas (Seg→Dom) abaixo do resumo semanal, mostrando visualmente quais dias da semana o usuário treinou (verde = treinou, cinza = não treinou)
-- Simples, leve e informativo — estilo Apple Activity
-- Arquivo: novo componente `WeekDots.tsx`, integrado ao `WeeklySummary.tsx`
+**Arquivo: `CheckinFullWizard.tsx`**
+- Receber a legenda do `CheckinConfirmation` e passar para `postToFeed`
 
-**3. Meta semanal editável**
-- Trocar o `goal = 7` fixo por um valor salvo no perfil do usuário
-- Adicionar botão de edição no anel de progresso para alterar a meta (1-7)
-- Migração SQL: adicionar coluna `weekly_goal` na tabela `profiles` (default 5)
-- Arquivos: `WeeklySummary.tsx`, migração SQL, `useProfile.ts`
+### 3. Notificações popup quando alguém do grupo faz check-in
 
-**4. Refinamento visual geral**
-- Cards com espaçamento mais uniforme
-- Seção de métricas com ícones mais vibrantes e micro-animações no valor
-- Melhor hierarquia de títulos (consistência nos `h2`)
+**Abordagem: Realtime do banco de dados**
+- Habilitar realtime na tabela `checkins` (migração SQL: `ALTER PUBLICATION supabase_realtime ADD TABLE public.checkins`)
+- Criar um hook `useCheckinNotifications` que escuta inserts na tabela `checkins` via canal realtime
+- Filtrar: só notificar se o `user_id` do novo checkin **não** é o usuário logado e o `group_id` pertence a um dos grupos do usuário
+- Buscar o nome do usuário via profiles para exibir na notificação
+- Exibir toast estilizado (sonner) com avatar, nome e tipo de treino: "🏋️ Cíntia acabou de treinar!"
+- Integrar o hook no `Dashboard.tsx` ou `App.tsx` para funcionar globalmente
 
 ### Resumo de alterações
 
 | Arquivo | Mudança |
 |---|---|
-| `DashboardHeader.tsx` | Saudação contextual com streak |
-| `Dashboard.tsx` | Passar streak para o header |
-| Novo `WeekDots.tsx` | Visualização dos 7 dias da semana |
-| `WeeklySummary.tsx` | Integrar dots + meta editável |
-| Migração SQL | `weekly_goal` em profiles |
-| `useProfile.ts` | Suporte a atualizar weekly_goal |
-| `HomeWelcome.tsx` | Refinamento visual dos stat cards |
+| `CheckinQuickMode.tsx` | 2 botões (câmera/galeria) + campo de legenda |
+| `CheckinConfirmation.tsx` | Campo de legenda para foto do feed |
+| `CheckinFullWizard.tsx` | Propagar legenda customizada |
+| Migração SQL | Habilitar realtime em `checkins` |
+| Novo `useCheckinNotifications.ts` | Hook de notificações realtime |
+| `App.tsx` ou `Dashboard.tsx` | Integrar hook de notificações |
 

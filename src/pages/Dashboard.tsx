@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useActiveGroup } from "@/contexts/ActiveGroupContext";
 import { useUserGroups } from "@/hooks/useGroupData";
-import { useProfile } from "@/hooks/useProfile";
+import { useProfile, useUpdateWeeklyGoal } from "@/hooks/useProfile";
 import { useAllUserCheckins, computeDaysActive, computeStreaks, useHasCheckedInToday, useDeleteTodayCheckins } from "@/hooks/useCheckins";
 import { useUserActiveChallenges } from "@/hooks/useUserChallenges";
 import { useBackHandler } from "@/hooks/useBackHandler";
@@ -40,6 +40,7 @@ const Dashboard = () => {
   const { data: activeChallenges } = useUserActiveChallenges();
   const { data: todayDone = false } = useHasCheckedInToday();
   const deleteTodayCheckins = useDeleteTodayCheckins();
+  const updateGoal = useUpdateWeeklyGoal();
 
   // Get all group IDs for global checkin query
   const allGroupIds = useMemo(() => groups?.map((g: any) => g.id) || [], [groups]);
@@ -68,7 +69,7 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <DashboardHeader userName={userName} />
+      <DashboardHeader userName={userName} streak={globalStats.streak} todayDone={todayDone} />
 
       <div className="mx-auto max-w-md space-y-6 px-4 py-4">
         <HomeWelcome
@@ -86,7 +87,11 @@ const Dashboard = () => {
 
         {allCheckins && allCheckins.length > 0 && (
           <>
-            <WeeklySummary checkins={allCheckins} />
+            <WeeklySummary
+              checkins={allCheckins}
+              weeklyGoal={(profile as any)?.weekly_goal ?? 5}
+              onGoalChange={(g) => updateGoal.mutate(g)}
+            />
             <RecentHistory checkins={allCheckins} />
           </>
         )}

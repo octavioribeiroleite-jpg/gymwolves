@@ -19,6 +19,7 @@ const CheckinConfirmation = ({ analysis, aiError, isPending, onBack, onConfirm }
   const [data, setData] = useState<WorkoutAnalysis>({ ...analysis });
   const [feedPhoto, setFeedPhoto] = useState<File | null>(null);
   const [feedPhotoPreview, setFeedPhotoPreview] = useState<string | null>(null);
+  const [customCaption, setCustomCaption] = useState("");
   const feedCameraRef = useRef<HTMLInputElement>(null);
   const feedGalleryRef = useRef<HTMLInputElement>(null);
 

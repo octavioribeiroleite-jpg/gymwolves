@@ -1,12 +1,12 @@
 import { useState, useRef } from "react";
 import { useCreateCheckin, useCreateCheckinAll } from "@/hooks/useCheckins";
 import { useCreatePost } from "@/hooks/useChallengePosts";
-import { supabase } from "@/integrations/supabase/client";
 import { uploadToStorage } from "@/lib/storage";
 import { useAuth } from "@/contexts/AuthContext";
 import { ActiveChallenge } from "@/hooks/useUserChallenges";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, Camera, Loader2, X } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { AlertTriangle, Camera, ImagePlus, Loader2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { isToday } from "date-fns";
 import CheckinDatePicker from "./CheckinDatePicker";
@@ -38,8 +38,10 @@ const CheckinQuickMode = ({ groupId, alreadyCheckedIn, activeChallenges, onBack,
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [caption, setCaption] = useState("");
   const [uploading, setUploading] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
+  const galleryRef = useRef<HTMLInputElement>(null);
   const createCheckin = useCreateCheckin();
   const createCheckinAll = useCreateCheckinAll();
   const createPost = useCreatePost();
@@ -52,12 +54,12 @@ const CheckinQuickMode = ({ groupId, alreadyCheckedIn, activeChallenges, onBack,
     if (!file) return;
     setPhoto(file);
     setPhotoPreview(URL.createObjectURL(file));
+    e.target.value = "";
   };
 
   const removePhoto = () => {
     setPhoto(null);
     setPhotoPreview(null);
-    if (fileRef.current) fileRef.current.value = "";
   };
 
   const uploadPhoto = async (): Promise<string | null> => {
@@ -66,19 +68,22 @@ const CheckinQuickMode = ({ groupId, alreadyCheckedIn, activeChallenges, onBack,
   };
 
   const postToFeed = (photoUrl: string, groups: { groupId: string }[], calories?: number, durationMin?: number) => {
-    const emoji = WORKOUT_TYPES.find((w) => w.value === workoutType)?.emoji || "⚡";
-    let caption = `${emoji} ${selectedLabel}`;
-    const stats: string[] = [];
-    if (calories && calories > 0) stats.push(`🔥 ${calories} kcal`);
-    if (durationMin && durationMin > 0) stats.push(`⏱ ${durationMin}min`);
-    if (stats.length > 0) {
-      caption += ` · ${stats.join(" · ")}`;
-    } else {
-      caption += ` · Check-in do dia ✅`;
+    let feedCaption = caption.trim();
+    if (!feedCaption) {
+      const emoji = WORKOUT_TYPES.find((w) => w.value === workoutType)?.emoji || "⚡";
+      feedCaption = `${emoji} ${selectedLabel}`;
+      const stats: string[] = [];
+      if (calories && calories > 0) stats.push(`🔥 ${calories} kcal`);
+      if (durationMin && durationMin > 0) stats.push(`⏱ ${durationMin}min`);
+      if (stats.length > 0) {
+        feedCaption += ` · ${stats.join(" · ")}`;
+      } else {
+        feedCaption += ` · Check-in do dia ✅`;
+      }
     }
     const uniqueGroupIds = [...new Set(groups.map((g) => g.groupId))];
     uniqueGroupIds.forEach((gid) => {
-      createPost.mutate({ challengeId: gid, imageUrl: photoUrl, caption });
+      createPost.mutate({ challengeId: gid, imageUrl: photoUrl, caption: feedCaption });
     });
   };
 
@@ -129,7 +134,6 @@ const CheckinQuickMode = ({ groupId, alreadyCheckedIn, activeChallenges, onBack,
 
   return (
     <div className="space-y-4">
-      {/* Date picker */}
       <CheckinDatePicker selectedDate={selectedDate} onDateChange={setSelectedDate} />
 
       {alreadyCheckedIn && isToday(selectedDate) && (
@@ -161,21 +165,16 @@ const CheckinQuickMode = ({ groupId, alreadyCheckedIn, activeChallenges, onBack,
         ))}
       </div>
 
-      {/* Photo upload */}
-      <input
-        ref={fileRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={handleFileChange}
-      />
+      {/* Photo upload: Camera + Gallery */}
+      <input ref={cameraRef} type="file" accept="image/*" capture="environment" onChange={handleFileChange} className="hidden" />
+      <input ref={galleryRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
 
       {photoPreview ? (
         <div className="relative">
           <img
             src={photoPreview}
             alt="Preview"
-            className="h-40 w-full rounded-[16px] object-cover"
+            className="w-full max-h-[50vh] rounded-[16px] object-contain bg-secondary"
           />
           <button
             type="button"
@@ -186,14 +185,35 @@ const CheckinQuickMode = ({ groupId, alreadyCheckedIn, activeChallenges, onBack,
           </button>
         </div>
       ) : (
-        <button
-          type="button"
-          onClick={() => fileRef.current?.click()}
-          className="flex w-full items-center justify-center gap-2 rounded-[16px] border-2 border-dashed border-subtle bg-secondary/50 py-4 text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
-        >
-          <Camera className="h-5 w-5" />
-          <span className="text-sm font-medium">Adicionar foto do treino</span>
-        </button>
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={() => cameraRef.current?.click()}
+            className="flex items-center justify-center gap-2 rounded-[16px] border-2 border-dashed border-subtle bg-secondary/50 py-4 text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
+          >
+            <Camera className="h-5 w-5" />
+            <span className="text-sm font-medium">Câmera</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => galleryRef.current?.click()}
+            className="flex items-center justify-center gap-2 rounded-[16px] border-2 border-dashed border-subtle bg-secondary/50 py-4 text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
+          >
+            <ImagePlus className="h-5 w-5" />
+            <span className="text-sm font-medium">Galeria</span>
+          </button>
+        </div>
+      )}
+
+      {/* Caption */}
+      {photoPreview && (
+        <Textarea
+          value={caption}
+          onChange={(e) => setCaption(e.target.value)}
+          placeholder="Escreva uma legenda... (opcional)"
+          className="rounded-[16px] border-subtle bg-secondary/50 resize-none min-h-[60px]"
+          maxLength={300}
+        />
       )}
 
       <Button

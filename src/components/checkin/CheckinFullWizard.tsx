@@ -184,15 +184,15 @@ const CheckinFullWizard = ({ groupId, alreadyCheckedIn, activeChallenges, onBack
     return caption;
   };
 
-  const postToFeed = (photoUrl: string, finalData: WorkoutAnalysis, groups: { groupId: string }[]) => {
-    const caption = buildFeedCaption(finalData);
+  const postToFeed = (photoUrl: string, finalData: WorkoutAnalysis, groups: { groupId: string }[], customCaption?: string) => {
+    const feedCaption = customCaption || buildFeedCaption(finalData);
     const uniqueGroupIds = [...new Set(groups.map((g) => g.groupId))];
     uniqueGroupIds.forEach((gid) => {
-      createPost.mutate({ challengeId: gid, imageUrl: photoUrl, caption });
+      createPost.mutate({ challengeId: gid, imageUrl: photoUrl, caption: feedCaption });
     });
   };
 
-  const handleConfirm = async (finalData: WorkoutAnalysis, feedPhoto?: File) => {
+  const handleConfirm = async (finalData: WorkoutAnalysis, feedPhoto?: File, customCaption?: string) => {
     setUploading(true);
     let proofUrl: string | null = null;
     if (feedPhoto) {
@@ -223,9 +223,9 @@ const CheckinFullWizard = ({ groupId, alreadyCheckedIn, activeChallenges, onBack
     const onSuccess = () => {
       if (proofUrl) {
         if (hasBatch && activeChallenges) {
-          postToFeed(proofUrl, finalData, activeChallenges);
+          postToFeed(proofUrl, finalData, activeChallenges, customCaption);
         } else {
-          postToFeed(proofUrl, finalData, [{ groupId }]);
+          postToFeed(proofUrl, finalData, [{ groupId }], customCaption);
         }
       }
       onDone();

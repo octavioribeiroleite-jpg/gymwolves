@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { motion } from "framer-motion";
+import { Textarea } from "@/components/ui/textarea";
 import { Loader2, ChevronLeft, AlertTriangle, Flame, Clock, Heart, MapPin, Footprints, Camera, ImagePlus, X } from "lucide-react";
 import type { WorkoutAnalysis } from "./CheckinFullWizard";
 
@@ -11,13 +12,14 @@ interface Props {
   aiError: string | null;
   isPending: boolean;
   onBack: () => void;
-  onConfirm: (data: WorkoutAnalysis, feedPhoto?: File) => void;
+  onConfirm: (data: WorkoutAnalysis, feedPhoto?: File, customCaption?: string) => void;
 }
 
 const CheckinConfirmation = ({ analysis, aiError, isPending, onBack, onConfirm }: Props) => {
   const [data, setData] = useState<WorkoutAnalysis>({ ...analysis });
   const [feedPhoto, setFeedPhoto] = useState<File | null>(null);
   const [feedPhotoPreview, setFeedPhotoPreview] = useState<string | null>(null);
+  const [customCaption, setCustomCaption] = useState("");
   const feedCameraRef = useRef<HTMLInputElement>(null);
   const feedGalleryRef = useRef<HTMLInputElement>(null);
 
@@ -180,6 +182,15 @@ const CheckinConfirmation = ({ analysis, aiError, isPending, onBack, onConfirm }
         )}
         <input ref={feedCameraRef} type="file" accept="image/*" capture="environment" onChange={handleFeedPhoto} className="hidden" />
         <input ref={feedGalleryRef} type="file" accept="image/*" onChange={handleFeedPhoto} className="hidden" />
+
+        {/* Caption */}
+        <Textarea
+          value={customCaption}
+          onChange={(e) => setCustomCaption(e.target.value)}
+          placeholder="Escreva uma legenda... (opcional)"
+          className="rounded-[16px] border-subtle bg-secondary/50 resize-none min-h-[60px]"
+          maxLength={300}
+        />
       </div>
 
       {/* Actions */}
@@ -188,7 +199,7 @@ const CheckinConfirmation = ({ analysis, aiError, isPending, onBack, onConfirm }
           <ChevronLeft className="mr-1 h-4 w-4" /> Voltar
         </Button>
         <Button
-          onClick={() => onConfirm(data, feedPhoto || undefined)}
+          onClick={() => onConfirm(data, feedPhoto || undefined, customCaption.trim() || undefined)}
           className="h-12 flex-1 rounded-[16px] font-bold glow-primary"
           disabled={isPending}
         >

@@ -6,6 +6,7 @@ import { useProfile, useUpdateWeeklyGoal } from "@/hooks/useProfile";
 import { useAllUserCheckins, computeDaysActive, computeStreaks, useHasCheckedInToday, useDeleteTodayCheckins } from "@/hooks/useCheckins";
 import { useUserActiveChallenges } from "@/hooks/useUserChallenges";
 import { useBackHandler } from "@/hooks/useBackHandler";
+import { useCheckinNotifications } from "@/hooks/useCheckinNotifications";
 import { Loader2 } from "lucide-react";
 
 import CheckinDialog from "@/components/CheckinDialog";
@@ -34,6 +35,7 @@ const Dashboard = () => {
   const { activeGroupId } = useActiveGroup();
   const [checkinOpen, setCheckinOpen] = useState(false);
   const { showExitDialog, confirmExit, cancelExit } = useBackHandler();
+  useCheckinNotifications();
 
   const { data: groups, isLoading } = useUserGroups();
   const { data: profile } = useProfile();

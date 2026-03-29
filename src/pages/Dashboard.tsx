@@ -96,6 +96,7 @@ const Dashboard = () => {
               onGoalChange={(g) => updateGoal.mutate(g)}
             />
             <RecentHistory checkins={allCheckins} />
+            <MonthlyHeatmap checkins={allCheckins} />
           </>
         )}
 

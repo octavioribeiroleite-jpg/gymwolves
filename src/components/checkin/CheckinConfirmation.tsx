@@ -12,7 +12,7 @@ interface Props {
   aiError: string | null;
   isPending: boolean;
   onBack: () => void;
-  onConfirm: (data: WorkoutAnalysis, feedPhoto?: File) => void;
+  onConfirm: (data: WorkoutAnalysis, feedPhoto?: File, customCaption?: string) => void;
 }
 
 const CheckinConfirmation = ({ analysis, aiError, isPending, onBack, onConfirm }: Props) => {

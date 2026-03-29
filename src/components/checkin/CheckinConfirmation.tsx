@@ -182,6 +182,15 @@ const CheckinConfirmation = ({ analysis, aiError, isPending, onBack, onConfirm }
         )}
         <input ref={feedCameraRef} type="file" accept="image/*" capture="environment" onChange={handleFeedPhoto} className="hidden" />
         <input ref={feedGalleryRef} type="file" accept="image/*" onChange={handleFeedPhoto} className="hidden" />
+
+        {/* Caption */}
+        <Textarea
+          value={customCaption}
+          onChange={(e) => setCustomCaption(e.target.value)}
+          placeholder="Escreva uma legenda... (opcional)"
+          className="rounded-[16px] border-subtle bg-secondary/50 resize-none min-h-[60px]"
+          maxLength={300}
+        />
       </div>
 
       {/* Actions */}
@@ -190,7 +199,7 @@ const CheckinConfirmation = ({ analysis, aiError, isPending, onBack, onConfirm }
           <ChevronLeft className="mr-1 h-4 w-4" /> Voltar
         </Button>
         <Button
-          onClick={() => onConfirm(data, feedPhoto || undefined)}
+          onClick={() => onConfirm(data, feedPhoto || undefined, customCaption.trim() || undefined)}
           className="h-12 flex-1 rounded-[16px] font-bold glow-primary"
           disabled={isPending}
         >

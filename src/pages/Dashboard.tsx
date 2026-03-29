@@ -19,6 +19,7 @@ import HomeChallengesList from "@/components/dashboard/HomeChallengesList";
 import DashboardFAB from "@/components/dashboard/DashboardFAB";
 import WeeklySummary from "@/components/dashboard/WeeklySummary";
 import RecentHistory from "@/components/dashboard/RecentHistory";
+import MonthlyHeatmap from "@/components/dashboard/MonthlyHeatmap";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -95,6 +96,7 @@ const Dashboard = () => {
               onGoalChange={(g) => updateGoal.mutate(g)}
             />
             <RecentHistory checkins={allCheckins} />
+            <MonthlyHeatmap checkins={allCheckins} />
           </>
         )}
 

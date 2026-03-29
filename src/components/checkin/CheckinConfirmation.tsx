@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { motion } from "framer-motion";
+import { Textarea } from "@/components/ui/textarea";
 import { Loader2, ChevronLeft, AlertTriangle, Flame, Clock, Heart, MapPin, Footprints, Camera, ImagePlus, X } from "lucide-react";
 import type { WorkoutAnalysis } from "./CheckinFullWizard";
 

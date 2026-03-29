@@ -1,34 +1,52 @@
 
 
-## Plano: Check-in da Home registra em todos os desafios
+## Plano: Melhorar o Painel Inicial
 
-### Problema atual
+Analisei o Dashboard atual e identifiquei melhorias práticas para torná-lo mais completo, bonito e funcional.
 
-O check-in da tela Home está vinculado apenas ao `activeGroupId` (um único grupo). Quando o usuário registra um treino, ele só é salvo nesse grupo, ignorando os outros desafios em que participa.
+### Layout atual (de cima pra baixo)
+1. Header (Olá, Nome 👋)
+2. Suas métricas (Sequência / Dias ativos / Recorde)
+3. Card de status do treino (Registrar / Concluído)
+4. Resumo semanal (treinos, min, kcal + anel)
+5. Histórico recente (últimos 5)
+6. Meus Desafios (lista de cards)
+7. Feed de atividade
 
-### Solução
+### Melhorias propostas
 
-Modificar o fluxo para que, ao fazer check-in pela Home, o treino seja registrado automaticamente em **todos os desafios ativos** do usuário. Isso envolve:
+**1. Saudação personalizada com motivação**
+- Trocar "Olá, Nome 👋" por mensagens contextuais baseadas no horário e na sequência
+  - Manhã: "Bom dia, Nome! ☀️"
+  - Se streak > 3: "🔥 5 dias seguidos! Continue assim!"
+  - Se não treinou hoje: "Bora treinar hoje?"
+- Arquivo: `DashboardHeader.tsx`
 
-1. **Criar hook `useUserActiveChallenges`** — busca todos os desafios ativos em que o usuário participa (via `challenge_participants` + `challenges` com status `active`)
+**2. Gráfico de atividade semanal (dots/heatmap)**
+- Adicionar uma fileira de 7 bolinhas (Seg→Dom) abaixo do resumo semanal, mostrando visualmente quais dias da semana o usuário treinou (verde = treinou, cinza = não treinou)
+- Simples, leve e informativo — estilo Apple Activity
+- Arquivo: novo componente `WeekDots.tsx`, integrado ao `WeeklySummary.tsx`
 
-2. **Modificar `useCreateCheckin`** — adicionar uma variante que aceita múltiplos `groupId`s/`challengeId`s e insere registros em batch:
-   - Inserir um `checkin` para cada grupo associado aos desafios ativos
-   - Inserir um `workout_log` para cada desafio ativo
-   - Tudo numa única mutação
+**3. Meta semanal editável**
+- Trocar o `goal = 7` fixo por um valor salvo no perfil do usuário
+- Adicionar botão de edição no anel de progresso para alterar a meta (1-7)
+- Migração SQL: adicionar coluna `weekly_goal` na tabela `profiles` (default 5)
+- Arquivos: `WeeklySummary.tsx`, migração SQL, `useProfile.ts`
 
-3. **Atualizar `Dashboard.tsx`** — em vez de passar apenas `activeGroupId` ao `CheckinDialog`, passar a lista de todos os desafios/grupos ativos do usuário
+**4. Refinamento visual geral**
+- Cards com espaçamento mais uniforme
+- Seção de métricas com ícones mais vibrantes e micro-animações no valor
+- Melhor hierarquia de títulos (consistência nos `h2`)
 
-4. **Atualizar `CheckinDialog.tsx`** — quando chamado da Home, usar a mutação em batch que registra em todos os desafios de uma vez. Mostrar feedback tipo "Treino registrado em 3 desafios! 💪"
+### Resumo de alterações
 
-5. **Invalidar queries** — após o check-in em batch, invalidar as queries de checkins de todos os grupos afetados para atualizar a UI
-
-### Alterações por arquivo
-
-| Arquivo | O que muda |
+| Arquivo | Mudança |
 |---|---|
-| `src/hooks/useUserChallenges.ts` | **Novo** — hook para buscar todos os desafios ativos do usuário |
-| `src/hooks/useCheckins.ts` | Adicionar mutação `useCreateCheckinAll` que insere em múltiplos grupos/desafios |
-| `src/pages/Dashboard.tsx` | Passar lista de desafios ativos ao CheckinDialog |
-| `src/components/CheckinDialog.tsx` | Suportar modo "todos os desafios" com inserção em batch e feedback adequado |
+| `DashboardHeader.tsx` | Saudação contextual com streak |
+| `Dashboard.tsx` | Passar streak para o header |
+| Novo `WeekDots.tsx` | Visualização dos 7 dias da semana |
+| `WeeklySummary.tsx` | Integrar dots + meta editável |
+| Migração SQL | `weekly_goal` em profiles |
+| `useProfile.ts` | Suporte a atualizar weekly_goal |
+| `HomeWelcome.tsx` | Refinamento visual dos stat cards |
 

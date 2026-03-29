@@ -192,7 +192,7 @@ const CheckinFullWizard = ({ groupId, alreadyCheckedIn, activeChallenges, onBack
     });
   };
 
-  const handleConfirm = async (finalData: WorkoutAnalysis, feedPhoto?: File) => {
+  const handleConfirm = async (finalData: WorkoutAnalysis, feedPhoto?: File, customCaption?: string) => {
     setUploading(true);
     let proofUrl: string | null = null;
     if (feedPhoto) {
@@ -223,9 +223,9 @@ const CheckinFullWizard = ({ groupId, alreadyCheckedIn, activeChallenges, onBack
     const onSuccess = () => {
       if (proofUrl) {
         if (hasBatch && activeChallenges) {
-          postToFeed(proofUrl, finalData, activeChallenges);
+          postToFeed(proofUrl, finalData, activeChallenges, customCaption);
         } else {
-          postToFeed(proofUrl, finalData, [{ groupId }]);
+          postToFeed(proofUrl, finalData, [{ groupId }], customCaption);
         }
       }
       onDone();

@@ -19,6 +19,7 @@ import HomeChallengesList from "@/components/dashboard/HomeChallengesList";
 import DashboardFAB from "@/components/dashboard/DashboardFAB";
 import WeeklySummary from "@/components/dashboard/WeeklySummary";
 import RecentHistory from "@/components/dashboard/RecentHistory";
+import MonthlyHeatmap from "@/components/dashboard/MonthlyHeatmap";
 import {
   AlertDialog,
   AlertDialogContent,

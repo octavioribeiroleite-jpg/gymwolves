@@ -14,21 +14,21 @@ export function extractStoragePath(urlOrPath: string): string {
 }
 
 /**
- * Creates a signed URL for a file in the checkin-photos bucket.
- * Handles both old full public URLs and new path-only values.
- * Returns null if the input is falsy or signing fails.
+ * Returns a public URL for a file in the checkin-photos bucket.
+ * Synchronous — no network call needed.
  */
-export async function getSignedImageUrl(urlOrPath: string | null | undefined): Promise<string | null> {
+export function getPublicImageUrl(urlOrPath: string | null | undefined): string | null {
   if (!urlOrPath) return null;
   const path = extractStoragePath(urlOrPath);
-  const { data, error } = await supabase.storage
-    .from(BUCKET)
-    .createSignedUrl(path, 3600); // 1 hour
-  if (error) {
-    console.warn("Failed to create signed URL for", path, error.message);
-    return null;
-  }
-  return data.signedUrl;
+  const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
+  return data.publicUrl;
+}
+
+/**
+ * @deprecated Use getPublicImageUrl instead. Kept for backward compatibility.
+ */
+export async function getSignedImageUrl(urlOrPath: string | null | undefined): Promise<string | null> {
+  return getPublicImageUrl(urlOrPath);
 }
 
 /**

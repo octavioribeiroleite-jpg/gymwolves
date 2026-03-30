@@ -1,41 +1,16 @@
-import { useState, useEffect } from "react";
-import { getSignedImageUrl } from "@/lib/storage";
+import { getPublicImageUrl } from "@/lib/storage";
 
 /**
- * React hook that resolves a storage path or public URL to a signed URL.
- * Caches the result for the lifetime of the component.
+ * Returns a public URL for a storage path or public URL.
+ * Synchronous — no network call, no flashing.
  */
 export function useSignedUrl(urlOrPath: string | null | undefined): string | null {
-  const [signedUrl, setSignedUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!urlOrPath) {
-      setSignedUrl(null);
-      return;
-    }
-    let cancelled = false;
-    getSignedImageUrl(urlOrPath).then((url) => {
-      if (!cancelled) setSignedUrl(url);
-    });
-    return () => { cancelled = true; };
-  }, [urlOrPath]);
-
-  return signedUrl;
+  return getPublicImageUrl(urlOrPath);
 }
 
 /**
- * Hook that resolves multiple URLs/paths to signed URLs.
+ * Returns public URLs for multiple paths. Synchronous.
  */
 export function useSignedUrls(urlsOrPaths: (string | null | undefined)[]): (string | null)[] {
-  const [signedUrls, setSignedUrls] = useState<(string | null)[]>([]);
-
-  useEffect(() => {
-    let cancelled = false;
-    Promise.all(urlsOrPaths.map((u) => getSignedImageUrl(u))).then((urls) => {
-      if (!cancelled) setSignedUrls(urls);
-    });
-    return () => { cancelled = true; };
-  }, [JSON.stringify(urlsOrPaths)]);
-
-  return signedUrls;
+  return urlsOrPaths.map((u) => getPublicImageUrl(u));
 }

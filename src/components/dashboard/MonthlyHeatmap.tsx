@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   startOfMonth,
   endOfMonth,
@@ -12,41 +12,181 @@ import {
   isFuture,
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, Dumbbell } from "lucide-react";
+import { getSignedImageUrl } from "@/lib/storage";
 
 interface MonthlyHeatmapProps {
   checkins: any[];
 }
 
+interface DayCheckin {
+  id: string;
+  title: string;
+  workout_type: string;
+  duration_min?: number | null;
+  calories?: number | null;
+  proof_url?: string | null;
+  note?: string | null;
+}
+
 const WEEKDAY_LABELS = ["D", "S", "T", "Q", "Q", "S", "S"];
+
+const PhotoThumbnail = ({ proofUrl }: { proofUrl: string }) => {
+  const [url, setUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    getSignedImageUrl(proofUrl).then((u) => {
+      if (!cancelled) setUrl(u);
+    });
+    return () => { cancelled = true; };
+  }, [proofUrl]);
+
+  if (!url) return null;
+
+  return (
+    <img
+      src={url}
+      alt=""
+      className="absolute inset-0 w-full h-full object-cover rounded-md"
+    />
+  );
+};
+
+const DayDetailSheet = ({
+  dateKey,
+  dayCheckins,
+  onClose,
+}: {
+  dateKey: string;
+  dayCheckins: DayCheckin[];
+  onClose: () => void;
+}) => {
+  const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    let cancelled = false;
+    const urls: string[] = dayCheckins
+      .map((c) => c.proof_url)
+      .filter(Boolean) as string[];
+    Promise.all(urls.map((u) => getSignedImageUrl(u).then((s) => [u, s] as const))).then(
+      (pairs) => {
+        if (cancelled) return;
+        const map: Record<string, string> = {};
+        pairs.forEach(([key, val]) => {
+          if (val) map[key] = val;
+        });
+        setSignedUrls(map);
+      }
+    );
+    return () => { cancelled = true; };
+  }, [dayCheckins]);
+
+  const dateFormatted = format(parseISO(dateKey), "dd 'de' MMMM", { locale: ptBR });
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm" onClick={onClose}>
+      <div
+        className="w-full max-w-md rounded-t-3xl bg-background p-5 pb-8 max-h-[70vh] overflow-y-auto animate-in slide-in-from-bottom-4"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-base font-bold capitalize">{dateFormatted}</h3>
+          <button onClick={onClose} className="p-1 rounded-full hover:bg-muted/50">
+            <X className="h-5 w-5 text-muted-foreground" />
+          </button>
+        </div>
+
+        <div className="space-y-3">
+          {dayCheckins.map((c) => (
+            <div key={c.id} className="rounded-2xl surface-1 border border-subtle overflow-hidden">
+              {c.proof_url && signedUrls[c.proof_url] && (
+                <img
+                  src={signedUrls[c.proof_url]}
+                  alt="Treino"
+                  className="w-full max-h-[50vh] object-contain bg-black/5"
+                />
+              )}
+              <div className="p-3 space-y-1">
+                <div className="flex items-center gap-2">
+                  <Dumbbell className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-semibold">{c.title}</span>
+                </div>
+                <div className="flex gap-3 text-xs text-muted-foreground">
+                  {c.duration_min && <span>⏱ {c.duration_min}min</span>}
+                  {c.calories && <span>🔥 {c.calories} kcal</span>}
+                </div>
+                {c.note && (
+                  <p className="text-xs text-muted-foreground mt-1">{c.note}</p>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const MonthlyHeatmap = ({ checkins }: MonthlyHeatmapProps) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [selectedDay, setSelectedDay] = useState<string | null>(null);
+
+  // Build a map of date -> checkins for the current month
+  const checkinsByDate = useMemo(() => {
+    const map: Record<string, DayCheckin[]> = {};
+    for (const c of checkins) {
+      const key = format(parseISO(c.checkin_at), "yyyy-MM-dd");
+      if (!map[key]) map[key] = [];
+      map[key].push({
+        id: c.id,
+        title: c.title || "Treino",
+        workout_type: c.workout_type || "musculacao",
+        duration_min: c.duration_min,
+        calories: c.calories,
+        proof_url: c.proof_url,
+        note: c.note,
+      });
+    }
+    return map;
+  }, [checkins]);
 
   const { grid, trainedCount, monthLabel } = useMemo(() => {
     const start = startOfMonth(currentMonth);
     const end = endOfMonth(currentMonth);
     const days = eachDayOfInterval({ start, end });
 
-    const checkinDates = new Set(
-      checkins.map((c) => format(parseISO(c.checkin_at), "yyyy-MM-dd"))
-    );
-
-    // Build 7-column grid with offset for start day
-    const startDow = getDay(start); // 0=Sun
-    const cells: (null | { date: Date; key: string; done: boolean; future: boolean; today: boolean })[] = [];
+    const startDow = getDay(start);
+    const cells: (null | {
+      date: Date;
+      key: string;
+      done: boolean;
+      future: boolean;
+      today: boolean;
+      hasPhoto: boolean;
+      firstPhoto: string | null;
+    })[] = [];
 
     for (let i = 0; i < startDow; i++) cells.push(null);
 
     let trained = 0;
     for (const day of days) {
       const key = format(day, "yyyy-MM-dd");
-      const done = checkinDates.has(key);
+      const dayCheckins = checkinsByDate[key] || [];
+      const done = dayCheckins.length > 0;
       if (done) trained++;
-      cells.push({ date: day, key, done, future: isFuture(day), today: isToday(day) });
+      const firstPhoto = dayCheckins.find((c) => c.proof_url)?.proof_url || null;
+      cells.push({
+        date: day,
+        key,
+        done,
+        future: isFuture(day),
+        today: isToday(day),
+        hasPhoto: !!firstPhoto,
+        firstPhoto,
+      });
     }
 
-    // Pad to complete last row
     while (cells.length % 7 !== 0) cells.push(null);
 
     const rows: typeof cells[] = [];
@@ -59,7 +199,7 @@ const MonthlyHeatmap = ({ checkins }: MonthlyHeatmapProps) => {
       trainedCount: trained,
       monthLabel: format(currentMonth, "MMMM yyyy", { locale: ptBR }),
     };
-  }, [checkins, currentMonth]);
+  }, [checkins, currentMonth, checkinsByDate]);
 
   const canGoNext = !isFuture(startOfMonth(addMonths(currentMonth, 1)));
 
@@ -104,20 +244,29 @@ const MonthlyHeatmap = ({ checkins }: MonthlyHeatmapProps) => {
             }
 
             return (
-              <div
+              <button
                 key={cell.key}
-                className={`aspect-square rounded-md flex items-center justify-center text-[10px] font-medium transition-all duration-200 ${
+                disabled={!cell.done}
+                onClick={() => cell.done && setSelectedDay(cell.key)}
+                className={`relative aspect-square rounded-md flex items-center justify-center text-[10px] font-medium transition-all duration-200 overflow-hidden ${
                   cell.done
-                    ? "bg-primary text-primary-foreground shadow-[0_0_6px_hsl(var(--primary)/0.3)]"
+                    ? "bg-primary text-primary-foreground shadow-[0_0_6px_hsl(var(--primary)/0.3)] cursor-pointer active:scale-95"
                     : cell.today
-                    ? "border border-primary/50 text-foreground"
+                    ? "border border-primary/50 text-foreground cursor-default"
                     : cell.future
-                    ? "text-muted-foreground/30"
-                    : "bg-muted/40 text-muted-foreground"
+                    ? "text-muted-foreground/30 cursor-default"
+                    : "bg-muted/40 text-muted-foreground cursor-default"
                 }`}
               >
-                {format(cell.date, "d")}
-              </div>
+                {/* Show photo thumbnail if available */}
+                {cell.done && cell.hasPhoto && cell.firstPhoto && (
+                  <PhotoThumbnail proofUrl={cell.firstPhoto} />
+                )}
+                {/* Day number overlay */}
+                <span className={`relative z-10 ${cell.hasPhoto && cell.done ? "text-white text-shadow-sm drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" : ""}`}>
+                  {format(cell.date, "d")}
+                </span>
+              </button>
             );
           })}
         </div>
@@ -133,6 +282,15 @@ const MonthlyHeatmap = ({ checkins }: MonthlyHeatmapProps) => {
           <span className="text-[12px] font-semibold text-primary">{trainedCount} dias</span>
         </div>
       </div>
+
+      {/* Day detail sheet */}
+      {selectedDay && checkinsByDate[selectedDay] && (
+        <DayDetailSheet
+          dateKey={selectedDay}
+          dayCheckins={checkinsByDate[selectedDay]}
+          onClose={() => setSelectedDay(null)}
+        />
+      )}
     </div>
   );
 };

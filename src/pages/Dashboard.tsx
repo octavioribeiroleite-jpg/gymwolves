@@ -8,6 +8,7 @@ import { useAllUserCheckins, computeDaysActive, computeStreaks, useHasCheckedInT
 import { useUserActiveChallenges } from "@/hooks/useUserChallenges";
 import { useBackHandler } from "@/hooks/useBackHandler";
 import { useCheckinNotifications } from "@/hooks/useCheckinNotifications";
+import { useCheckinEvent } from "@/hooks/useCheckinEvent";
 import { Loader2 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 
@@ -19,7 +20,6 @@ import WorkoutStatusCard from "@/components/dashboard/WorkoutStatusCard";
 import QuickStats from "@/components/dashboard/QuickStats";
 import HomeChallengesList from "@/components/dashboard/HomeChallengesList";
 import HomeGroupsList from "@/components/dashboard/HomeGroupsList";
-import DashboardFAB from "@/components/dashboard/DashboardFAB";
 import WeeklySummary from "@/components/dashboard/WeeklySummary";
 import PullToRefresh from "@/components/PullToRefresh";
 import RecentHistory from "@/components/dashboard/RecentHistory";

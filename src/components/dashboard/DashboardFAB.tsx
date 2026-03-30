@@ -47,7 +47,7 @@ const DashboardFAB = ({ onCheckin }: DashboardFABProps) => {
       )}
 
       {open && (
-        <div className="fixed bottom-[136px] right-5 z-50 flex flex-col items-end gap-1.5">
+        <div className="fixed bottom-[148px] right-5 z-50 flex flex-col items-end gap-1.5">
           {actions.map((a) => (
             <button
               key={a.key}

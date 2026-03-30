@@ -18,6 +18,7 @@ import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import WorkoutStatusCard from "@/components/dashboard/WorkoutStatusCard";
 import QuickStats from "@/components/dashboard/QuickStats";
 import HomeChallengesList from "@/components/dashboard/HomeChallengesList";
+import HomeGroupsList from "@/components/dashboard/HomeGroupsList";
 import DashboardFAB from "@/components/dashboard/DashboardFAB";
 import WeeklySummary from "@/components/dashboard/WeeklySummary";
 import PullToRefresh from "@/components/PullToRefresh";
@@ -132,7 +133,10 @@ const Dashboard = () => {
         {/* 4. Desafio ativo */}
         <HomeChallengesList />
 
-        {/* 5. Atividade da matilha */}
+        {/* 5. Seus grupos */}
+        <HomeGroupsList />
+
+        {/* 6. Atividade do grupo ativo */}
         {activeGroupId && <ActivityFeed groupId={activeGroupId} compact maxItems={2} />}
 
         {/* 6. Mapa de treinos compacto */}

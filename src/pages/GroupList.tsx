@@ -5,15 +5,25 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Loader2, Trophy, Plus, LogIn, Users, CalendarDays } from "lucide-react";
-import { format } from "date-fns";
+import { Loader2, Trophy, Plus, LogIn, Users, CalendarDays, ChevronRight } from "lucide-react";
+import { format, differenceInDays, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import logo from "@/assets/logo.png";
-import BottomNav from "@/components/BottomNav";
 import AppScaffold from "@/components/ds/AppScaffold";
 import EmptyState from "@/components/ds/EmptyState";
+import { toast } from "sonner";
 
-const GroupCard = ({ group, onSelect }: { group: any; onSelect: () => void }) => {
+const GroupCard = ({
+  group,
+  isActive,
+  onOpen,
+  onSetActive,
+}: {
+  group: any;
+  isActive: boolean;
+  onOpen: () => void;
+  onSetActive: () => void;
+}) => {
   const { user } = useAuth();
   const { data: members } = useGroupMembers(group.id);
   const { data: checkins } = useGroupCheckins(group.id);
@@ -22,33 +32,92 @@ const GroupCard = ({ group, onSelect }: { group: any; onSelect: () => void }) =>
   const goal = group.goal_total || 200;
   const pct = goal > 0 ? Math.min(Math.round((myDays / goal) * 100), 100) : 0;
 
+  const daysLeft =
+    group.end_date
+      ? Math.max(0, differenceInDays(parseISO(group.end_date), new Date()))
+      : null;
+
+  // Compute user ranking position
+  const rankPosition = (() => {
+    if (!checkins || !user) return null;
+    const userDays: Record<string, number> = {};
+    checkins.forEach((c: any) => {
+      userDays[c.user_id] = (userDays[c.user_id] || 0) + 1;
+    });
+    const sorted = Object.entries(userDays).sort(([, a], [, b]) => b - a);
+    const idx = sorted.findIndex(([uid]) => uid === user.id);
+    return idx >= 0 ? idx + 1 : null;
+  })();
+
   return (
     <button
-      onClick={onSelect}
-      className="w-full text-left rounded-[20px] surface-1 border border-subtle p-4 transition-all active:scale-[0.98]"
+      onClick={onOpen}
+      className={`w-full text-left rounded-2xl surface-1 border p-3.5 transition-all active:scale-[0.98] ${
+        isActive ? "border-primary/30 bg-primary/[0.03]" : "border-subtle"
+      }`}
     >
-      <div className="flex items-start justify-between">
-        <div className="flex items-center gap-2">
-          <Trophy className="h-4 w-4 text-primary" />
-          <h3 className="text-body font-bold">{group.name}</h3>
+      {/* Line 1: Name + Members + Active chip */}
+      <div className="flex items-center gap-2">
+        <div className="flex-1 min-w-0 flex items-center gap-2">
+          <Trophy className="h-4 w-4 text-primary shrink-0" />
+          <h3 className="text-[14px] font-bold truncate">{group.name}</h3>
+          {isActive && (
+            <span className="shrink-0 bg-primary/10 text-primary text-[10px] font-bold rounded-full px-2 py-0.5">
+              Ativo
+            </span>
+          )}
         </div>
-        <div className="flex items-center gap-1 text-caption text-muted-foreground">
+        <div className="flex items-center gap-1 text-[11px] text-muted-foreground shrink-0">
           <Users className="h-3.5 w-3.5" />
           <span>{members?.length ?? 0}</span>
         </div>
       </div>
-      {group.start_date && group.end_date && (
-        <div className="mt-2 flex items-center gap-1.5 text-caption text-muted-foreground">
-          <CalendarDays className="h-3.5 w-3.5" />
-          {format(new Date(group.start_date), "dd MMM", { locale: ptBR })} — {format(new Date(group.end_date), "dd MMM yyyy", { locale: ptBR })}
-        </div>
-      )}
-      <div className="mt-3">
-        <div className="mb-1 flex items-center justify-between text-caption">
-          <span className="text-muted-foreground">Dias ativos</span>
+
+      {/* Line 2: Period + Days left */}
+      <div className="mt-2 flex items-center gap-3 text-[11px] text-muted-foreground">
+        {group.start_date && group.end_date && (
+          <span className="flex items-center gap-1">
+            <CalendarDays className="h-3.5 w-3.5" />
+            {format(new Date(group.start_date), "dd MMM", { locale: ptBR })} — {format(new Date(group.end_date), "dd MMM", { locale: ptBR })}
+          </span>
+        )}
+        {daysLeft !== null && (
+          <span className="font-medium">{daysLeft}d restantes</span>
+        )}
+      </div>
+
+      {/* Line 3: Progress + Ranking */}
+      <div className="mt-2.5 flex items-center justify-between text-[12px]">
+        <span className="text-muted-foreground">Dias ativos</span>
+        <div className="flex items-center gap-2.5">
+          {rankPosition && (
+            <span className="text-muted-foreground">
+              #{rankPosition} no ranking
+            </span>
+          )}
           <span className="font-bold text-primary">{myDays}/{goal}</span>
         </div>
-        <Progress value={pct} className="h-2" />
+      </div>
+
+      {/* Line 4: Progress bar */}
+      <Progress value={pct} className="h-1.5 mt-1.5" />
+
+      {/* Line 5: Actions */}
+      <div className="mt-3 flex items-center gap-2">
+        <span className="flex-1 flex items-center gap-1 text-[11px] font-medium text-muted-foreground">
+          Abrir grupo <ChevronRight className="h-3 w-3" />
+        </span>
+        {!isActive && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onSetActive();
+            }}
+            className="text-[11px] font-bold text-primary bg-primary/8 rounded-lg px-3 py-1.5 hover:bg-primary/15 transition-colors"
+          >
+            Tornar ativo
+          </button>
+        )}
       </div>
     </button>
   );
@@ -56,12 +125,16 @@ const GroupCard = ({ group, onSelect }: { group: any; onSelect: () => void }) =>
 
 const GroupList = () => {
   const { data: groups, isLoading } = useUserGroups();
-  const { setActiveGroupId } = useActiveGroup();
+  const { activeGroupId, setActiveGroupId } = useActiveGroup();
   const navigate = useNavigate();
 
-  const handleSelect = (id: string) => {
+  const handleOpen = (id: string) => {
+    navigate(`/grupos/${id}/detalhes`);
+  };
+
+  const handleSetActive = (id: string, name: string) => {
     setActiveGroupId(id);
-    navigate("/");
+    toast.success(`"${name}" agora é o grupo ativo`);
   };
 
   if (isLoading) {
@@ -74,7 +147,7 @@ const GroupList = () => {
 
   if (!groups || groups.length === 0) {
     return (
-      <AppScaffold title="Matilha" subtitle="Seus grupos de treino">
+      <AppScaffold title="Grupos" subtitle="Seus grupos de treino">
         <EmptyState
           image={logo}
           title="Nenhum grupo ainda"
@@ -93,7 +166,7 @@ const GroupList = () => {
 
   return (
     <AppScaffold
-      title="Matilha"
+      title="Grupos"
       subtitle="Seus grupos de treino"
       headerRight={
         <div className="flex gap-2">
@@ -107,7 +180,13 @@ const GroupList = () => {
       }
     >
       {groups.map((g) => (
-        <GroupCard key={g.id} group={g} onSelect={() => handleSelect(g.id)} />
+        <GroupCard
+          key={g.id}
+          group={g}
+          isActive={g.id === activeGroupId}
+          onOpen={() => handleOpen(g.id)}
+          onSetActive={() => handleSetActive(g.id, g.name)}
+        />
       ))}
     </AppScaffold>
   );

@@ -221,7 +221,7 @@ const SidebarMenu = () => {
           {/* Desafio */}
           {challengeItems.length > 0 && (
             <div className="py-2 border-b border-subtle">
-              <p className="px-5 py-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Desafio</p>
+              <p className="px-5 py-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Grupo ativo</p>
               {challengeItems.map((item, i) => {
                 const idx = globalIndex++;
                 return (

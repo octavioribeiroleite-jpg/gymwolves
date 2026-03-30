@@ -78,6 +78,7 @@ const Dashboard = () => {
   const userName = profile?.display_name || "Você";
 
   return (
+    <PullToRefresh onRefresh={handleRefresh}>
     <div className="min-h-screen bg-background">
       <DashboardHeader userName={userName} streak={globalStats.streak} todayDone={todayDone} />
 

@@ -1,17 +1,16 @@
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useActiveGroup } from "@/contexts/ActiveGroupContext";
 import { useQueryClient } from "@tanstack/react-query";
 import { useUserGroups } from "@/hooks/useGroupData";
 import { useProfile, useUpdateWeeklyGoal } from "@/hooks/useProfile";
 import { useAllUserCheckins, computeDaysActive, computeStreaks, useHasCheckedInToday, useDeleteTodayCheckins } from "@/hooks/useCheckins";
-import { useUserActiveChallenges } from "@/hooks/useUserChallenges";
 import { useBackHandler } from "@/hooks/useBackHandler";
 import { useCheckinNotifications } from "@/hooks/useCheckinNotifications";
+import { dispatchCheckinOpen } from "@/hooks/useCheckinEvent";
 import { Loader2 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 
-import CheckinDialog from "@/components/CheckinDialog";
 import ActivityFeed from "@/components/ActivityFeed";
 import Onboarding from "./Onboarding";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
@@ -19,7 +18,6 @@ import WorkoutStatusCard from "@/components/dashboard/WorkoutStatusCard";
 import QuickStats from "@/components/dashboard/QuickStats";
 import HomeChallengesList from "@/components/dashboard/HomeChallengesList";
 import HomeGroupsList from "@/components/dashboard/HomeGroupsList";
-import DashboardFAB from "@/components/dashboard/DashboardFAB";
 import WeeklySummary from "@/components/dashboard/WeeklySummary";
 import PullToRefresh from "@/components/PullToRefresh";
 import RecentHistory from "@/components/dashboard/RecentHistory";
@@ -38,7 +36,6 @@ import {
 const Dashboard = () => {
   const { user } = useAuth();
   const { activeGroupId } = useActiveGroup();
-  const [checkinOpen, setCheckinOpen] = useState(false);
   const { showExitDialog, confirmExit, cancelExit } = useBackHandler();
   useCheckinNotifications();
   const queryClient = useQueryClient();
@@ -49,7 +46,6 @@ const Dashboard = () => {
 
   const { data: groups, isLoading } = useUserGroups();
   const { data: profile } = useProfile();
-  const { data: activeChallenges } = useUserActiveChallenges();
   const { data: todayDone = false } = useHasCheckedInToday();
   const deleteTodayCheckins = useDeleteTodayCheckins();
   const updateGoal = useUpdateWeeklyGoal();
@@ -108,7 +104,7 @@ const Dashboard = () => {
         {/* 1. Card principal do dia */}
         <WorkoutStatusCard
           todayDone={todayDone}
-          onCheckin={() => setCheckinOpen(true)}
+          onCheckin={() => dispatchCheckinOpen()}
           onDelete={() => deleteTodayCheckins.mutate()}
           isDeleting={deleteTodayCheckins.isPending}
           todayCheckin={todayCheckin}
@@ -150,14 +146,6 @@ const Dashboard = () => {
         )}
       </div>
 
-      <DashboardFAB onCheckin={() => setCheckinOpen(true)} />
-
-      <CheckinDialog
-        open={checkinOpen}
-        onOpenChange={setCheckinOpen}
-        alreadyCheckedIn={todayDone}
-        activeChallenges={activeChallenges}
-      />
 
       <AlertDialog open={showExitDialog} onOpenChange={cancelExit}>
         <AlertDialogContent>

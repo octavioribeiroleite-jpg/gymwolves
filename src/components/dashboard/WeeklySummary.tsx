@@ -44,15 +44,15 @@ const WeeklySummary = ({ checkins, weeklyGoal, onGoalChange }: WeeklySummaryProp
   const circumference = 2 * Math.PI * 28;
 
   return (
-    <div className="rounded-2xl surface-1 border border-subtle p-4 card-shadow">
+    <div className="rounded-2xl surface-1 border border-subtle p-3.5 card-shadow">
       {/* Title row */}
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-[14px] font-bold">Sua semana</h2>
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="text-[13px] font-bold">Sua semana</h2>
         <Popover open={goalOpen} onOpenChange={setGoalOpen}>
           <PopoverTrigger asChild>
-            <button className="flex items-center gap-1 text-[12px] text-muted-foreground hover:text-foreground transition-colors">
+            <button className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground transition-colors">
               Meta: {stats.count}/{goal}
-              <Pencil className="h-3 w-3" />
+              <Pencil className="h-2.5 w-2.5" />
             </button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-3" align="end">
@@ -78,27 +78,27 @@ const WeeklySummary = ({ checkins, weeklyGoal, onGoalChange }: WeeklySummaryProp
       </div>
 
       {/* Progress ring + metrics */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
         {/* Ring */}
-        <div className="relative flex items-center justify-center w-[64px] h-[64px] shrink-0">
+        <div className="relative flex items-center justify-center w-[52px] h-[52px] shrink-0">
           <svg viewBox="0 0 64 64" className="w-full h-full -rotate-90">
-            <circle cx="32" cy="32" r="28" fill="none" stroke="hsl(var(--border))" strokeWidth="5" />
+            <circle cx="32" cy="32" r="28" fill="none" stroke="hsl(var(--border))" strokeWidth="5.5" />
             <circle
               cx="32" cy="32" r="28"
               fill="none"
               stroke="hsl(var(--primary))"
-              strokeWidth="5"
+              strokeWidth="5.5"
               strokeLinecap="round"
               strokeDasharray={`${circumference}`}
               strokeDashoffset={`${circumference * (1 - progress)}`}
               className="transition-all duration-700 ease-out"
             />
           </svg>
-          <span className="absolute text-[13px] font-bold">{stats.count}/{goal}</span>
+          <span className="absolute text-[11px] font-bold">{stats.count}/{goal}</span>
         </div>
 
         {/* Metrics in a row */}
-        <div className="flex-1 grid grid-cols-3 gap-1">
+        <div className="flex-1 flex items-center gap-3">
           <MetricPill icon={Dumbbell} value={stats.count} label="treinos" color="bg-primary" />
           {stats.totalMin > 0 && (
             <MetricPill icon={Timer} value={stats.totalMin} label="min" color="bg-blue-500" />

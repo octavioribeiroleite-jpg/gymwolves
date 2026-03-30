@@ -1,6 +1,8 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
+import BottomNav from "@/components/BottomNav";
+import { dispatchCheckinOpen } from "@/hooks/useCheckinEvent";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { session, loading } = useAuth();
@@ -15,7 +17,12 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
   if (!session) return <Navigate to="/auth" replace />;
 
-  return <>{children}</>;
+  return (
+    <>
+      {children}
+      <BottomNav onCheckin={dispatchCheckinOpen} />
+    </>
+  );
 };
 
 export default ProtectedRoute;

@@ -19,7 +19,7 @@ const HomeChallengesList = () => {
 
   return (
     <div>
-      <h2 className="text-[14px] font-bold mb-2">Desafio ativo</h2>
+      <h2 className="text-[13px] font-bold mb-2">Desafio ativo</h2>
 
       {activeGroup ? (
         <HomeChallengeCard group={activeGroup} userId={user!.id} />

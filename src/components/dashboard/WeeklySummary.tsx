@@ -41,87 +41,88 @@ const WeeklySummary = ({ checkins, weeklyGoal, onGoalChange }: WeeklySummaryProp
 
   const goal = weeklyGoal;
   const progress = Math.min(stats.count / goal, 1);
-  const circumference = 2 * Math.PI * 34;
+  const circumference = 2 * Math.PI * 28;
 
   return (
-    <div className="space-y-2">
-      <h2 className="text-[13px] font-semibold uppercase tracking-wide text-muted-foreground">Resumo semanal</h2>
-      <div className="rounded-2xl surface-2 border border-subtle px-4 py-3 card-shadow">
-        <div className="flex items-center justify-between">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-500">
-                <Dumbbell className="h-3.5 w-3.5 text-white" strokeWidth={2.5} />
-              </div>
-              <span className="text-[17px] font-bold leading-none">{stats.count}</span>
-              <span className="text-[12px] text-muted-foreground -ml-1">treinos</span>
+    <div className="rounded-2xl surface-1 border border-subtle p-4 card-shadow">
+      {/* Title row */}
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-[14px] font-bold">Sua semana</h2>
+        <Popover open={goalOpen} onOpenChange={setGoalOpen}>
+          <PopoverTrigger asChild>
+            <button className="flex items-center gap-1 text-[12px] text-muted-foreground hover:text-foreground transition-colors">
+              Meta: {stats.count}/{goal}
+              <Pencil className="h-3 w-3" />
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-3" align="end">
+            <p className="text-xs text-muted-foreground mb-2">Meta semanal</p>
+            <div className="flex gap-1.5">
+              {[1, 2, 3, 4, 5, 6, 7].map((n) => (
+                <Button
+                  key={n}
+                  size="sm"
+                  variant={n === goal ? "default" : "outline"}
+                  className="h-8 w-8 p-0 text-xs"
+                  onClick={() => {
+                    onGoalChange?.(n);
+                    setGoalOpen(false);
+                  }}
+                >
+                  {n}
+                </Button>
+              ))}
             </div>
+          </PopoverContent>
+        </Popover>
+      </div>
 
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-500">
-                <Timer className="h-3.5 w-3.5 text-white" strokeWidth={2.5} />
-              </div>
-              <span className="text-[17px] font-bold leading-none">{stats.totalMin}</span>
-              <span className="text-[12px] text-muted-foreground -ml-1">min</span>
-            </div>
-
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-rose-500">
-                <Flame className="h-3.5 w-3.5 text-white" strokeWidth={2.5} />
-              </div>
-              <span className="text-[17px] font-bold leading-none">{stats.totalCal}</span>
-              <span className="text-[12px] text-muted-foreground -ml-1">kcal</span>
-            </div>
-          </div>
-
-          <Popover open={goalOpen} onOpenChange={setGoalOpen}>
-            <PopoverTrigger asChild>
-              <button className="relative flex items-center justify-center w-[76px] h-[76px] shrink-0 group cursor-pointer">
-                <svg viewBox="0 0 80 80" className="w-full h-full -rotate-90">
-                  <circle cx="40" cy="40" r="34" fill="none" stroke="hsl(var(--border))" strokeWidth="6" />
-                  <circle
-                    cx="40" cy="40" r="34"
-                    fill="none"
-                    stroke="hsl(var(--primary))"
-                    strokeWidth="6"
-                    strokeLinecap="round"
-                    strokeDasharray={`${circumference}`}
-                    strokeDashoffset={`${circumference * (1 - progress)}`}
-                    className="transition-all duration-700 ease-out"
-                  />
-                </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-[14px] font-bold leading-none">{stats.count}/{goal}</span>
-                  <Pencil className="h-2.5 w-2.5 text-muted-foreground mt-1 opacity-0 group-hover:opacity-100 transition-opacity" />
-                </div>
-              </button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-3" align="end">
-              <p className="text-xs text-muted-foreground mb-2">Meta semanal</p>
-              <div className="flex gap-1.5">
-                {[1, 2, 3, 4, 5, 6, 7].map((n) => (
-                  <Button
-                    key={n}
-                    size="sm"
-                    variant={n === goal ? "default" : "outline"}
-                    className="h-8 w-8 p-0 text-xs"
-                    onClick={() => {
-                      onGoalChange?.(n);
-                      setGoalOpen(false);
-                    }}
-                  >
-                    {n}
-                  </Button>
-                ))}
-              </div>
-            </PopoverContent>
-          </Popover>
+      {/* Progress ring + metrics */}
+      <div className="flex items-center gap-4">
+        {/* Ring */}
+        <div className="relative flex items-center justify-center w-[64px] h-[64px] shrink-0">
+          <svg viewBox="0 0 64 64" className="w-full h-full -rotate-90">
+            <circle cx="32" cy="32" r="28" fill="none" stroke="hsl(var(--border))" strokeWidth="5" />
+            <circle
+              cx="32" cy="32" r="28"
+              fill="none"
+              stroke="hsl(var(--primary))"
+              strokeWidth="5"
+              strokeLinecap="round"
+              strokeDasharray={`${circumference}`}
+              strokeDashoffset={`${circumference * (1 - progress)}`}
+              className="transition-all duration-700 ease-out"
+            />
+          </svg>
+          <span className="absolute text-[13px] font-bold">{stats.count}/{goal}</span>
         </div>
 
-        <WeekDots checkins={checkins} />
+        {/* Metrics in a row */}
+        <div className="flex-1 grid grid-cols-3 gap-1">
+          <MetricPill icon={Dumbbell} value={stats.count} label="treinos" color="bg-primary" />
+          {stats.totalMin > 0 && (
+            <MetricPill icon={Timer} value={stats.totalMin} label="min" color="bg-blue-500" />
+          )}
+          {stats.totalCal > 0 && (
+            <MetricPill icon={Flame} value={stats.totalCal} label="kcal" color="bg-rose-500" />
+          )}
+        </div>
       </div>
+
+      {/* Week dots */}
+      <WeekDots checkins={checkins} />
     </div>
   );
 };
+
+const MetricPill = ({ icon: Icon, value, label, color }: { icon: any; value: number; label: string; color: string }) => (
+  <div className="flex flex-col items-center">
+    <div className={`flex h-6 w-6 items-center justify-center rounded-full ${color} mb-1`}>
+      <Icon className="h-3 w-3 text-white" strokeWidth={2.5} />
+    </div>
+    <span className="text-[14px] font-bold leading-none">{value}</span>
+    <span className="text-[10px] text-muted-foreground">{label}</span>
+  </div>
+);
 
 export default WeeklySummary;

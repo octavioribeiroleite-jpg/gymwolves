@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Plus, Dumbbell, Zap, MapPin, Footprints } from "lucide-react";
 
 interface DashboardFABProps {
@@ -14,6 +14,23 @@ const actions = [
 
 const DashboardFAB = ({ onCheckin }: DashboardFABProps) => {
   const [open, setOpen] = useState(false);
+  const [visible, setVisible] = useState(true);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentY = window.scrollY;
+      if (currentY > lastScrollY.current + 10) {
+        setVisible(false);
+      } else if (currentY < lastScrollY.current - 10) {
+        setVisible(true);
+      }
+      lastScrollY.current = currentY;
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const handleAction = () => {
     setOpen(false);
@@ -22,7 +39,6 @@ const DashboardFAB = ({ onCheckin }: DashboardFABProps) => {
 
   return (
     <>
-      {/* Overlay */}
       {open && (
         <div
           className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
@@ -30,9 +46,8 @@ const DashboardFAB = ({ onCheckin }: DashboardFABProps) => {
         />
       )}
 
-      {/* Action menu */}
       {open && (
-        <div className="fixed bottom-24 right-4 z-50 flex flex-col items-end gap-2">
+        <div className="fixed bottom-28 right-4 z-50 flex flex-col items-end gap-2">
           {actions.map((a) => (
             <button
               key={a.key}
@@ -46,12 +61,12 @@ const DashboardFAB = ({ onCheckin }: DashboardFABProps) => {
         </div>
       )}
 
-      {/* FAB button */}
       <button
         onClick={() => setOpen(!open)}
-        className={`fixed bottom-6 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg glow-primary transition-all active:scale-90 ${
+        className={`fixed bottom-20 right-4 z-50 flex h-13 w-13 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg glow-primary transition-all active:scale-90 ${
           open ? "rotate-45" : ""
-        }`}
+        } ${visible ? "translate-y-0 opacity-100" : "translate-y-16 opacity-0"}`}
+        style={{ transitionDuration: "300ms" }}
         aria-label="Ações rápidas"
       >
         <Plus className="h-6 w-6 transition-transform" strokeWidth={2.5} />

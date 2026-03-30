@@ -145,14 +145,6 @@ const Dashboard = () => {
         )}
       </div>
 
-      
-
-      <CheckinDialog
-        open={checkinOpen}
-        onOpenChange={setCheckinOpen}
-        alreadyCheckedIn={todayDone}
-        activeChallenges={activeChallenges}
-      />
 
       <AlertDialog open={showExitDialog} onOpenChange={cancelExit}>
         <AlertDialogContent>

@@ -10,7 +10,6 @@ import { useCheckinNotifications } from "@/hooks/useCheckinNotifications";
 import { Loader2 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 
-import CheckinDialog from "@/components/CheckinDialog";
 import ActivityFeed from "@/components/ActivityFeed";
 import Onboarding from "./Onboarding";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";

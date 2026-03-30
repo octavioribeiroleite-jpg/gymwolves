@@ -45,7 +45,6 @@ const Dashboard = () => {
 
   const { data: groups, isLoading } = useUserGroups();
   const { data: profile } = useProfile();
-  const { data: activeChallenges } = useUserActiveChallenges();
   const { data: todayDone = false } = useHasCheckedInToday();
   const deleteTodayCheckins = useDeleteTodayCheckins();
   const updateGoal = useUpdateWeeklyGoal();

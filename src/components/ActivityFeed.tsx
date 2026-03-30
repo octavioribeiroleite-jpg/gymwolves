@@ -56,9 +56,9 @@ const ActivityFeed = ({ groupId, compact = false, maxItems }: ActivityFeedProps)
   if (feed.length === 0) return null;
 
   return (
-    <div className="rounded-2xl surface-1 border border-subtle p-4 card-shadow">
-      <h2 className="text-[14px] font-bold mb-3">Atividade da matilha</h2>
-      <div className="space-y-2.5">
+    <div className="rounded-2xl surface-1 border border-subtle p-3.5 card-shadow">
+      <h2 className="text-[13px] font-bold mb-2">Atividade da matilha</h2>
+      <div className="space-y-2">
         {feed.map((item) => (
           <FeedItem key={item.id} item={item} compact={compact} />
         ))}
@@ -66,10 +66,10 @@ const ActivityFeed = ({ groupId, compact = false, maxItems }: ActivityFeedProps)
       {compact && (
         <button
           onClick={() => navigate(`/grupos/${groupId}/detalhes`)}
-          className="flex items-center justify-center gap-1 w-full mt-3 pt-3 border-t border-subtle text-[13px] font-medium text-primary hover:text-primary/80 transition-colors"
+          className="flex items-center justify-center gap-1 w-full mt-2.5 pt-2.5 border-t border-subtle text-[12px] font-medium text-primary hover:text-primary/80 transition-colors"
         >
           Ver feed completo
-          <ChevronRight className="h-4 w-4" />
+          <ChevronRight className="h-3.5 w-3.5" />
         </button>
       )}
     </div>

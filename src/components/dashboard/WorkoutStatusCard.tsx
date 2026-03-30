@@ -112,14 +112,14 @@ const WorkoutStatusCard = ({ todayDone, onCheckin, onDelete, isDeleting, todayCh
 
   // Not trained today
   return (
-    <div className="rounded-2xl surface-1 border border-subtle p-5 card-shadow">
-      <div className="flex items-center gap-4 mb-4">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10">
-          <Dumbbell className="h-6 w-6 text-primary" />
+    <div className="rounded-2xl surface-1 border border-subtle p-4 card-shadow">
+      <div className="flex items-center gap-3 mb-3">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10">
+          <Dumbbell className="h-5 w-5 text-primary" />
         </div>
         <div>
-          <p className="text-[16px] font-bold">Você ainda não treinou hoje</p>
-          <p className="text-[13px] text-muted-foreground mt-0.5">
+          <p className="text-[15px] font-bold leading-tight">Você ainda não treinou hoje</p>
+          <p className="text-[12px] text-muted-foreground mt-0.5 leading-tight">
             {format(new Date(), "EEEE, d 'de' MMMM", { locale: ptBR })}
           </p>
         </div>
@@ -127,16 +127,16 @@ const WorkoutStatusCard = ({ todayDone, onCheckin, onDelete, isDeleting, todayCh
       <div className="flex gap-2">
         <button
           onClick={onCheckin}
-          className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-primary text-primary-foreground font-bold text-[14px] h-11 glow-primary-sm transition-all active:scale-[0.97]"
+          className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-primary text-primary-foreground font-bold text-[13px] h-10 glow-primary-sm transition-all active:scale-[0.97]"
         >
           <Dumbbell className="h-4 w-4" strokeWidth={2.5} />
           Fazer check-in
         </button>
         <button
           onClick={onCheckin}
-          className="flex items-center justify-center gap-1.5 rounded-xl border border-subtle px-4 h-11 text-[13px] font-medium text-muted-foreground hover:text-foreground hover:border-primary/20 transition-all"
+          className="flex items-center justify-center gap-1.5 rounded-xl border border-subtle px-3.5 h-10 text-[12px] font-medium text-muted-foreground hover:text-foreground hover:border-primary/20 transition-all"
         >
-          <Zap className="h-4 w-4" />
+          <Zap className="h-3.5 w-3.5" />
           Rápido
         </button>
       </div>

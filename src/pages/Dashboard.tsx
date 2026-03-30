@@ -133,7 +133,7 @@ const Dashboard = () => {
         <HomeChallengesList />
 
         {/* 5. Atividade da matilha */}
-        {activeGroupId && <ActivityFeed groupId={activeGroupId} compact maxItems={3} />}
+        {activeGroupId && <ActivityFeed groupId={activeGroupId} compact maxItems={2} />}
 
         {/* 6. Mapa de treinos compacto */}
         {allCheckins && allCheckins.length > 0 && (

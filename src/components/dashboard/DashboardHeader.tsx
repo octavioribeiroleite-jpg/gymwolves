@@ -21,20 +21,20 @@ const DashboardHeader = ({ userName, streak = 0, todayDone = false, activeGroupN
 
   return (
     <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-md">
-      <div className="mx-auto flex h-14 max-w-md items-center justify-between px-4">
+      <div className="mx-auto flex h-12 max-w-md items-center justify-between px-5">
         <SidebarMenu />
         <div className="flex-1 text-center min-w-0 px-2">
-          <h1 className="text-[15px] font-bold truncate">
+          <h1 className="text-[14px] font-bold truncate leading-tight">
             {greeting}, {firstName} {streak >= 5 ? "🔥" : streak >= 3 ? "💪" : todayDone ? "✅" : "👋"}
           </h1>
           {activeGroupName && (
-            <p className="text-[11px] text-muted-foreground truncate -mt-0.5">
+            <p className="text-[10px] text-muted-foreground truncate leading-tight">
               {activeGroupName}
             </p>
           )}
         </div>
-        <button className="flex h-9 w-9 items-center justify-center rounded-xl text-muted-foreground hover:text-foreground transition-colors">
-          <Bell className="h-5 w-5" strokeWidth={1.8} />
+        <button className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground transition-colors">
+          <Bell className="h-4.5 w-4.5" strokeWidth={1.8} />
         </button>
       </div>
     </header>

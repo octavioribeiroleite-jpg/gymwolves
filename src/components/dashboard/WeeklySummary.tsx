@@ -117,11 +117,11 @@ const WeeklySummary = ({ checkins, weeklyGoal, onGoalChange }: WeeklySummaryProp
 
 const MetricPill = ({ icon: Icon, value, label, color }: { icon: any; value: number; label: string; color: string }) => (
   <div className="flex flex-col items-center">
-    <div className={`flex h-6 w-6 items-center justify-center rounded-full ${color} mb-1`}>
-      <Icon className="h-3 w-3 text-white" strokeWidth={2.5} />
+    <div className={`flex h-5 w-5 items-center justify-center rounded-full ${color} mb-0.5`}>
+      <Icon className="h-2.5 w-2.5 text-white" strokeWidth={2.5} />
     </div>
-    <span className="text-[14px] font-bold leading-none">{value}</span>
-    <span className="text-[10px] text-muted-foreground">{label}</span>
+    <span className="text-[13px] font-bold leading-none">{value}</span>
+    <span className="text-[9px] text-muted-foreground">{label}</span>
   </div>
 );
 

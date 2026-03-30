@@ -19,6 +19,7 @@ import HomeWelcome from "@/components/dashboard/HomeWelcome";
 import HomeChallengesList from "@/components/dashboard/HomeChallengesList";
 import DashboardFAB from "@/components/dashboard/DashboardFAB";
 import WeeklySummary from "@/components/dashboard/WeeklySummary";
+import PullToRefresh from "@/components/PullToRefresh";
 import RecentHistory from "@/components/dashboard/RecentHistory";
 import MonthlyHeatmap from "@/components/dashboard/MonthlyHeatmap";
 import {

@@ -1,30 +1,47 @@
 
 
-## Plano: Pull-to-refresh no Dashboard
+## Plano: Refatoração completa da Home do GymWolves
 
-Adicionar gesto de "puxar para baixo para atualizar" no painel inicial, funcionando tanto em iOS quanto Android.
+Reorganizar e refinar visualmente a tela inicial seguindo a referência enviada, priorizando hierarquia visual, escaneabilidade e experiência premium.
 
-### Abordagem
+### Estrutura final (de cima pra baixo)
 
-Usar a biblioteca **react-pull-to-refresh** ou implementar manualmente com touch events + framer-motion. Como o app já usa framer-motion, vou implementar um componente `PullToRefresh` customizado com touch events nativos (`touchstart`, `touchmove`, `touchend`) que:
+1. **Header compacto** — saudação + subtítulo grupo ativo + ícones
+2. **Card principal do dia** — status dominante (treinou / não treinou) com foto, tipo, ações
+3. **Card "Sua semana"** — meta, anel, métricas, WeekDots
+4. **Métricas rápidas** — linha horizontal compacta (sequência, dias ativos, recorde)
+5. **Grupo/desafio ativo** — card único do grupo ativo com ranking top 3 e progresso
+6. **Atividade da matilha** — preview de 2-3 itens + "Ver feed completo"
+7. **Mapa de treinos compacto** — título + botão "Abrir calendário", heatmap colapsado
+8. **Últimos check-ins** — máximo 2 itens + "Ver histórico completo"
 
-1. Detecta o gesto de arrastar para baixo quando o scroll está no topo
-2. Mostra um spinner animado (ícone girando)
-3. Dispara o `refetch` de todos os dados do Dashboard (checkins, perfil, desafios)
-4. Funciona em PWA standalone no iOS e Android
-
-### Alterações
+### Alterações por arquivo
 
 | Arquivo | Mudança |
 |---|---|
-| Novo `src/components/PullToRefresh.tsx` | Componente wrapper com touch events + spinner animado |
-| `src/pages/Dashboard.tsx` | Envolver conteúdo com `PullToRefresh`, passando função de refresh que revalida queries |
+| `Dashboard.tsx` | Reordenar seções na nova ordem; passar dados do grupo ativo; adicionar padding-bottom para FAB/nav |
+| `DashboardHeader.tsx` | Reduzir altura; adicionar subtítulo "Grupo ativo: X" clicável; remover ícone MoreVertical desnecessário |
+| `WorkoutStatusCard.tsx` | Redesenhar como card dominante: cenário A (treinou) com foto mini, tipo, hora relativa, botões "Ver check-in" e "Desfazer"; cenário B (não treinou) com CTA verde grande + "Modo rápido" |
+| `WeeklySummary.tsx` | Adicionar título "Sua semana" dentro do card; mostrar "Meta semanal: X/Y" com ícone editar; layout mais integrado com métricas em linha |
+| `HomeWelcome.tsx` → Renomear para `QuickStats.tsx` | Transformar em linha horizontal compacta (não 3 cards grandes); formato: ícone + valor + label inline, ocupando pouca altura |
+| `HomeChallengeCard.tsx` | Refinar: mostrar apenas o grupo ativo, com posição no ranking, dias restantes, top 3 compacto horizontal, botão "Ver ranking" |
+| `HomeChallengesList.tsx` | Simplificar: mostrar apenas o grupo ativo (não lista de todos); manter botões criar/entrar abaixo apenas se não houver grupo |
+| `ActivityFeed.tsx` | Criar versão compacta para Home: limitar a 3 itens, adicionar botão "Ver feed completo" que navega para a página do grupo |
+| `MonthlyHeatmap.tsx` | Criar modo compacto: esconder navegação de mês, mostrar apenas mês atual resumido, botão "Abrir calendário" que expande ou navega |
+| `RecentHistory.tsx` | Limitar a 2 itens na Home; adicionar botão "Ver histórico completo" que navega para /historico |
+| `DashboardFAB.tsx` | Ajustar posição: `bottom-20` para ficar acima da BottomNav com espaçamento; esconder no scroll down, reaparecer no scroll up |
+| `BottomNav.tsx` | Refinar visual: remover borda superior, usar sombra sutil para cima, melhorar espaçamento e estado ativo mais evidente |
 
-### Detalhes técnicos
+### Novos componentes
 
-- Touch events: `onTouchStart`, `onTouchMove`, `onTouchEnd` para detectar o gesto
-- Threshold de 80px para ativar o refresh
-- Spinner com `framer-motion` (rotate animation)
-- No refresh: invalidar queries do React Query via `queryClient.invalidateQueries()`
-- CSS: `overscroll-behavior-y: contain` no container para evitar o bounce nativo do iOS competir com o componente
+- `QuickStats.tsx` — substitui HomeWelcome, linha horizontal compacta de 3 métricas
+- Nenhum outro componente novo necessário, apenas refatoração dos existentes
+
+### Regras seguidas
+
+- Reutiliza todos os dados e hooks existentes (useAllUserCheckins, useProfile, useUserGroups, etc.)
+- Não altera lógica de negócio
+- Mantém compatibilidade PWA e responsividade
+- Mantém pull-to-refresh, notificações realtime, CheckinDialog
+- Foco em CSS/layout/hierarquia, não em funcionalidade nova
 

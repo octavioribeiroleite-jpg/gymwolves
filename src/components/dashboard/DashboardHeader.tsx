@@ -1,4 +1,5 @@
 import { Bell } from "lucide-react";
+import { Link } from "react-router-dom";
 import SidebarMenu from "@/components/SidebarMenu";
 
 interface DashboardHeaderProps {

@@ -44,9 +44,9 @@ const WeeklySummary = ({ checkins, weeklyGoal, onGoalChange }: WeeklySummaryProp
   const circumference = 2 * Math.PI * 28;
 
   return (
-    <div className="rounded-2xl surface-1 border border-subtle p-3.5 card-shadow">
+    <div className="rounded-2xl surface-1 border border-subtle p-3 card-shadow">
       {/* Title row */}
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex items-center justify-between mb-1.5">
         <h2 className="text-[13px] font-bold">Sua semana</h2>
         <Popover open={goalOpen} onOpenChange={setGoalOpen}>
           <PopoverTrigger asChild>

@@ -19,8 +19,11 @@ export function extractStoragePath(urlOrPath: string): string {
  */
 export function getPublicImageUrl(urlOrPath: string | null | undefined): string | null {
   if (!urlOrPath) return null;
-  const path = extractStoragePath(urlOrPath);
-  const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
+  // If it's already a full URL, return as-is
+  if (urlOrPath.startsWith("http://") || urlOrPath.startsWith("https://")) {
+    return urlOrPath;
+  }
+  const { data } = supabase.storage.from(BUCKET).getPublicUrl(urlOrPath);
   return data.publicUrl;
 }
 

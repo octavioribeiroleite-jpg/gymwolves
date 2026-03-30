@@ -41,7 +41,9 @@ const PhotoThumbnail = ({ proofUrl }: { proofUrl: string }) => {
     <img
       src={url}
       alt=""
+      loading="lazy"
       className="absolute inset-0 w-full h-full object-cover rounded-md"
+      onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
     />
   );
 };

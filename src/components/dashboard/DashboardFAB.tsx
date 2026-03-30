@@ -63,7 +63,7 @@ const DashboardFAB = ({ onCheckin }: DashboardFABProps) => {
 
       <button
         onClick={() => setOpen(!open)}
-        className={`fixed bottom-[76px] right-5 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg glow-primary transition-all active:scale-90 ${
+        className={`fixed bottom-[84px] right-5 z-50 flex h-[52px] w-[52px] items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg glow-primary transition-all active:scale-90 ${
           open ? "rotate-45" : ""
         } ${visible ? "translate-y-0 opacity-100" : "translate-y-16 opacity-0"}`}
         style={{ transitionDuration: "300ms" }}

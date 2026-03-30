@@ -79,7 +79,7 @@ const WorkoutStatusCard = ({ todayDone, onCheckin, onDelete, isDeleting, todayCh
             <button
               onClick={() => setConfirmOpen(true)}
               disabled={isDeleting}
-              className="flex items-center justify-center gap-1 px-3 py-2 text-[12px] font-medium text-destructive hover:bg-destructive/5 transition-colors"
+              className="flex items-center justify-center gap-1 px-3 py-1.5 text-[11px] font-medium text-destructive hover:bg-destructive/5 transition-colors"
             >
               <Trash2 className="h-3 w-3" />
               Desfazer

@@ -39,6 +39,11 @@ const Dashboard = () => {
   const [checkinOpen, setCheckinOpen] = useState(false);
   const { showExitDialog, confirmExit, cancelExit } = useBackHandler();
   useCheckinNotifications();
+  const queryClient = useQueryClient();
+
+  const handleRefresh = useCallback(async () => {
+    await queryClient.invalidateQueries();
+  }, [queryClient]);
 
   const { data: groups, isLoading } = useUserGroups();
   const { data: profile } = useProfile();

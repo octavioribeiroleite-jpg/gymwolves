@@ -1,6 +1,7 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useActiveGroup } from "@/contexts/ActiveGroupContext";
+import { useQueryClient } from "@tanstack/react-query";
 import { useUserGroups } from "@/hooks/useGroupData";
 import { useProfile, useUpdateWeeklyGoal } from "@/hooks/useProfile";
 import { useAllUserCheckins, computeDaysActive, computeStreaks, useHasCheckedInToday, useDeleteTodayCheckins } from "@/hooks/useCheckins";
@@ -18,6 +19,7 @@ import HomeWelcome from "@/components/dashboard/HomeWelcome";
 import HomeChallengesList from "@/components/dashboard/HomeChallengesList";
 import DashboardFAB from "@/components/dashboard/DashboardFAB";
 import WeeklySummary from "@/components/dashboard/WeeklySummary";
+import PullToRefresh from "@/components/PullToRefresh";
 import RecentHistory from "@/components/dashboard/RecentHistory";
 import MonthlyHeatmap from "@/components/dashboard/MonthlyHeatmap";
 import {
@@ -37,6 +39,11 @@ const Dashboard = () => {
   const [checkinOpen, setCheckinOpen] = useState(false);
   const { showExitDialog, confirmExit, cancelExit } = useBackHandler();
   useCheckinNotifications();
+  const queryClient = useQueryClient();
+
+  const handleRefresh = useCallback(async () => {
+    await queryClient.invalidateQueries();
+  }, [queryClient]);
 
   const { data: groups, isLoading } = useUserGroups();
   const { data: profile } = useProfile();
@@ -71,6 +78,7 @@ const Dashboard = () => {
   const userName = profile?.display_name || "Você";
 
   return (
+    <PullToRefresh onRefresh={handleRefresh}>
     <div className="min-h-screen bg-background">
       <DashboardHeader userName={userName} streak={globalStats.streak} todayDone={todayDone} />
 
@@ -129,6 +137,7 @@ const Dashboard = () => {
         </AlertDialogContent>
       </AlertDialog>
     </div>
+    </PullToRefresh>
   );
 };
 

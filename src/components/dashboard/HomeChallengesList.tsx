@@ -22,7 +22,12 @@ const HomeChallengesList = () => {
       <h2 className="text-[13px] font-bold mb-2">Desafio ativo</h2>
 
       {activeGroup ? (
-        <HomeChallengeCard group={activeGroup} userId={user!.id} />
+        <div className="relative">
+          <span className="absolute top-2.5 right-2.5 z-10 bg-primary/10 text-primary text-[10px] font-bold rounded-full px-2 py-0.5">
+            Ativo
+          </span>
+          <HomeChallengeCard group={activeGroup} userId={user!.id} />
+        </div>
       ) : (
         <div className="rounded-2xl surface-1 border border-subtle p-5 text-center card-shadow">
           <p className="text-[13px] text-muted-foreground mb-3">

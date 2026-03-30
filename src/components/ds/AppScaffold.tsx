@@ -43,7 +43,7 @@ const AppScaffold = ({ children, title, subtitle, showBack, headerRight, hideNav
         </div>
       </header>
 
-      <div className="mx-auto max-w-md space-y-4 px-5 py-4">
+      <div className="mx-auto max-w-md space-y-3 px-5 py-4">
         {children}
       </div>
 

@@ -29,9 +29,9 @@ const DashboardHeader = ({ userName, streak = 0, todayDone = false, activeGroupN
             {greeting}, {firstName} {streak >= 5 ? "🔥" : streak >= 3 ? "💪" : todayDone ? "✅" : "👋"}
           </h1>
           {activeGroupName && (
-            <p className="text-[10px] text-muted-foreground truncate leading-tight">
+            <Link to="/grupos" className="text-[10px] text-muted-foreground truncate leading-tight hover:text-primary transition-colors">
               {activeGroupName}
-            </p>
+            </Link>
           )}
         </div>
         <button className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground transition-colors">

@@ -34,7 +34,7 @@ interface DayCheckin {
 const WEEKDAY_LABELS = ["D", "S", "T", "Q", "Q", "S", "S"];
 
 const PhotoThumbnail = ({ proofUrl }: { proofUrl: string }) => {
-  const url = getPublicImageUrl(proofUrl);
+  const url = getThumbnailUrl(proofUrl, 80);
   if (!url) return null;
 
   return (
@@ -42,7 +42,9 @@ const PhotoThumbnail = ({ proofUrl }: { proofUrl: string }) => {
       src={url}
       alt=""
       loading="lazy"
-      className="absolute inset-0 w-full h-full object-cover rounded-md"
+      decoding="async"
+      className="absolute inset-0 w-full h-full object-cover rounded-md opacity-0 transition-opacity duration-300"
+      onLoad={(e) => { (e.target as HTMLImageElement).classList.replace("opacity-0", "opacity-100"); }}
       onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
     />
   );

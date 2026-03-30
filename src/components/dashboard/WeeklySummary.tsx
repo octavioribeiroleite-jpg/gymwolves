@@ -78,27 +78,27 @@ const WeeklySummary = ({ checkins, weeklyGoal, onGoalChange }: WeeklySummaryProp
       </div>
 
       {/* Progress ring + metrics */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2.5">
         {/* Ring */}
-        <div className="relative flex items-center justify-center w-[52px] h-[52px] shrink-0">
+        <div className="relative flex items-center justify-center w-[44px] h-[44px] shrink-0">
           <svg viewBox="0 0 64 64" className="w-full h-full -rotate-90">
-            <circle cx="32" cy="32" r="28" fill="none" stroke="hsl(var(--border))" strokeWidth="5.5" />
+            <circle cx="32" cy="32" r="28" fill="none" stroke="hsl(var(--border))" strokeWidth="6" />
             <circle
               cx="32" cy="32" r="28"
               fill="none"
               stroke="hsl(var(--primary))"
-              strokeWidth="5.5"
+              strokeWidth="6"
               strokeLinecap="round"
               strokeDasharray={`${circumference}`}
               strokeDashoffset={`${circumference * (1 - progress)}`}
               className="transition-all duration-700 ease-out"
             />
           </svg>
-          <span className="absolute text-[11px] font-bold">{stats.count}/{goal}</span>
+          <span className="absolute text-[10px] font-bold">{stats.count}/{goal}</span>
         </div>
 
         {/* Metrics in a row */}
-        <div className="flex-1 flex items-center gap-3">
+        <div className="flex-1 flex items-center gap-2.5">
           <MetricPill icon={Dumbbell} value={stats.count} label="treinos" color="bg-primary" />
           {stats.totalMin > 0 && (
             <MetricPill icon={Timer} value={stats.totalMin} label="min" color="bg-blue-500" />

@@ -1,6 +1,7 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useActiveGroup } from "@/contexts/ActiveGroupContext";
+import { useQueryClient } from "@tanstack/react-query";
 import { useUserGroups } from "@/hooks/useGroupData";
 import { useProfile, useUpdateWeeklyGoal } from "@/hooks/useProfile";
 import { useAllUserCheckins, computeDaysActive, computeStreaks, useHasCheckedInToday, useDeleteTodayCheckins } from "@/hooks/useCheckins";

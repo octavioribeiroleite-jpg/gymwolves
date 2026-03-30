@@ -38,7 +38,6 @@ const Dashboard = () => {
   const { showExitDialog, confirmExit, cancelExit } = useBackHandler();
   useCheckinNotifications();
   const queryClient = useQueryClient();
-  const queryClient = useQueryClient();
 
   const handleRefresh = useCallback(async () => {
     await queryClient.invalidateQueries();

@@ -133,7 +133,10 @@ const Dashboard = () => {
         {/* 4. Desafio ativo */}
         <HomeChallengesList />
 
-        {/* 5. Atividade da matilha */}
+        {/* 5. Seus grupos */}
+        <HomeGroupsList />
+
+        {/* 6. Atividade do grupo ativo */}
         {activeGroupId && <ActivityFeed groupId={activeGroupId} compact maxItems={2} />}
 
         {/* 6. Mapa de treinos compacto */}

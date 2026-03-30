@@ -151,7 +151,7 @@ const Dashboard = () => {
         )}
       </div>
 
-      <DashboardFAB onCheckin={() => setCheckinOpen(true)} />
+      
 
       <CheckinDialog
         open={checkinOpen}

@@ -63,13 +63,13 @@ const DashboardFAB = ({ onCheckin }: DashboardFABProps) => {
 
       <button
         onClick={() => setOpen(!open)}
-        className={`fixed bottom-20 right-4 z-50 flex h-13 w-13 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg glow-primary transition-all active:scale-90 ${
+        className={`fixed bottom-[76px] right-5 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg glow-primary transition-all active:scale-90 ${
           open ? "rotate-45" : ""
         } ${visible ? "translate-y-0 opacity-100" : "translate-y-16 opacity-0"}`}
         style={{ transitionDuration: "300ms" }}
         aria-label="Ações rápidas"
       >
-        <Plus className="h-6 w-6 transition-transform" strokeWidth={2.5} />
+        <Plus className="h-5 w-5 transition-transform" strokeWidth={2.5} />
       </button>
     </>
   );

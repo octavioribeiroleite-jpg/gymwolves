@@ -55,24 +55,15 @@ const DayDetailSheet = ({
   dayCheckins: DayCheckin[];
   onClose: () => void;
 }) => {
-  const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
-
-  useEffect(() => {
-    let cancelled = false;
-    const urls: string[] = dayCheckins
-      .map((c) => c.proof_url)
-      .filter(Boolean) as string[];
-    Promise.all(urls.map((u) => getSignedImageUrl(u).then((s) => [u, s] as const))).then(
-      (pairs) => {
-        if (cancelled) return;
-        const map: Record<string, string> = {};
-        pairs.forEach(([key, val]) => {
-          if (val) map[key] = val;
-        });
-        setSignedUrls(map);
+  const signedUrls = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const c of dayCheckins) {
+      if (c.proof_url) {
+        const url = getPublicImageUrl(c.proof_url);
+        if (url) map[c.proof_url] = url;
       }
-    );
-    return () => { cancelled = true; };
+    }
+    return map;
   }, [dayCheckins]);
 
   const dateFormatted = format(parseISO(dateKey), "dd 'de' MMMM", { locale: ptBR });

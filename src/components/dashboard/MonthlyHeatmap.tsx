@@ -34,16 +34,7 @@ interface DayCheckin {
 const WEEKDAY_LABELS = ["D", "S", "T", "Q", "Q", "S", "S"];
 
 const PhotoThumbnail = ({ proofUrl }: { proofUrl: string }) => {
-  const [url, setUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    getSignedImageUrl(proofUrl).then((u) => {
-      if (!cancelled) setUrl(u);
-    });
-    return () => { cancelled = true; };
-  }, [proofUrl]);
-
+  const url = getPublicImageUrl(proofUrl);
   if (!url) return null;
 
   return (

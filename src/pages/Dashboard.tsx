@@ -103,7 +103,7 @@ const Dashboard = () => {
         activeGroupName={activeGroupName}
       />
 
-      <div className="mx-auto max-w-md space-y-4 px-4 pt-2 pb-4">
+      <div className="mx-auto max-w-md space-y-3 px-5 pt-1.5 pb-4">
         {/* 1. Card principal do dia */}
         <WorkoutStatusCard
           todayDone={todayDone}

@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import {
   startOfMonth,
   endOfMonth,
@@ -13,7 +13,7 @@ import {
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { ChevronLeft, ChevronRight, X, Dumbbell, CalendarDays } from "lucide-react";
-import { getSignedImageUrl } from "@/lib/storage";
+import { getPublicImageUrl } from "@/lib/storage";
 import { useNavigate } from "react-router-dom";
 
 interface MonthlyHeatmapProps {
@@ -34,16 +34,7 @@ interface DayCheckin {
 const WEEKDAY_LABELS = ["D", "S", "T", "Q", "Q", "S", "S"];
 
 const PhotoThumbnail = ({ proofUrl }: { proofUrl: string }) => {
-  const [url, setUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    getSignedImageUrl(proofUrl).then((u) => {
-      if (!cancelled) setUrl(u);
-    });
-    return () => { cancelled = true; };
-  }, [proofUrl]);
-
+  const url = getPublicImageUrl(proofUrl);
   if (!url) return null;
 
   return (
@@ -64,24 +55,15 @@ const DayDetailSheet = ({
   dayCheckins: DayCheckin[];
   onClose: () => void;
 }) => {
-  const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
-
-  useEffect(() => {
-    let cancelled = false;
-    const urls: string[] = dayCheckins
-      .map((c) => c.proof_url)
-      .filter(Boolean) as string[];
-    Promise.all(urls.map((u) => getSignedImageUrl(u).then((s) => [u, s] as const))).then(
-      (pairs) => {
-        if (cancelled) return;
-        const map: Record<string, string> = {};
-        pairs.forEach(([key, val]) => {
-          if (val) map[key] = val;
-        });
-        setSignedUrls(map);
+  const signedUrls = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const c of dayCheckins) {
+      if (c.proof_url) {
+        const url = getPublicImageUrl(c.proof_url);
+        if (url) map[c.proof_url] = url;
       }
-    );
-    return () => { cancelled = true; };
+    }
+    return map;
   }, [dayCheckins]);
 
   const dateFormatted = format(parseISO(dateKey), "dd 'de' MMMM", { locale: ptBR });

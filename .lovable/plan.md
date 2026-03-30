@@ -1,54 +1,83 @@
 
 
-## Plano: Tornar imagens estáveis e rápidas
+## Plano: Padronização Global + Grupo Ativo + Multi-grupo na Home
 
-### Problema raiz
+### Contexto
 
-Cada componente que exibe uma imagem chama `createSignedUrl` individualmente via `useSignedUrl`. Isso causa:
-- **Sem cache**: a mesma imagem gera uma chamada de rede toda vez que o componente monta/remonta
-- **Cascata de requests**: o Dashboard renderiza ~10+ componentes, cada um disparando signed URL requests em paralelo
-- **Flash de conteúdo vazio**: `useState(null)` → render sem imagem → resolve → re-render com imagem
-
-### Solução: Bucket público + URL direta (sem signed URLs)
-
-A abordagem mais simples e performática: tornar o bucket `checkin-photos` **público** e usar URLs diretas, eliminando 100% das chamadas de signed URL.
-
-Fotos de treino não são dados sensíveis — são compartilhadas no feed do grupo. Torná-las públicas é seguro e resolve o problema na raiz.
+O app já funciona bem. A mudança principal é:
+- Tratar "Matilha" como nome de grupo, não como módulo
+- Adicionar seção "Seus grupos" na Home
+- Enriquecer a tela de Grupos (GroupList) com ranking, dias restantes e ação "Tornar ativo"
+- Padronizar visualmente todas as telas
+- Tornar o subtítulo do grupo ativo clicável no header
 
 ### Alterações
 
-**1. Migração SQL** — Tornar o bucket público
-```sql
-UPDATE storage.buckets SET public = true WHERE id = 'checkin-photos';
-```
-E adicionar policy de leitura pública nos objetos.
+**1. Novo componente `HomeGroupsList.tsx`** — Seção "Seus grupos" na Home
+- Mostra até 3 grupos (excluindo o ativo) como mini cards horizontais em scroll
+- Cada mini card: nome, progresso (X/Y dias), chip "Ativo" se aplicável
+- Botão "Tornar ativo" em cada card (chama `setActiveGroupId`)
+- Se houver mais de 3, CTA "Ver todos" → `/grupos`
+- Inserir no Dashboard entre `HomeChallengesList` e `ActivityFeed`
 
-**2. `src/lib/storage.ts`** — Nova função `getPublicImageUrl`
-- Usar `supabase.storage.from(BUCKET).getPublicUrl(path)` que retorna URL síncrona, sem chamada de rede
-- Manter `getSignedImageUrl` como fallback mas não usar mais
+**2. `Dashboard.tsx`** — Integrar `HomeGroupsList`
+- Importar e renderizar `HomeGroupsList` passando `groups`, `activeGroupId`, `setActiveGroupId`
+- Renomear comentário "Atividade da matilha" → "Atividade do grupo"
 
-**3. `src/hooks/useSignedUrl.ts`** — Simplificar para URL síncrona
-- `useSignedUrl` passa a retornar a URL pública diretamente (síncrono, sem useState/useEffect)
-- `useSignedUrls` retorna array de URLs públicas diretamente
-- Zero chamadas de rede, zero delay, zero flash
+**3. `DashboardHeader.tsx`** — Subtítulo clicável
+- Envolver o nome do grupo ativo em `<Link to="/grupos">` para troca rápida
+- Manter estilo atual, apenas adicionar navegação
 
-**4. Todos os consumidores** — Nenhuma mudança necessária
-- Como `useSignedUrl` mantém a mesma interface (recebe path, retorna string|null), todos os componentes (`WorkoutStatusCard`, `ActivityFeed`, `PostCard`, `RecentHistory`, `MonthlyHeatmap`) continuam funcionando sem alteração
+**4. `GroupList.tsx`** — Enriquecer cards com contexto
+- Adicionar chip "Grupo ativo" (verde, `bg-primary/10 text-primary`) no card do grupo ativo
+- Adicionar posição do usuário no ranking
+- Adicionar dias restantes
+- Separar ações: tocar no card → abre detalhes (`/grupos/:id/detalhes`); botão "Tornar ativo" → muda contexto sem navegar
+- Borda diferenciada (`border-primary/30`) no card ativo
 
-### Resultado
+**5. `HomeChallengesList.tsx`** — Adicionar chip "Ativo" no card do grupo ativo
 
-- Imagens aparecem instantaneamente (URL síncrona)
-- Zero chamadas extras de rede para resolver URLs
-- Zero flashes ou delays
-- Sem re-renders desnecessários
-- Performance drasticamente melhor no Dashboard
+**6. `AppScaffold.tsx`** — Padronizar spacing global
+- Alterar `space-y-4` → `space-y-3` e `px-5` para alinhar com Dashboard
+- Manter `py-4`
+
+**7. `BottomNav.tsx`** — Renomear label "Grupos" (já correto, manter)
+
+**8. `SidebarMenu.tsx`** — Renomear seção "Desafio" → "Grupo ativo"
+
+### Padronização visual (aplicar em todas as telas)
+- Cards: `rounded-2xl surface-1 border border-subtle` (já usado na maioria)
+- Títulos de seção: `text-[13px] font-bold`
+- Padding interno: `p-3.5`
+- Spacing entre seções: `space-y-3`
+
+### Ordem final da Home
+1. Header (subtítulo clicável)
+2. Card principal do dia
+3. Sua semana
+4. Métricas rápidas
+5. Desafio ativo (com chip "Ativo")
+6. **Seus grupos** (novo)
+7. Atividade do grupo ativo
+8. Mapa de treinos compacto
+9. Últimos check-ins
 
 ### Arquivos alterados
 
 | Arquivo | Mudança |
 |---|---|
-| Migração SQL | Bucket público + policy de leitura |
-| `src/lib/storage.ts` | Adicionar `getPublicImageUrl`, síncrona |
-| `src/hooks/useSignedUrl.ts` | Retornar URL pública síncrona em vez de signed URL assíncrona |
-| `MonthlyHeatmap.tsx` | Remover `PhotoThumbnail` e `DayDetailSheet` com signed URL manual, usar a nova função |
+| Novo `src/components/dashboard/HomeGroupsList.tsx` | Carrossel de mini cards dos outros grupos |
+| `src/pages/Dashboard.tsx` | Inserir HomeGroupsList na posição 6 |
+| `src/components/dashboard/DashboardHeader.tsx` | Subtítulo clicável → `/grupos` |
+| `src/pages/GroupList.tsx` | Chip ativo, ranking, dias restantes, ações separadas |
+| `src/components/dashboard/HomeChallengesList.tsx` | Chip "Ativo" |
+| `src/components/ds/AppScaffold.tsx` | `space-y-3 px-5` |
+| `src/components/SidebarMenu.tsx` | Renomear "Desafio" → "Grupo ativo" |
+
+### O que NÃO muda
+- ActiveGroupContext (já persiste em localStorage)
+- Lógica de check-in, notificações, pull-to-refresh
+- Hooks de dados existentes
+- BottomNav, FAB, cards internos
+- Tela de detalhe do grupo (GroupDetails) — já é genérica
 

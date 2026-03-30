@@ -5,10 +5,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useUserGroups } from "@/hooks/useGroupData";
 import { useProfile, useUpdateWeeklyGoal } from "@/hooks/useProfile";
 import { useAllUserCheckins, computeDaysActive, computeStreaks, useHasCheckedInToday, useDeleteTodayCheckins } from "@/hooks/useCheckins";
-import { useUserActiveChallenges } from "@/hooks/useUserChallenges";
 import { useBackHandler } from "@/hooks/useBackHandler";
 import { useCheckinNotifications } from "@/hooks/useCheckinNotifications";
-import { useCheckinEvent } from "@/hooks/useCheckinEvent";
 import { Loader2 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 

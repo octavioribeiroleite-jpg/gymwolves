@@ -1,10 +1,11 @@
 import { useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { useGroupCheckins } from "@/hooks/useCheckins";
 import { useGroupMembers } from "@/hooks/useGroupData";
-import SectionTitle from "@/components/ds/SectionTitle";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useSignedUrl } from "@/hooks/useSignedUrl";
+import { ChevronRight } from "lucide-react";
 
 const WORKOUT_EMOJIS: Record<string, string> = {
   musculacao: "🏋️",
@@ -19,9 +20,12 @@ const WORKOUT_EMOJIS: Record<string, string> = {
 
 interface ActivityFeedProps {
   groupId: string;
+  compact?: boolean;
+  maxItems?: number;
 }
 
-const ActivityFeed = ({ groupId }: ActivityFeedProps) => {
+const ActivityFeed = ({ groupId, compact = false, maxItems }: ActivityFeedProps) => {
+  const navigate = useNavigate();
   const { data: checkins } = useGroupCheckins(groupId);
   const { data: members } = useGroupMembers(groupId);
 
@@ -34,9 +38,11 @@ const ActivityFeed = ({ groupId }: ActivityFeedProps) => {
       profileMap.set(m.user_id, profile?.display_name || "Sem nome");
     });
 
+    const limit = maxItems ?? (compact ? 3 : 10);
+
     return [...checkins]
       .sort((a, b) => new Date(b.checkin_at).getTime() - new Date(a.checkin_at).getTime())
-      .slice(0, 10)
+      .slice(0, limit)
       .map((c) => ({
         id: c.id,
         name: profileMap.get(c.user_id) || "Sem nome",
@@ -45,42 +51,56 @@ const ActivityFeed = ({ groupId }: ActivityFeedProps) => {
         proofUrl: c.proof_url,
         time: c.checkin_at,
       }));
-  }, [checkins, members]);
+  }, [checkins, members, compact, maxItems]);
 
   if (feed.length === 0) return null;
 
   return (
-    <div className="rounded-[20px] surface-1 border border-subtle p-4">
-      <SectionTitle>Atividade do grupo</SectionTitle>
-      <div className="mt-3 space-y-3">
+    <div className="rounded-2xl surface-1 border border-subtle p-4 card-shadow">
+      <h2 className="text-[14px] font-bold mb-3">Atividade da matilha</h2>
+      <div className="space-y-2.5">
         {feed.map((item) => (
-          <FeedItem key={item.id} item={item} />
+          <FeedItem key={item.id} item={item} compact={compact} />
         ))}
       </div>
+      {compact && (
+        <button
+          onClick={() => navigate(`/grupos/${groupId}/detalhes`)}
+          className="flex items-center justify-center gap-1 w-full mt-3 pt-3 border-t border-subtle text-[13px] font-medium text-primary hover:text-primary/80 transition-colors"
+        >
+          Ver feed completo
+          <ChevronRight className="h-4 w-4" />
+        </button>
+      )}
     </div>
   );
 };
 
-const FeedItem = ({ item }: { item: { id: string; name: string; title: string; workoutType: string; proofUrl: string | null; time: string } }) => {
+const FeedItem = ({ item, compact }: { item: { id: string; name: string; title: string; workoutType: string; proofUrl: string | null; time: string }; compact?: boolean }) => {
   const signedUrl = useSignedUrl(item.proofUrl);
   return (
-    <div className="flex gap-3">
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-secondary text-lg">
+    <div className="flex gap-2.5">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary text-sm">
         {WORKOUT_EMOJIS[item.workoutType] || "⚡"}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-body">
+        <p className="text-[13px] leading-tight">
           <span className="font-bold">{item.name}</span>{" "}
-          <span className="text-muted-foreground">treinou</span>{" "}
+          <span className="text-muted-foreground">·</span>{" "}
           <span className="text-primary font-medium">{item.title}</span>
         </p>
-        {signedUrl && (
-          <img src={signedUrl} alt="Foto do treino" className="mt-2 h-32 w-full rounded-xl object-cover" />
+        {!compact && signedUrl && (
+          <img src={signedUrl} alt="Foto do treino" className="mt-1.5 h-28 w-full rounded-xl object-cover" />
         )}
-        <p className="mt-1 text-caption text-muted-foreground">
+        <p className="text-[11px] text-muted-foreground mt-0.5">
           {formatDistanceToNow(new Date(item.time), { addSuffix: true, locale: ptBR })}
         </p>
       </div>
+      {compact && signedUrl && (
+        <div className="h-9 w-9 shrink-0 rounded-lg overflow-hidden">
+          <img src={signedUrl} alt="" className="h-full w-full object-cover" />
+        </div>
+      )}
     </div>
   );
 };

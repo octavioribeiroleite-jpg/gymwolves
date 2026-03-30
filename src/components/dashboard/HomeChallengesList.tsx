@@ -3,51 +3,51 @@ import { Plus, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useUserGroups } from "@/hooks/useGroupData";
 import { useAuth } from "@/contexts/AuthContext";
+import { useActiveGroup } from "@/contexts/ActiveGroupContext";
 import HomeChallengeCard from "./HomeChallengeCard";
 
 const HomeChallengesList = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { activeGroupId } = useActiveGroup();
   const { data: groups, isLoading } = useUserGroups();
 
   if (isLoading) return null;
 
+  // Show only the active group, or the first one
+  const activeGroup = groups?.find((g) => g.id === activeGroupId) || groups?.[0];
+
   return (
     <div>
-      <h2 className="text-[15px] font-bold mb-3">Meus Desafios</h2>
+      <h2 className="text-[14px] font-bold mb-2">Desafio ativo</h2>
 
-      {groups && groups.length > 0 ? (
-        <div className="space-y-3">
-          {groups.map((g) => (
-            <HomeChallengeCard key={g.id} group={g} userId={user!.id} />
-          ))}
-        </div>
+      {activeGroup ? (
+        <HomeChallengeCard group={activeGroup} userId={user!.id} />
       ) : (
-        <div className="rounded-[18px] surface-1 border border-subtle p-6 text-center">
-          <p className="text-[14px] text-muted-foreground mb-2">
+        <div className="rounded-2xl surface-1 border border-subtle p-5 text-center card-shadow">
+          <p className="text-[13px] text-muted-foreground mb-3">
             Você ainda não participa de nenhum desafio
           </p>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              className="flex-1 rounded-xl h-9 text-[13px]"
+              onClick={() => navigate("/grupos/criar")}
+            >
+              <Plus className="h-4 w-4 mr-1" />
+              Criar
+            </Button>
+            <Button
+              variant="outline"
+              className="flex-1 rounded-xl h-9 text-[13px]"
+              onClick={() => navigate("/grupos/entrar")}
+            >
+              <LogIn className="h-4 w-4 mr-1" />
+              Entrar
+            </Button>
+          </div>
         </div>
       )}
-
-      <div className="flex gap-2 mt-3">
-        <Button
-          variant="outline"
-          className="flex-1 rounded-2xl h-10 text-[13px]"
-          onClick={() => navigate("/grupos/criar")}
-        >
-          <Plus className="h-4 w-4 mr-1" />
-          Criar desafio
-        </Button>
-        <Button
-          variant="outline"
-          className="flex-1 rounded-2xl h-10 text-[13px]"
-          onClick={() => navigate("/grupos/entrar")}
-        >
-          <LogIn className="h-4 w-4 mr-1" />
-          Entrar com código
-        </Button>
-      </div>
     </div>
   );
 };

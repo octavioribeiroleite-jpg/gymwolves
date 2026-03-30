@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { formatDistanceToNow, parseISO, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Dumbbell, Footprints, Bike, Heart, Zap, ChevronRight, Timer, Flame, X } from "lucide-react";
@@ -7,6 +8,8 @@ import { useSignedUrl } from "@/hooks/useSignedUrl";
 
 interface RecentHistoryProps {
   checkins: any[];
+  compact?: boolean;
+  maxItems?: number;
 }
 
 const workoutIcons: Record<string, any> = {
@@ -25,12 +28,13 @@ const workoutLabels: Record<string, string> = {
   cardio: "Cardio",
 };
 
-const RecentHistory = ({ checkins }: RecentHistoryProps) => {
+const RecentHistory = ({ checkins, compact = false, maxItems }: RecentHistoryProps) => {
+  const navigate = useNavigate();
   const [selectedCheckin, setSelectedCheckin] = useState<any>(null);
+  const limit = maxItems ?? (compact ? 2 : 5);
 
   const recent = useMemo(() => {
     const sorted = [...checkins].sort((a, b) => new Date(b.checkin_at).getTime() - new Date(a.checkin_at).getTime());
-    // Deduplicate by date — keep only the first (most recent) checkin per day
     const seenDates = new Set<string>();
     const unique = sorted.filter((c) => {
       const day = format(parseISO(c.checkin_at), "yyyy-MM-dd");
@@ -38,8 +42,8 @@ const RecentHistory = ({ checkins }: RecentHistoryProps) => {
       seenDates.add(day);
       return true;
     });
-    return unique.slice(0, 5);
-  }, [checkins]);
+    return unique.slice(0, limit);
+  }, [checkins, limit]);
 
   if (recent.length === 0) return null;
 
@@ -53,10 +57,8 @@ const RecentHistory = ({ checkins }: RecentHistoryProps) => {
 
   return (
     <>
-      <div className="space-y-2">
-        <h3 className="text-[13px] font-semibold text-muted-foreground uppercase tracking-wide px-1">
-          Histórico recente
-        </h3>
+      <div className="rounded-2xl surface-1 border border-subtle p-4 card-shadow">
+        <h2 className="text-[14px] font-bold mb-2">Últimos check-ins</h2>
         <div className="space-y-1.5">
           {recent.map((c) => {
             const Icon = workoutIcons[c.workout_type] || Zap;
@@ -69,9 +71,18 @@ const RecentHistory = ({ checkins }: RecentHistoryProps) => {
             );
           })}
         </div>
+        {compact && (
+          <button
+            onClick={() => navigate("/historico")}
+            className="flex items-center justify-center gap-1 w-full mt-3 pt-2.5 border-t border-subtle text-[13px] font-medium text-primary"
+          >
+            Ver histórico completo
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        )}
       </div>
 
-      {/* Detail Sheet - Samsung Health style */}
+      {/* Detail Sheet */}
       <Sheet open={!!selectedCheckin} onOpenChange={(open) => !open && setSelectedCheckin(null)}>
         <SheetContent side="bottom" className="rounded-t-3xl px-0 pb-8">
           {selectedCheckin && (() => {
@@ -81,7 +92,6 @@ const RecentHistory = ({ checkins }: RecentHistoryProps) => {
 
             return (
               <>
-                {/* Header with gradient */}
                 <div className="gradient-primary px-5 pt-4 pb-5 -mt-6 rounded-t-3xl">
                   <SheetHeader className="mb-3">
                     <SheetTitle className="text-primary-foreground text-left text-[15px]">
@@ -106,39 +116,17 @@ const RecentHistory = ({ checkins }: RecentHistoryProps) => {
                   </div>
                 </div>
 
-                {/* Proof photo */}
                 <ProofImage proofUrl={c.proof_url} />
 
-                {/* Details grid */}
                 <div className="px-5 pt-5">
                   <div className="grid grid-cols-2 gap-4">
-                    <DetailItem
-                      icon={Timer}
-                      label="Duração total"
-                      value={formatDuration(c.duration_min)}
-                      color="text-blue-500"
-                    />
-                    <DetailItem
-                      icon={Flame}
-                      label="Calorias perdidas"
-                      value={c.calories ? `${c.calories} kcal` : "—"}
-                      color="text-rose-500"
-                    />
+                    <DetailItem icon={Timer} label="Duração total" value={formatDuration(c.duration_min)} color="text-blue-500" />
+                    <DetailItem icon={Flame} label="Calorias" value={c.calories ? `${c.calories} kcal` : "—"} color="text-rose-500" />
                     {c.distance_km && (
-                      <DetailItem
-                        icon={Footprints}
-                        label="Distância"
-                        value={`${c.distance_km} km`}
-                        color="text-emerald-500"
-                      />
+                      <DetailItem icon={Footprints} label="Distância" value={`${c.distance_km} km`} color="text-primary" />
                     )}
                     {c.steps && (
-                      <DetailItem
-                        icon={Footprints}
-                        label="Passos"
-                        value={c.steps.toLocaleString("pt-BR")}
-                        color="text-emerald-500"
-                      />
+                      <DetailItem icon={Footprints} label="Passos" value={c.steps.toLocaleString("pt-BR")} color="text-primary" />
                     )}
                   </div>
 
@@ -179,16 +167,15 @@ const DetailItem = ({ icon: Icon, label, value, color }: DetailItemProps) => (
   </div>
 );
 
-// Sub-component for checkin row with signed URL
 const CheckinRow = ({ checkin: c, Icon, meta, onClick }: { checkin: any; Icon: any; meta: string[]; onClick: () => void }) => {
   const signedUrl = useSignedUrl(c.proof_url);
   return (
     <button
       onClick={onClick}
-      className="flex w-full items-center gap-2.5 rounded-xl surface-1 border border-subtle px-3 py-2.5 card-shadow text-left transition-default hover:border-primary/20 active:scale-[0.98]"
+      className="flex w-full items-center gap-2.5 rounded-xl px-2 py-2 text-left transition-default hover:bg-muted/30 active:scale-[0.98]"
     >
       {signedUrl ? (
-        <div className="h-11 w-11 shrink-0 rounded-xl overflow-hidden bg-secondary">
+        <div className="h-10 w-10 shrink-0 rounded-xl overflow-hidden bg-secondary">
           <img src={signedUrl} alt="" className="h-full w-full object-cover" />
         </div>
       ) : (
@@ -208,7 +195,6 @@ const CheckinRow = ({ checkin: c, Icon, meta, onClick }: { checkin: any; Icon: a
   );
 };
 
-// Sub-component for proof image with signed URL
 const ProofImage = ({ proofUrl }: { proofUrl: string | null }) => {
   const signedUrl = useSignedUrl(proofUrl);
   if (!signedUrl) return null;

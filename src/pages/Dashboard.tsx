@@ -9,13 +9,14 @@ import { useUserActiveChallenges } from "@/hooks/useUserChallenges";
 import { useBackHandler } from "@/hooks/useBackHandler";
 import { useCheckinNotifications } from "@/hooks/useCheckinNotifications";
 import { Loader2 } from "lucide-react";
+import { format, parseISO } from "date-fns";
 
 import CheckinDialog from "@/components/CheckinDialog";
 import ActivityFeed from "@/components/ActivityFeed";
 import Onboarding from "./Onboarding";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import WorkoutStatusCard from "@/components/dashboard/WorkoutStatusCard";
-import HomeWelcome from "@/components/dashboard/HomeWelcome";
+import QuickStats from "@/components/dashboard/QuickStats";
 import HomeChallengesList from "@/components/dashboard/HomeChallengesList";
 import DashboardFAB from "@/components/dashboard/DashboardFAB";
 import WeeklySummary from "@/components/dashboard/WeeklySummary";
@@ -52,7 +53,6 @@ const Dashboard = () => {
   const deleteTodayCheckins = useDeleteTodayCheckins();
   const updateGoal = useUpdateWeeklyGoal();
 
-  // Get all group IDs for global checkin query
   const allGroupIds = useMemo(() => groups?.map((g: any) => g.id) || [], [groups]);
   const { data: allCheckins } = useAllUserCheckins(allGroupIds.length > 0 ? allGroupIds : undefined);
 
@@ -62,6 +62,22 @@ const Dashboard = () => {
     const streaks = computeStreaks(allCheckins, user.id);
     return { streak: streaks.current, daysActive: days, record: streaks.best };
   }, [allCheckins, user]);
+
+  // Get today's checkin for the status card
+  const todayCheckin = useMemo(() => {
+    if (!allCheckins || !user) return null;
+    const today = format(new Date(), "yyyy-MM-dd");
+    const found = [...allCheckins]
+      .reverse()
+      .find((c) => c.user_id === user.id && format(parseISO(c.checkin_at), "yyyy-MM-dd") === today);
+    return found || null;
+  }, [allCheckins, user]);
+
+  // Active group name
+  const activeGroupName = useMemo(() => {
+    if (!groups || !activeGroupId) return undefined;
+    return groups.find((g: any) => g.id === activeGroupId)?.name;
+  }, [groups, activeGroupId]);
 
   if (isLoading) {
     return (
@@ -79,38 +95,55 @@ const Dashboard = () => {
 
   return (
     <PullToRefresh onRefresh={handleRefresh}>
-    <div className="min-h-screen bg-background">
-      <DashboardHeader userName={userName} streak={globalStats.streak} todayDone={todayDone} />
+    <div className="min-h-screen bg-background pb-20">
+      <DashboardHeader
+        userName={userName}
+        streak={globalStats.streak}
+        todayDone={todayDone}
+        activeGroupName={activeGroupName}
+      />
 
-      <div className="mx-auto max-w-md space-y-6 px-4 py-4">
-        <HomeWelcome
-          streak={globalStats.streak}
-          daysActive={globalStats.daysActive}
-          record={globalStats.record}
-        />
-
+      <div className="mx-auto max-w-md space-y-4 px-4 pt-2 pb-4">
+        {/* 1. Card principal do dia */}
         <WorkoutStatusCard
           todayDone={todayDone}
           onCheckin={() => setCheckinOpen(true)}
           onDelete={() => deleteTodayCheckins.mutate()}
           isDeleting={deleteTodayCheckins.isPending}
+          todayCheckin={todayCheckin}
         />
 
+        {/* 2. Sua semana */}
         {allCheckins && allCheckins.length > 0 && (
-          <>
-            <WeeklySummary
-              checkins={allCheckins}
-              weeklyGoal={(profile as any)?.weekly_goal ?? 5}
-              onGoalChange={(g) => updateGoal.mutate(g)}
-            />
-            <RecentHistory checkins={allCheckins} />
-            <MonthlyHeatmap checkins={allCheckins} />
-          </>
+          <WeeklySummary
+            checkins={allCheckins}
+            weeklyGoal={(profile as any)?.weekly_goal ?? 5}
+            onGoalChange={(g) => updateGoal.mutate(g)}
+          />
         )}
 
+        {/* 3. Métricas rápidas */}
+        <QuickStats
+          streak={globalStats.streak}
+          daysActive={globalStats.daysActive}
+          record={globalStats.record}
+        />
+
+        {/* 4. Desafio ativo */}
         <HomeChallengesList />
 
-        {activeGroupId && <ActivityFeed groupId={activeGroupId} />}
+        {/* 5. Atividade da matilha */}
+        {activeGroupId && <ActivityFeed groupId={activeGroupId} compact maxItems={3} />}
+
+        {/* 6. Mapa de treinos compacto */}
+        {allCheckins && allCheckins.length > 0 && (
+          <MonthlyHeatmap checkins={allCheckins} compact />
+        )}
+
+        {/* 7. Últimos check-ins */}
+        {allCheckins && allCheckins.length > 0 && (
+          <RecentHistory checkins={allCheckins} compact maxItems={2} />
+        )}
       </div>
 
       <DashboardFAB onCheckin={() => setCheckinOpen(true)} />

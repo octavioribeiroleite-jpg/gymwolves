@@ -12,11 +12,13 @@ import {
   isFuture,
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { ChevronLeft, ChevronRight, X, Dumbbell } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, Dumbbell, CalendarDays } from "lucide-react";
 import { getSignedImageUrl } from "@/lib/storage";
+import { useNavigate } from "react-router-dom";
 
 interface MonthlyHeatmapProps {
   checkins: any[];
+  compact?: boolean;
 }
 
 interface DayCheckin {
@@ -128,11 +130,12 @@ const DayDetailSheet = ({
   );
 };
 
-const MonthlyHeatmap = ({ checkins }: MonthlyHeatmapProps) => {
+const MonthlyHeatmap = ({ checkins, compact = false }: MonthlyHeatmapProps) => {
+  const navigate = useNavigate();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState(!compact);
 
-  // Build a map of date -> checkins for the current month
   const checkinsByDate = useMemo(() => {
     const map: Record<string, DayCheckin[]> = {};
     for (const c of checkins) {
@@ -203,21 +206,49 @@ const MonthlyHeatmap = ({ checkins }: MonthlyHeatmapProps) => {
 
   const canGoNext = !isFuture(startOfMonth(addMonths(currentMonth, 1)));
 
+  // Compact: show summary only
+  if (compact && !expanded) {
+    return (
+      <div className="rounded-2xl surface-1 border border-subtle p-4 card-shadow">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <CalendarDays className="h-4 w-4 text-primary" />
+            <h2 className="text-[14px] font-bold">Mapa de treinos</h2>
+          </div>
+          <span className="text-[13px] font-bold text-primary">{trainedCount} dias</span>
+        </div>
+        <p className="text-[12px] text-muted-foreground mt-1 capitalize">{monthLabel}</p>
+        <button
+          onClick={() => setExpanded(true)}
+          className="flex items-center justify-center gap-1 w-full mt-3 pt-2.5 border-t border-subtle text-[13px] font-medium text-primary"
+        >
+          Abrir calendário
+          <ChevronRight className="h-4 w-4" />
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-2">
-      <h2 className="text-[13px] font-semibold uppercase tracking-wide text-muted-foreground">
-        Mapa de treinos
-      </h2>
-      <div className="rounded-2xl surface-2 border border-subtle px-4 py-3 card-shadow">
+      <div className="flex items-center justify-between">
+        <h2 className="text-[14px] font-bold">Mapa de treinos</h2>
+        {compact && expanded && (
+          <button onClick={() => setExpanded(false)} className="text-[12px] text-muted-foreground">
+            Recolher
+          </button>
+        )}
+      </div>
+      <div className="rounded-2xl surface-1 border border-subtle px-3 py-3 card-shadow">
         {/* Month navigation */}
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between mb-2">
           <button
             onClick={() => setCurrentMonth((m) => subMonths(m, 1))}
             className="p-1 rounded-lg hover:bg-muted/50 transition-colors"
           >
             <ChevronLeft className="h-4 w-4 text-muted-foreground" />
           </button>
-          <span className="text-sm font-semibold capitalize">{monthLabel}</span>
+          <span className="text-[13px] font-semibold capitalize">{monthLabel}</span>
           <button
             onClick={() => setCurrentMonth((m) => addMonths(m, 1))}
             disabled={!canGoNext}
@@ -258,12 +289,10 @@ const MonthlyHeatmap = ({ checkins }: MonthlyHeatmapProps) => {
                     : "bg-muted/40 text-muted-foreground cursor-default"
                 }`}
               >
-                {/* Show photo thumbnail if available */}
                 {cell.done && cell.hasPhoto && cell.firstPhoto && (
                   <PhotoThumbnail proofUrl={cell.firstPhoto} />
                 )}
-                {/* Day number overlay */}
-                <span className={`relative z-10 ${cell.hasPhoto && cell.done ? "text-white text-shadow-sm drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" : ""}`}>
+                <span className={`relative z-10 ${cell.hasPhoto && cell.done ? "text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" : ""}`}>
                   {format(cell.date, "d")}
                 </span>
               </button>
@@ -272,18 +301,15 @@ const MonthlyHeatmap = ({ checkins }: MonthlyHeatmapProps) => {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between mt-3 pt-2 border-t border-subtle">
+        <div className="flex items-center justify-between mt-2 pt-2 border-t border-subtle">
           <div className="flex items-center gap-2">
             <div className="h-2.5 w-2.5 rounded-sm bg-primary" />
             <span className="text-[11px] text-muted-foreground">Treinou</span>
-            <div className="h-2.5 w-2.5 rounded-sm bg-muted/40 ml-2" />
-            <span className="text-[11px] text-muted-foreground">Não treinou</span>
           </div>
           <span className="text-[12px] font-semibold text-primary">{trainedCount} dias</span>
         </div>
       </div>
 
-      {/* Day detail sheet */}
       {selectedDay && checkinsByDate[selectedDay] && (
         <DayDetailSheet
           dateKey={selectedDay}

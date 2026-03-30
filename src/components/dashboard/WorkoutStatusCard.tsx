@@ -54,16 +54,16 @@ const WorkoutStatusCard = ({ todayDone, onCheckin, onDelete, isDeleting, todayCh
       <>
         <div className="rounded-2xl surface-1 border border-subtle overflow-hidden card-shadow">
           {/* Green success banner */}
-          <div className="gradient-primary px-3.5 py-2.5 flex items-center gap-2.5">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/20">
-              <CheckCircle2 className="h-4 w-4 text-primary-foreground" />
+          <div className="gradient-primary px-3 py-2 flex items-center gap-2">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/20">
+              <CheckCircle2 className="h-3.5 w-3.5 text-primary-foreground" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[14px] font-bold text-primary-foreground leading-tight">Treino concluído! 💪</p>
-              <p className="text-[11px] text-primary-foreground/70 leading-tight mt-0.5">{typeLabel} · {timeAgo}</p>
+              <p className="text-[13px] font-bold text-primary-foreground leading-tight">Treino concluído! 💪</p>
+              <p className="text-[10px] text-primary-foreground/70 leading-tight mt-0.5">{typeLabel} · {timeAgo}</p>
             </div>
             {signedUrl && (
-              <div className="h-9 w-9 shrink-0 rounded-lg overflow-hidden border-2 border-white/30">
+              <div className="h-8 w-8 shrink-0 rounded-lg overflow-hidden border-2 border-white/30">
                 <img src={signedUrl} alt="" className="h-full w-full object-cover" />
               </div>
             )}

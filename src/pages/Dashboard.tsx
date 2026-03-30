@@ -103,7 +103,7 @@ const Dashboard = () => {
         {/* 1. Card principal do dia */}
         <WorkoutStatusCard
           todayDone={todayDone}
-          onCheckin={() => setCheckinOpen(true)}
+          onCheckin={() => dispatchCheckinOpen()}
           onDelete={() => deleteTodayCheckins.mutate()}
           isDeleting={deleteTodayCheckins.isPending}
           todayCheckin={todayCheckin}

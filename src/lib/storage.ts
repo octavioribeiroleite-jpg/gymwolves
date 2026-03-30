@@ -28,6 +28,24 @@ export function getPublicImageUrl(urlOrPath: string | null | undefined): string 
 }
 
 /**
+ * Returns a resized thumbnail URL using Supabase image transformation.
+ * Falls back to the full URL if transformation isn't supported.
+ */
+export function getThumbnailUrl(urlOrPath: string | null | undefined, width = 80): string | null {
+  const fullUrl = getPublicImageUrl(urlOrPath);
+  if (!fullUrl) return null;
+  // Supabase storage image transformation via render/image
+  // Convert /object/public/ to /render/image/public/ and append query params
+  if (fullUrl.includes("/storage/v1/object/public/")) {
+    return fullUrl.replace(
+      "/storage/v1/object/public/",
+      "/storage/v1/render/image/public/"
+    ) + `?width=${width}&resize=cover&quality=60`;
+  }
+  return fullUrl;
+}
+
+/**
  * @deprecated Use getPublicImageUrl instead. Kept for backward compatibility.
  */
 export async function getSignedImageUrl(urlOrPath: string | null | undefined): Promise<string | null> {

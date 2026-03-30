@@ -35,10 +35,9 @@ import {
 const Dashboard = () => {
   const { user } = useAuth();
   const { activeGroupId } = useActiveGroup();
-  const [checkinOpen, setCheckinOpen] = useState(false);
   const { showExitDialog, confirmExit, cancelExit } = useBackHandler();
   useCheckinNotifications();
-  useCheckinEvent(useCallback(() => setCheckinOpen(true), []));
+  const queryClient = useQueryClient();
   const queryClient = useQueryClient();
 
   const handleRefresh = useCallback(async () => {

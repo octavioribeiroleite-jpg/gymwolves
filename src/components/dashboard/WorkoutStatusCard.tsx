@@ -72,7 +72,7 @@ const WorkoutStatusCard = ({ todayDone, onCheckin, onDelete, isDeleting, todayCh
           <div className="flex items-center border-t border-subtle divide-x divide-subtle">
             <button
               onClick={onCheckin}
-              className="flex-1 text-center py-2 text-[12px] font-medium text-primary hover:bg-muted/30 transition-colors"
+              className="flex-1 text-center py-1.5 text-[11px] font-medium text-primary hover:bg-muted/30 transition-colors"
             >
               Ver check-in
             </button>

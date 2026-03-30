@@ -92,7 +92,11 @@ const DayDetailSheet = ({
                 <img
                   src={signedUrls[c.proof_url]}
                   alt="Treino"
-                  className="w-full max-h-[50vh] object-contain bg-black/5"
+                  loading="lazy"
+                  decoding="async"
+                  className="w-full max-h-[50vh] object-contain bg-black/5 opacity-0 transition-opacity duration-300"
+                  onLoad={(e) => { (e.target as HTMLImageElement).classList.replace("opacity-0", "opacity-100"); }}
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
                 />
               )}
               <div className="p-3 space-y-1">

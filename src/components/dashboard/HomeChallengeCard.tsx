@@ -24,7 +24,7 @@ const getInitials = (name: string) =>
     .slice(0, 2)
     .toUpperCase();
 
-const HomeChallengeCard = ({ group, userId }: HomeChallengeCardProps) => {
+const HomeChallengeCard = ({ group, userId, showActiveBadge = false }: HomeChallengeCardProps) => {
   const navigate = useNavigate();
   const { setActiveGroupId } = useActiveGroup();
   const { data: members } = useGroupMembers(group.id);

@@ -19,6 +19,9 @@ export const useGroupCheckins = (groupId: string | undefined) => {
       return data as any[];
     },
     enabled: !!groupId,
+    staleTime: 30_000,          // considera fresco por 30s
+    refetchOnWindowFocus: true, // atualiza ao voltar para o app
+    refetchInterval: 60_000,    // polling a cada 60s em background
   });
 };
 
@@ -26,7 +29,6 @@ export const useGroupCheckins = (groupId: string | undefined) => {
 export const useCreateCheckin = () => {
   const { user } = useAuth();
   const qc = useQueryClient();
-
   return useMutation({
     mutationFn: async (params: {
       groupId: string;
@@ -42,8 +44,14 @@ export const useCreateCheckin = () => {
     }) => {
       if (!user) throw new Error("Não autenticado");
       const checkinAt = params.checkinDate
-        ? new Date(params.checkinDate.getFullYear(), params.checkinDate.getMonth(), params.checkinDate.getDate(), 12, 0, 0).toISOString()
+        ? new Date(
+            params.checkinDate.getFullYear(),
+            params.checkinDate.getMonth(),
+            params.checkinDate.getDate(),
+            12, 0, 0
+          ).toISOString()
         : new Date().toISOString();
+
       const { data, error } = await supabase
         .from("checkins")
         .insert({
@@ -62,14 +70,21 @@ export const useCreateCheckin = () => {
         } as any)
         .select()
         .single();
+
       if (error) throw error;
       return data;
     },
     onSuccess: (_, vars) => {
+      // Invalida todas as queries relacionadas
       qc.invalidateQueries({ queryKey: ["checkins", vars.groupId] });
+      qc.invalidateQueries({ queryKey: ["checkins-today"] });
+      qc.invalidateQueries({ queryKey: ["all-user-checkins"] });
       toast.success("Treino registrado! 💪");
     },
-    onError: (e: any) => toast.error(e.message),
+    onError: (e: any) => {
+      console.error("[useCreateCheckin] erro:", e);
+      toast.error("Erro ao registrar treino: " + (e.message || "tente novamente"));
+    },
   });
 };
 
@@ -77,7 +92,6 @@ export const useCreateCheckin = () => {
 export const useCreateCheckinAll = () => {
   const { user } = useAuth();
   const qc = useQueryClient();
-
   return useMutation({
     mutationFn: async (params: {
       challenges: { challengeId: string; groupId: string }[];
@@ -95,8 +109,14 @@ export const useCreateCheckinAll = () => {
       if (!params.challenges.length) throw new Error("Nenhum desafio ativo");
 
       const checkinAt = params.checkinDate
-        ? new Date(params.checkinDate.getFullYear(), params.checkinDate.getMonth(), params.checkinDate.getDate(), 12, 0, 0).toISOString()
+        ? new Date(
+            params.checkinDate.getFullYear(),
+            params.checkinDate.getMonth(),
+            params.checkinDate.getDate(),
+            12, 0, 0
+          ).toISOString()
         : new Date().toISOString();
+
       const today = params.checkinDate
         ? format(params.checkinDate, "yyyy-MM-dd")
         : format(new Date(), "yyyy-MM-dd");
@@ -104,9 +124,25 @@ export const useCreateCheckinAll = () => {
       // Unique group IDs to avoid duplicate checkins for same group
       const uniqueGroups = [...new Set(params.challenges.map((c) => c.groupId))];
 
-      // Insert checkins for each unique group
+      // FIX: verifica se já existe checkin hoje antes de inserir (evita duplicatas)
+      const { data: existing } = await supabase
+        .from("checkins")
+        .select("group_id")
+        .eq("user_id", user.id)
+        .gte("checkin_at", today + "T00:00:00.000Z")
+        .lt("checkin_at", today + "T23:59:59.999Z")
+        .in("group_id", uniqueGroups);
+
+      const alreadyCheckedGroupIds = new Set((existing || []).map((c: any) => c.group_id));
+      const groupsToInsert = uniqueGroups.filter((gid) => !alreadyCheckedGroupIds.has(gid));
+
+      if (groupsToInsert.length === 0) {
+        throw new Error("Você já fez check-in hoje em todos os desafios ativos.");
+      }
+
+      // Insert checkins apenas nos grupos que ainda não têm check-in hoje
       const { error: checkinError } = await supabase.from("checkins").insert(
-        uniqueGroups.map((groupId) => ({
+        groupsToInsert.map((groupId) => ({
           group_id: groupId,
           user_id: user.id,
           title: params.title,
@@ -121,31 +157,41 @@ export const useCreateCheckinAll = () => {
           steps: params.steps || null,
         }) as any)
       );
+
       if (checkinError) throw checkinError;
 
-      // Try to insert workout_logs (may fail if challenge_participants is empty, ignore)
+      // workout_logs — ignora falha silenciosamente
       try {
-        await supabase.from("workout_logs").insert(
-          params.challenges.map((c) => ({
+        const logsToInsert = params.challenges
+          .filter((c) => !alreadyCheckedGroupIds.has(c.groupId))
+          .map((c) => ({
             challenge_id: c.challengeId,
             user_id: user.id,
             workout_date: today,
-          }))
-        );
+          }));
+        if (logsToInsert.length > 0) {
+          await supabase.from("workout_logs").insert(logsToInsert);
+        }
       } catch {
-        // workout_logs may fail due to RLS if challenge_participants is empty — safe to ignore
+        // safe to ignore
       }
 
-      return { groupIds: uniqueGroups, count: params.challenges.length };
+      return { groupIds: groupsToInsert, count: groupsToInsert.length };
     },
     onSuccess: (result) => {
+      // FIX: invalida TODAS as queries de checkins de uma vez
       result.groupIds.forEach((gid) => {
         qc.invalidateQueries({ queryKey: ["checkins", gid] });
       });
+      qc.invalidateQueries({ queryKey: ["checkins-today"] });
+      qc.invalidateQueries({ queryKey: ["all-user-checkins"] });
       qc.invalidateQueries({ queryKey: ["workout-logs"] });
       toast.success(`Treino registrado em ${result.count} desafio${result.count > 1 ? "s" : ""}! 💪`);
     },
-    onError: (e: any) => toast.error(e.message),
+    onError: (e: any) => {
+      console.error("[useCreateCheckinAll] erro:", e);
+      toast.error(e.message || "Erro ao registrar treino. Tente novamente.");
+    },
   });
 };
 
@@ -163,6 +209,8 @@ export const useDeleteCheckin = () => {
     },
     onSuccess: (groupId) => {
       qc.invalidateQueries({ queryKey: ["checkins", groupId] });
+      qc.invalidateQueries({ queryKey: ["checkins-today"] });
+      qc.invalidateQueries({ queryKey: ["all-user-checkins"] });
       toast.success("Treino removido");
     },
     onError: (e: any) => toast.error(e.message),
@@ -202,7 +250,6 @@ export const computeStreaks = (checkins: any[], userId: string) => {
 
   let streak = 1;
   let best = 1;
-
   for (let i = 1; i < dates.length; i++) {
     const prev = new Date(dates[i - 1]);
     const curr = new Date(dates[i]);
@@ -219,7 +266,6 @@ export const computeStreaks = (checkins: any[], userId: string) => {
   const yesterday = format(new Date(Date.now() - 86400000), "yyyy-MM-dd");
   const last = dates[dates.length - 1];
   const current = last === today || last === yesterday ? streak : 0;
-
   return { current, best };
 };
 
@@ -240,6 +286,9 @@ export const useAllUserCheckins = (groupIds: string[] | undefined) => {
       return data as any[];
     },
     enabled: !!user && !!groupIds && groupIds.length > 0,
+    staleTime: 30_000,
+    refetchOnWindowFocus: true,
+    refetchInterval: 60_000,
   });
 };
 
@@ -258,7 +307,6 @@ export const useHasCheckedInToday = () => {
   const { user } = useAuth();
   const today = format(new Date(), "yyyy-MM-dd");
   const tomorrow = format(new Date(Date.now() + 86400000), "yyyy-MM-dd");
-
   return useQuery({
     queryKey: ["checkins-today", user?.id, today],
     queryFn: async () => {
@@ -267,12 +315,15 @@ export const useHasCheckedInToday = () => {
         .from("checkins")
         .select("id", { count: "exact", head: true })
         .eq("user_id", user.id)
-        .gte("checkin_at", today)
-        .lt("checkin_at", tomorrow);
+        .gte("checkin_at", today + "T00:00:00.000Z")
+        .lt("checkin_at", tomorrow + "T00:00:00.000Z");
       if (error) throw error;
       return (count ?? 0) > 0;
     },
     enabled: !!user,
+    staleTime: 10_000,           // FIX: mais curto — verifica com mais frequência
+    refetchOnWindowFocus: true,
+    refetchInterval: 30_000,     // FIX: polling a cada 30s para o "hoje"
   });
 };
 
@@ -280,32 +331,34 @@ export const useHasCheckedInToday = () => {
 export const useDeleteTodayCheckins = () => {
   const { user } = useAuth();
   const qc = useQueryClient();
-
   return useMutation({
     mutationFn: async () => {
       if (!user) throw new Error("Não autenticado");
       const today = format(new Date(), "yyyy-MM-dd");
       const tomorrow = format(new Date(Date.now() + 86400000), "yyyy-MM-dd");
 
-      // Delete today's checkins
       const { error: checkinError } = await supabase
         .from("checkins")
         .delete()
         .eq("user_id", user.id)
-        .gte("checkin_at", today)
-        .lt("checkin_at", tomorrow);
+        .gte("checkin_at", today + "T00:00:00.000Z")
+        .lt("checkin_at", tomorrow + "T00:00:00.000Z");
+
       if (checkinError) throw checkinError;
 
-      // Delete today's workout_logs
       const { error: logError } = await supabase
         .from("workout_logs")
         .delete()
         .eq("user_id", user.id)
         .eq("workout_date", today);
+
       if (logError) throw logError;
     },
     onSuccess: () => {
+      // FIX: invalida tudo relacionado a checkins
       qc.invalidateQueries({ queryKey: ["checkins"] });
+      qc.invalidateQueries({ queryKey: ["checkins-today"] });
+      qc.invalidateQueries({ queryKey: ["all-user-checkins"] });
       qc.invalidateQueries({ queryKey: ["workout-logs"] });
       toast.success("Treino removido");
     },

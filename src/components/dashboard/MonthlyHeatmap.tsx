@@ -13,7 +13,7 @@ import {
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { ChevronLeft, ChevronRight, X, Dumbbell, CalendarDays } from "lucide-react";
-import { getPublicImageUrl, getThumbnailUrl } from "@/lib/storage";
+import { getPublicImageUrl } from "@/lib/storage";
 import { useNavigate } from "react-router-dom";
 
 interface MonthlyHeatmapProps {

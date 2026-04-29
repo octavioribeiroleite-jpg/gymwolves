@@ -43,7 +43,7 @@ const PhotoThumbnail = ({ proofUrl }: { proofUrl: string }) => {
       alt=""
       loading="lazy"
       decoding="async"
-      className="absolute inset-0 w-full h-full object-cover rounded-md opacity-0 transition-opacity duration-300"
+      className="absolute inset-0 w-full h-full object-cover rounded-md z-0 opacity-0 transition-opacity duration-300"
       onLoad={(e) => { (e.target as HTMLImageElement).classList.replace("opacity-0", "opacity-100"); }}
       onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
     />
@@ -269,7 +269,7 @@ const MonthlyHeatmap = ({ checkins, compact = false }: MonthlyHeatmapProps) => {
                 key={cell.key}
                 disabled={!cell.done}
                 onClick={() => cell.done && setSelectedDay(cell.key)}
-                className={`relative aspect-square rounded-md flex items-center justify-center text-[10px] font-medium transition-all duration-200 overflow-hidden ${
+                className={`relative aspect-square rounded-md flex items-center justify-center text-[10px] font-medium transition-all duration-200 overflow-hidden isolate ${
                   cell.done
                     ? "bg-primary text-primary-foreground shadow-[0_0_6px_hsl(var(--primary)/0.3)] cursor-pointer active:scale-95"
                     : cell.today
@@ -282,7 +282,7 @@ const MonthlyHeatmap = ({ checkins, compact = false }: MonthlyHeatmapProps) => {
                 {cell.done && cell.hasPhoto && cell.firstPhoto && (
                   <PhotoThumbnail proofUrl={cell.firstPhoto} />
                 )}
-                <span className="relative z-10 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+                <span className="relative z-10 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] pointer-events-none">
                   {format(cell.date, "d")}
                 </span>
               </button>

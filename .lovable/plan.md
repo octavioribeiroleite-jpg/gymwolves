@@ -1,83 +1,50 @@
+# Finalização automática de competições
 
+## Objetivo
+Quando um grupo do tipo `challenge` passa de `end_date`, marcá-lo como `finished` automaticamente e refletir isso na UI (sumir das listas ativas, aparecer em "Desafios concluídos").
 
-## Plano: Padronização Global + Grupo Ativo + Multi-grupo na Home
+## Migration 1 — Coluna `status` em `groups`
+- `ALTER TABLE groups ADD COLUMN status TEXT NOT NULL DEFAULT 'active'`
+- `CHECK (status IN ('active','finished'))`
+- Backfill imediato: marcar `finished` os grupos `type='challenge'` com `end_date < CURRENT_DATE`
+- Index parcial em `(status)` para acelerar o filtro de listagens
 
-### Contexto
+## Migration 2 — Extensões + cron horário
+- `CREATE EXTENSION IF NOT EXISTS pg_cron;`
+- `CREATE EXTENSION IF NOT EXISTS pg_net;` (incluída para uso futuro)
+- Função `public.finalize_expired_groups()` (SECURITY DEFINER, search_path travado):
+  ```text
+  UPDATE groups
+     SET status = 'finished'
+   WHERE status = 'active'
+     AND type = 'challenge'
+     AND end_date IS NOT NULL
+     AND end_date < CURRENT_DATE;
+  ```
+- `cron.schedule('finalize-expired-groups', '0 * * * *', 'SELECT public.finalize_expired_groups();')` — roda toda hora cheia
+- Idempotente: só toca em linhas ainda `active`. Grupos sem `end_date` ou tipo não-challenge nunca finalizam.
 
-O app já funciona bem. A mudança principal é:
-- Tratar "Matilha" como nome de grupo, não como módulo
-- Adicionar seção "Seus grupos" na Home
-- Enriquecer a tela de Grupos (GroupList) com ranking, dias restantes e ação "Tornar ativo"
-- Padronizar visualmente todas as telas
-- Tornar o subtítulo do grupo ativo clicável no header
-
-### Alterações
-
-**1. Novo componente `HomeGroupsList.tsx`** — Seção "Seus grupos" na Home
-- Mostra até 3 grupos (excluindo o ativo) como mini cards horizontais em scroll
-- Cada mini card: nome, progresso (X/Y dias), chip "Ativo" se aplicável
-- Botão "Tornar ativo" em cada card (chama `setActiveGroupId`)
-- Se houver mais de 3, CTA "Ver todos" → `/grupos`
-- Inserir no Dashboard entre `HomeChallengesList` e `ActivityFeed`
-
-**2. `Dashboard.tsx`** — Integrar `HomeGroupsList`
-- Importar e renderizar `HomeGroupsList` passando `groups`, `activeGroupId`, `setActiveGroupId`
-- Renomear comentário "Atividade da matilha" → "Atividade do grupo"
-
-**3. `DashboardHeader.tsx`** — Subtítulo clicável
-- Envolver o nome do grupo ativo em `<Link to="/grupos">` para troca rápida
-- Manter estilo atual, apenas adicionar navegação
-
-**4. `GroupList.tsx`** — Enriquecer cards com contexto
-- Adicionar chip "Grupo ativo" (verde, `bg-primary/10 text-primary`) no card do grupo ativo
-- Adicionar posição do usuário no ranking
-- Adicionar dias restantes
-- Separar ações: tocar no card → abre detalhes (`/grupos/:id/detalhes`); botão "Tornar ativo" → muda contexto sem navegar
-- Borda diferenciada (`border-primary/30`) no card ativo
-
-**5. `HomeChallengesList.tsx`** — Adicionar chip "Ativo" no card do grupo ativo
-
-**6. `AppScaffold.tsx`** — Padronizar spacing global
-- Alterar `space-y-4` → `space-y-3` e `px-5` para alinhar com Dashboard
-- Manter `py-4`
-
-**7. `BottomNav.tsx`** — Renomear label "Grupos" (já correto, manter)
-
-**8. `SidebarMenu.tsx`** — Renomear seção "Desafio" → "Grupo ativo"
-
-### Padronização visual (aplicar em todas as telas)
-- Cards: `rounded-2xl surface-1 border border-subtle` (já usado na maioria)
-- Títulos de seção: `text-[13px] font-bold`
-- Padding interno: `p-3.5`
-- Spacing entre seções: `space-y-3`
-
-### Ordem final da Home
-1. Header (subtítulo clicável)
-2. Card principal do dia
-3. Sua semana
-4. Métricas rápidas
-5. Desafio ativo (com chip "Ativo")
-6. **Seus grupos** (novo)
-7. Atividade do grupo ativo
-8. Mapa de treinos compacto
-9. Últimos check-ins
-
-### Arquivos alterados
+## Frontend — usar `status` em vez de comparar datas
 
 | Arquivo | Mudança |
 |---|---|
-| Novo `src/components/dashboard/HomeGroupsList.tsx` | Carrossel de mini cards dos outros grupos |
-| `src/pages/Dashboard.tsx` | Inserir HomeGroupsList na posição 6 |
-| `src/components/dashboard/DashboardHeader.tsx` | Subtítulo clicável → `/grupos` |
-| `src/pages/GroupList.tsx` | Chip ativo, ranking, dias restantes, ações separadas |
-| `src/components/dashboard/HomeChallengesList.tsx` | Chip "Ativo" |
-| `src/components/ds/AppScaffold.tsx` | `space-y-3 px-5` |
-| `src/components/SidebarMenu.tsx` | Renomear "Desafio" → "Grupo ativo" |
+| `src/hooks/useGroupData.ts` → `useUserGroups` | Filtrar `status='active'` por padrão |
+| `src/hooks/useGroupData.ts` (novo) → `useCompletedGroups` | Lista grupos com `status='finished'` |
+| `src/hooks/useUserChallenges.ts` → `useUserActiveChallenges` | Filtrar grupos ativos no join |
+| `src/pages/CompletedChallenges.tsx` | Substituir EmptyState estático por lista real, card com nome/período/badge "Concluído" |
+| `src/components/dashboard/HomeChallengeCard.tsx` | "Dias restantes" só se `status='active'`; senão badge "Concluído" |
+| `src/pages/GroupList.tsx` | Mesma regra de exibição condicional |
+| `src/pages/Ranking.tsx`, `src/pages/InviteScreen.tsx`, `src/components/challenge/ChallengeGeneralTab.tsx` | "Dias restantes" condicionado a `status='active'` |
+| `src/contexts/ActiveGroupContext.tsx` | Se o grupo ativo virar `finished`, limpar a seleção |
 
-### O que NÃO muda
-- ActiveGroupContext (já persiste em localStorage)
-- Lógica de check-in, notificações, pull-to-refresh
-- Hooks de dados existentes
-- BottomNav, FAB, cards internos
-- Tela de detalhe do grupo (GroupDetails) — já é genérica
+Grupos finalizados continuam acessíveis via link/detalhe — só somem das listas "em andamento".
 
+## Detalhes técnicos
+- Tipos do Supabase (`src/integrations/supabase/types.ts`) regenerados automaticamente após a migration.
+- RLS atual mantida; o cron roda como superuser via SECURITY DEFINER.
+- Tabela legada `challenges` permanece intocada (não usada pela UI).
+
+## Fora do escopo
+- Notificação ao usuário quando um desafio finaliza.
+- Snapshot de ranking final / premiação.
+- Migrar a tabela `challenges` legada.

@@ -422,6 +422,7 @@ export type Database = {
           name: string
           scoring_mode: string
           start_date: string | null
+          status: string
           type: string
           updated_at: string
         }
@@ -436,6 +437,7 @@ export type Database = {
           name: string
           scoring_mode?: string
           start_date?: string | null
+          status?: string
           type?: string
           updated_at?: string
         }
@@ -450,6 +452,7 @@ export type Database = {
           name?: string
           scoring_mode?: string
           start_date?: string | null
+          status?: string
           type?: string
           updated_at?: string
         }

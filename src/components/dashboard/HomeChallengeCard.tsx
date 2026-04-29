@@ -11,6 +11,7 @@ import { useActiveGroup } from "@/contexts/ActiveGroupContext";
 interface HomeChallengeCardProps {
   group: any;
   userId: string;
+  showActiveBadge?: boolean;
 }
 
 const medals = ["🥇", "🥈", "🥉"];
@@ -23,7 +24,7 @@ const getInitials = (name: string) =>
     .slice(0, 2)
     .toUpperCase();
 
-const HomeChallengeCard = ({ group, userId }: HomeChallengeCardProps) => {
+const HomeChallengeCard = ({ group, userId, showActiveBadge = false }: HomeChallengeCardProps) => {
   const navigate = useNavigate();
   const { setActiveGroupId } = useActiveGroup();
   const { data: members } = useGroupMembers(group.id);
@@ -78,8 +79,8 @@ const HomeChallengeCard = ({ group, userId }: HomeChallengeCardProps) => {
       className="w-full text-left rounded-2xl surface-1 border border-subtle p-3.5 transition-all hover:border-primary/20 active:scale-[0.98]"
     >
       {/* Header */}
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-2 min-w-0">
+      <div className="flex items-start justify-between gap-2 mb-2">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
           <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10">
             {isChallenge ? (
               <Trophy className="h-3.5 w-3.5 text-primary" />
@@ -89,9 +90,22 @@ const HomeChallengeCard = ({ group, userId }: HomeChallengeCardProps) => {
           </div>
           <span className="text-[14px] font-bold truncate">{group.name}</span>
         </div>
-        <div className="flex items-center gap-1 text-muted-foreground shrink-0">
-          <Users className="h-3 w-3" />
-          <span className="text-[11px]">{memberCount}</span>
+        <div className="flex flex-col items-end gap-1 shrink-0">
+          {(showActiveBadge || isFinished) && (
+            <span
+              className={`text-[10px] font-bold rounded-full px-2 py-0.5 ${
+                isFinished
+                  ? "bg-muted text-muted-foreground"
+                  : "bg-primary/10 text-primary"
+              }`}
+            >
+              {isFinished ? "Concluído" : "Ativo"}
+            </span>
+          )}
+          <div className="flex items-center gap-1 text-muted-foreground">
+            <Users className="h-3 w-3" />
+            <span className="text-[11px]">{memberCount}</span>
+          </div>
         </div>
       </div>
 

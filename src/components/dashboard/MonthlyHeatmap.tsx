@@ -269,7 +269,7 @@ const MonthlyHeatmap = ({ checkins, compact = false }: MonthlyHeatmapProps) => {
                 key={cell.key}
                 disabled={!cell.done}
                 onClick={() => cell.done && setSelectedDay(cell.key)}
-                className={`relative aspect-square rounded-md flex items-center justify-center text-[10px] font-medium transition-all duration-200 overflow-hidden ${
+                className={`relative aspect-square rounded-md flex items-center justify-center text-[10px] font-medium transition-all duration-200 overflow-hidden isolate ${
                   cell.done
                     ? "bg-primary text-primary-foreground shadow-[0_0_6px_hsl(var(--primary)/0.3)] cursor-pointer active:scale-95"
                     : cell.today

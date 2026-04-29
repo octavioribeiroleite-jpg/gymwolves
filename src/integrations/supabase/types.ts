@@ -522,6 +522,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      finalize_expired_groups: { Args: never; Returns: undefined }
       find_challenge_by_code: {
         Args: { _code: string }
         Returns: {

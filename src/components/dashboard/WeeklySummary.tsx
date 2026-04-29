@@ -37,7 +37,7 @@ const WeeklySummary = ({ checkins, weeklyGoal, onGoalChange }: WeeklySummaryProp
 
   const goal = weeklyGoal;
   const progress = Math.min(stats.count / goal, 1);
-  const circumference = 2 * Math.PI * 28;
+  const circumference = 2 * Math.PI * 20;
   const goalReached = stats.count >= goal;
 
   return (

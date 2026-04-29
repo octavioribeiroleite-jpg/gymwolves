@@ -43,7 +43,7 @@ const PhotoThumbnail = ({ proofUrl }: { proofUrl: string }) => {
       alt=""
       loading="lazy"
       decoding="async"
-      className="absolute inset-0 w-full h-full object-cover rounded-md opacity-0 transition-opacity duration-300"
+      className="absolute inset-0 w-full h-full object-cover rounded-md z-0 opacity-0 transition-opacity duration-300"
       onLoad={(e) => { (e.target as HTMLImageElement).classList.replace("opacity-0", "opacity-100"); }}
       onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
     />

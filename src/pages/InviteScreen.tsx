@@ -22,7 +22,8 @@ const InviteScreen = () => {
 
   const inviteCode = group?.invite_code || "";
   const groupAny = group as any;
-  const daysRemaining = groupAny?.end_date
+  const isFinished = groupAny?.status === "finished";
+  const daysRemaining = !isFinished && groupAny?.end_date
     ? Math.max(0, differenceInDays(new Date(groupAny.end_date), new Date()))
     : null;
 

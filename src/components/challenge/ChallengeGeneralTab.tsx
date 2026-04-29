@@ -178,7 +178,11 @@ const ChallengeGeneralTab = ({ group, groupId }: Props) => {
                 <CalendarDays className="h-3.5 w-3.5 text-primary" />
                 {format(new Date(group.start_date), "dd MMM", { locale: ptBR })} — {format(new Date(group.end_date), "dd MMM yyyy", { locale: ptBR })}
               </span>
-              {totalDays && (
+              {(group as any)?.status === "finished" ? (
+                <span className="text-[10px] font-bold rounded-full px-2 py-0.5 bg-secondary text-muted-foreground">
+                  Concluído
+                </span>
+              ) : totalDays && (
                 <span className="text-[11px] font-medium text-primary">
                   {Math.max(0, totalDays - daysPassed)} dias restantes
                 </span>

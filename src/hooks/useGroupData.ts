@@ -3,11 +3,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
-// ── List groups the user belongs to ──
-export const useUserGroups = () => {
+// ── List groups the user belongs to (active by default) ──
+export const useUserGroups = (groupStatus: "active" | "finished" | "all" = "active") => {
   const { user } = useAuth();
   return useQuery({
-    queryKey: ["user-groups", user?.id],
+    queryKey: ["user-groups", user?.id, groupStatus],
     queryFn: async () => {
       if (!user) return [];
       const { data: memberships, error: mErr } = await supabase
@@ -19,17 +19,23 @@ export const useUserGroups = () => {
       if (!memberships.length) return [];
 
       const ids = memberships.map((m) => m.group_id);
-      const { data, error } = await supabase
+      const baseQuery: any = supabase
         .from("groups")
         .select("*")
-        .in("id", ids)
-        .order("created_at", { ascending: false });
+        .in("id", ids);
+      const filtered = groupStatus === "all"
+        ? baseQuery
+        : baseQuery.eq("status", groupStatus);
+      const { data, error } = await filtered.order("created_at", { ascending: false });
       if (error) throw error;
       return data;
     },
     enabled: !!user,
   });
 };
+
+// ── Completed groups (status = 'finished') ──
+export const useCompletedGroups = () => useUserGroups("finished");
 
 // ── Single group detail ──
 export const useGroupDetail = (groupId: string | undefined) => {

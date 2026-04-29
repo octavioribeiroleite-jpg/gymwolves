@@ -32,8 +32,9 @@ const GroupCard = ({
   const goal = group.goal_total || 200;
   const pct = goal > 0 ? Math.min(Math.round((myDays / goal) * 100), 100) : 0;
 
+  const isFinished = group.status === "finished";
   const daysLeft =
-    group.end_date
+    !isFinished && group.end_date
       ? Math.max(0, differenceInDays(parseISO(group.end_date), new Date()))
       : null;
 

@@ -24,6 +24,7 @@ const WeeklySummary = ({ checkins, weeklyGoal, onGoalChange }: WeeklySummaryProp
       return isWithinInterval(date, { start: weekStart, end: weekEnd });
     });
 
+    // Deduplicate by yyyy-MM-dd to avoid multi-group inflation
     const seenDates = new Set<string>();
     const uniqueCheckins = weekCheckins.filter((c) => {
       const day = format(parseISO(c.checkin_at), "yyyy-MM-dd");
@@ -32,8 +33,12 @@ const WeeklySummary = ({ checkins, weeklyGoal, onGoalChange }: WeeklySummaryProp
       return true;
     });
 
-    const totalMin = uniqueCheckins.reduce((sum, c) => sum + (c.duration_min || 0), 0);
-    const totalCal = uniqueCheckins.reduce((sum, c) => sum + (c.calories || 0), 0);
+    const totalMin = Math.round(
+      uniqueCheckins.reduce((sum, c) => sum + (c.duration_min || 0), 0)
+    );
+    const totalCal = Math.round(
+      uniqueCheckins.reduce((sum, c) => sum + (c.calories || 0), 0)
+    );
     const count = uniqueCheckins.length;
 
     return { totalMin, totalCal, count };
@@ -41,17 +46,18 @@ const WeeklySummary = ({ checkins, weeklyGoal, onGoalChange }: WeeklySummaryProp
 
   const goal = weeklyGoal;
   const progress = Math.min(stats.count / goal, 1);
-  const circumference = 2 * Math.PI * 28;
+  const radius = 28;
+  const circumference = 2 * Math.PI * radius;
   const goalReached = stats.count >= goal;
 
   return (
-    <div className="rounded-2xl surface-1 border border-subtle p-3 card-shadow">
-      {/* Title row */}
-      <div className="flex items-center justify-between mb-1.5">
-        <h2 className="text-[13px] font-bold">Sua semana</h2>
+    <div className="rounded-2xl bg-card border border-subtle p-4 shadow-sm">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-sm font-bold">Sua semana</h2>
         <Popover open={goalOpen} onOpenChange={setGoalOpen}>
           <PopoverTrigger asChild>
-            <button className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground transition-colors">
+            <button className="flex items-center gap-1 rounded-full bg-secondary px-2.5 py-1 text-[11px] font-medium text-muted-foreground hover:text-foreground transition-colors">
               Meta: {stats.count}/{goal}
               <Pencil className="h-2.5 w-2.5" />
             </button>
@@ -78,57 +84,102 @@ const WeeklySummary = ({ checkins, weeklyGoal, onGoalChange }: WeeklySummaryProp
         </Popover>
       </div>
 
-      {/* Progress ring + metrics */}
-      <div className="flex items-center gap-2.5">
-        {/* Ring */}
-        <div className="relative flex items-center justify-center w-[44px] h-[44px] shrink-0">
-          <svg viewBox="0 0 64 64" className="w-full h-full -rotate-90">
-            <circle cx="32" cy="32" r="28" fill="none" stroke="hsl(var(--border))" strokeWidth="6" />
+      {/* Main: ring + stats */}
+      <div className="flex items-center gap-4">
+        {/* Progress ring */}
+        <div className="relative flex h-16 w-16 shrink-0 items-center justify-center">
+          <svg viewBox="0 0 64 64" className="h-full w-full -rotate-90">
             <circle
-              cx="32" cy="32" r="28"
+              cx="32"
+              cy="32"
+              r={radius}
+              fill="none"
+              stroke="hsl(var(--border))"
+              strokeWidth="6"
+            />
+            <circle
+              cx="32"
+              cy="32"
+              r={radius}
               fill="none"
               stroke="hsl(var(--primary))"
               strokeWidth="6"
               strokeLinecap="round"
-              strokeDasharray={`${circumference}`}
-              strokeDashoffset={`${circumference * (1 - progress)}`}
+              strokeDasharray={circumference}
+              strokeDashoffset={circumference * (1 - progress)}
               className="transition-all duration-700 ease-out"
             />
           </svg>
-          {goalReached ? (
-            <div className="absolute flex h-5 w-5 items-center justify-center rounded-full bg-primary">
-              <Check className="h-3 w-3 text-primary-foreground" strokeWidth={3} />
-            </div>
-          ) : (
-            <span className="absolute text-[10px] font-bold">{stats.count}/{goal}</span>
-          )}
+          <div className="absolute flex flex-col items-center justify-center">
+            {goalReached ? (
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary">
+                <Check className="h-4 w-4 text-primary-foreground" strokeWidth={3} />
+              </div>
+            ) : (
+              <>
+                <span className="text-sm font-bold leading-none">{stats.count}</span>
+                <span className="text-[10px] text-muted-foreground leading-none mt-0.5">
+                  /{goal}
+                </span>
+              </>
+            )}
+          </div>
         </div>
 
-        {/* Metrics in a row */}
-        <div className="flex-1 flex items-center gap-2.5">
-          <MetricPill icon={Dumbbell} value={stats.count} label="treinos" color="bg-primary" />
+        {/* Stats */}
+        <div className="flex flex-1 items-stretch gap-2">
+          <StatCard
+            icon={Dumbbell}
+            value={stats.count}
+            label={`treino${stats.count !== 1 ? "s" : ""}`}
+            iconBg="bg-primary"
+          />
           {stats.totalMin > 0 && (
-            <MetricPill icon={Timer} value={stats.totalMin} label="min" color="bg-blue-500" />
+            <StatCard
+              icon={Timer}
+              value={stats.totalMin}
+              label="min"
+              iconBg="bg-blue-500"
+            />
           )}
           {stats.totalCal > 0 && (
-            <MetricPill icon={Flame} value={stats.totalCal} label="kcal" color="bg-rose-500" />
+            <StatCard
+              icon={Flame}
+              value={stats.totalCal}
+              label="kcal"
+              iconBg="bg-orange-500"
+            />
           )}
         </div>
       </div>
 
       {/* Week dots */}
-      <WeekDots checkins={checkins} />
+      <div className="mt-3">
+        <WeekDots checkins={checkins} />
+      </div>
     </div>
   );
 };
 
-const MetricPill = ({ icon: Icon, value, label, color }: { icon: any; value: number; label: string; color: string }) => (
-  <div className="flex flex-col items-center">
-    <div className={`flex h-4.5 w-4.5 items-center justify-center rounded-full ${color} mb-0.5`}>
-      <Icon className="h-2.5 w-2.5 text-white" strokeWidth={2.5} />
+const StatCard = ({
+  icon: Icon,
+  value,
+  label,
+  iconBg,
+}: {
+  icon: any;
+  value: number;
+  label: string;
+  iconBg: string;
+}) => (
+  <div className="flex flex-1 items-center gap-2 rounded-xl bg-secondary/50 px-2.5 py-1.5">
+    <div className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${iconBg}`}>
+      <Icon className="h-3 w-3 text-white" strokeWidth={2.5} />
     </div>
-    <span className="text-[12px] font-bold leading-none">{value}</span>
-    <span className="text-[9px] text-muted-foreground">{label}</span>
+    <div className="flex flex-col leading-tight min-w-0">
+      <span className="text-[13px] font-bold truncate">{value}</span>
+      <span className="text-[10px] text-muted-foreground truncate">{label}</span>
+    </div>
   </div>
 );
 

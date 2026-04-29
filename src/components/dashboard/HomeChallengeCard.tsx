@@ -42,10 +42,11 @@ const HomeChallengeCard = ({ group, userId }: HomeChallengeCardProps) => {
   const goal = group.goal_total || 200;
   const pct = goal > 0 ? Math.min(Math.round((myDays / goal) * 100), 100) : 0;
 
+  const isFinished = group.status === "finished";
   const daysRemaining = useMemo(() => {
-    if (!group.end_date) return null;
+    if (isFinished || !group.end_date) return null;
     return Math.max(0, differenceInDays(new Date(group.end_date), new Date()));
-  }, [group.end_date]);
+  }, [group.end_date, isFinished]);
 
   const top3 = useMemo(() => {
     if (!members || !checkins) return [];

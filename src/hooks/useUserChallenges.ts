@@ -22,14 +22,14 @@ export const useUserActiveChallenges = () => {
 
       const { data, error } = await supabase
         .from("group_members")
-        .select("group_id, groups:group_id(id, name)")
+        .select("group_id, groups:group_id(id, name, status)")
         .eq("user_id", user.id)
         .eq("status", "active");
 
       if (error) throw error;
 
       return (data || [])
-        .filter((row: any) => row.groups)
+        .filter((row: any) => row.groups && row.groups.status === "active")
         .map((row: any) => ({
           challengeId: row.groups.id,
           groupId: row.groups.id,

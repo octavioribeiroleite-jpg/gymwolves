@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Timer, Flame, Dumbbell, Pencil } from "lucide-react";
+import { Timer, Flame, Dumbbell, Pencil, Check } from "lucide-react";
 import { startOfWeek, endOfWeek, isWithinInterval, parseISO, format } from "date-fns";
 import WeekDots from "./WeekDots";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -42,6 +42,7 @@ const WeeklySummary = ({ checkins, weeklyGoal, onGoalChange }: WeeklySummaryProp
   const goal = weeklyGoal;
   const progress = Math.min(stats.count / goal, 1);
   const circumference = 2 * Math.PI * 28;
+  const goalReached = stats.count >= goal;
 
   return (
     <div className="rounded-2xl surface-1 border border-subtle p-3 card-shadow">
@@ -94,7 +95,13 @@ const WeeklySummary = ({ checkins, weeklyGoal, onGoalChange }: WeeklySummaryProp
               className="transition-all duration-700 ease-out"
             />
           </svg>
-          <span className="absolute text-[10px] font-bold">{stats.count}/{goal}</span>
+          {goalReached ? (
+            <div className="absolute flex h-5 w-5 items-center justify-center rounded-full bg-primary">
+              <Check className="h-3 w-3 text-primary-foreground" strokeWidth={3} />
+            </div>
+          ) : (
+            <span className="absolute text-[10px] font-bold">{stats.count}/{goal}</span>
+          )}
         </div>
 
         {/* Metrics in a row */}

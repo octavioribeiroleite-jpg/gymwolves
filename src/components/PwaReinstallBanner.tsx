@@ -112,7 +112,7 @@ export default function PwaReinstallBanner() {
                 <div className="relative">
                   <img
                     src={logo}
-                    alt="GymWoves"
+                    alt="GymWolves"
                     className="h-16 w-16 object-contain"
                     style={{ filter: "drop-shadow(0 0 12px hsl(142 71% 45% / 0.25))" }}
                   />
@@ -129,14 +129,14 @@ export default function PwaReinstallBanner() {
               <div className="mt-4 rounded-[16px] bg-secondary/50 p-4 space-y-2.5">
                 {ios ? (
                   <>
-                    <Step n={1}>Mantenha pressionado o ícone do <strong className="text-foreground">GymWoves</strong> na tela inicial</Step>
+                    <Step n={1}>Mantenha pressionado o ícone do <strong className="text-foreground">GymWolves</strong> na tela inicial</Step>
                     <Step n={2}>Toque em <strong className="text-foreground">"Remover App"</strong> → <strong className="text-foreground">"Apagar App"</strong></Step>
                     <Step n={3}>Abra o Safari e acesse o site novamente</Step>
                     <Step n={4}>Toque em Compartilhar → <strong className="text-foreground">"Adicionar à Tela de Início"</strong></Step>
                   </>
                 ) : (
                   <>
-                    <Step n={1}>Mantenha pressionado o ícone do <strong className="text-foreground">GymWoves</strong></Step>
+                    <Step n={1}>Mantenha pressionado o ícone do <strong className="text-foreground">GymWolves</strong></Step>
                     <Step n={2}>Toque em <strong className="text-foreground">"Desinstalar"</strong></Step>
                     <Step n={3}>Abra o navegador e acesse o site novamente</Step>
                     <Step n={4}>Toque em <strong className="text-foreground">"Instalar aplicativo"</strong> no menu do navegador</Step>

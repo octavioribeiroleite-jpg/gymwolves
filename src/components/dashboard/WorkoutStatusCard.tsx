@@ -74,7 +74,7 @@ const WorkoutStatusCard = ({ todayDone, onCheckin, onDelete, isDeleting, todayCh
           {/* Actions */}
           <div className="flex divide-x divide-border bg-card">
             <button
-              onClick={() => {}}
+              onClick={onCheckin}
               className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-semibold text-primary hover:bg-primary/5 transition-colors"
             >
               <Camera className="w-3.5 h-3.5" />

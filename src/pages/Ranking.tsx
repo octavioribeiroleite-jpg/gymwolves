@@ -31,7 +31,8 @@ const Ranking = () => {
 
   const groupAny = group as any;
   const scoringMode = groupAny?.scoring_mode || "days_active";
-  const daysRemaining = groupAny?.end_date
+  const isFinished = groupAny?.status === "finished";
+  const daysRemaining = !isFinished && groupAny?.end_date
     ? Math.max(0, differenceInDays(new Date(groupAny.end_date), new Date()))
     : null;
 

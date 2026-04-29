@@ -37,7 +37,7 @@ const WeeklySummary = ({ checkins, weeklyGoal, onGoalChange }: WeeklySummaryProp
 
   const goal = weeklyGoal;
   const progress = Math.min(stats.count / goal, 1);
-  const circumference = 2 * Math.PI * 28;
+  const circumference = 2 * Math.PI * 20;
   const goalReached = stats.count >= goal;
 
   return (
@@ -70,57 +70,56 @@ const WeeklySummary = ({ checkins, weeklyGoal, onGoalChange }: WeeklySummaryProp
         </Popover>
       </div>
 
-      <div className="flex items-center gap-4 mb-4">
+      <div className="flex items-center gap-3 mb-4">
+        {/* Anel menor (52px) */}
         <div className="relative shrink-0">
-          <svg width="72" height="72" viewBox="0 0 72 72">
+          <svg width="52" height="52" viewBox="0 0 52 52">
             <circle
-              cx="36" cy="36" r="28"
+              cx="26" cy="26" r="20"
               fill="none"
               stroke="hsl(var(--muted))"
-              strokeWidth="6"
+              strokeWidth="5"
             />
             <circle
-              cx="36" cy="36" r="28"
+              cx="26" cy="26" r="20"
               fill="none"
               stroke="hsl(var(--primary))"
-              strokeWidth="6"
+              strokeWidth="5"
               strokeDasharray={circumference}
               strokeDashoffset={circumference * (1 - progress)}
               strokeLinecap="round"
-              transform="rotate(-90 36 36)"
+              transform="rotate(-90 26 26)"
               className="transition-all duration-700"
             />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             {goalReached ? (
-              <CheckCircle2 className="w-5 h-5 text-primary" />
+              <CheckCircle2 className="w-4 h-4 text-primary" />
             ) : (
-              <>
-                <span className="text-sm font-bold leading-none">{stats.count}</span>
-                <span className="text-[10px] text-muted-foreground">/{goal}</span>
-              </>
+              <span className="text-[11px] font-bold leading-none">
+                {stats.count}<span className="text-muted-foreground font-medium">/{goal}</span>
+              </span>
             )}
           </div>
         </div>
 
-        <div className="flex flex-col gap-2 flex-1">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-              <Dumbbell className="w-3.5 h-3.5 text-primary" />
+        {/* Stats em linha horizontal */}
+        <div className="flex flex-1 items-center gap-2 min-w-0">
+          <div className="flex flex-1 items-center gap-1.5 rounded-xl bg-primary/5 px-2 py-1.5 min-w-0">
+            <div className="w-6 h-6 rounded-lg bg-primary/15 flex items-center justify-center shrink-0">
+              <Dumbbell className="w-3 h-3 text-primary" />
             </div>
-            <div>
-              <p className="text-sm font-semibold leading-none">
-                {stats.count} treino{stats.count !== 1 ? "s" : ""}
-              </p>
-              <p className="text-[11px] text-muted-foreground">esta semana</p>
+            <div className="flex flex-col leading-tight min-w-0">
+              <span className="text-[12px] font-bold truncate">{stats.count}</span>
+              <span className="text-[9px] text-muted-foreground truncate">treinos</span>
             </div>
           </div>
 
           {stats.totalMin > 0 && (
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
+            <div className="flex flex-1 items-center gap-1.5 rounded-xl bg-blue-500/5 px-2 py-1.5 min-w-0">
+              <div className="w-6 h-6 rounded-lg bg-blue-500/15 flex items-center justify-center shrink-0">
                 <svg
-                  className="w-3.5 h-3.5 text-blue-500"
+                  className="w-3 h-3 text-blue-500"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -130,21 +129,21 @@ const WeeklySummary = ({ checkins, weeklyGoal, onGoalChange }: WeeklySummaryProp
                   <polyline points="12 6 12 12 16 14" />
                 </svg>
               </div>
-              <div>
-                <p className="text-sm font-semibold leading-none">{stats.totalMin} min</p>
-                <p className="text-[11px] text-muted-foreground">tempo total</p>
+              <div className="flex flex-col leading-tight min-w-0">
+                <span className="text-[12px] font-bold truncate">{stats.totalMin}</span>
+                <span className="text-[9px] text-muted-foreground truncate">min</span>
               </div>
             </div>
           )}
 
           {stats.totalCal > 0 && (
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-orange-500/10 flex items-center justify-center shrink-0">
-                <Flame className="w-3.5 h-3.5 text-orange-500" />
+            <div className="flex flex-1 items-center gap-1.5 rounded-xl bg-orange-500/5 px-2 py-1.5 min-w-0">
+              <div className="w-6 h-6 rounded-lg bg-orange-500/15 flex items-center justify-center shrink-0">
+                <Flame className="w-3 h-3 text-orange-500" />
               </div>
-              <div>
-                <p className="text-sm font-semibold leading-none">{stats.totalCal} kcal</p>
-                <p className="text-[11px] text-muted-foreground">queimadas</p>
+              <div className="flex flex-col leading-tight min-w-0">
+                <span className="text-[12px] font-bold truncate">{stats.totalCal}</span>
+                <span className="text-[9px] text-muted-foreground truncate">kcal</span>
               </div>
             </div>
           )}

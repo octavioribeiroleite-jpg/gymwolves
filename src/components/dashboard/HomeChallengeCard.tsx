@@ -137,7 +137,11 @@ const HomeChallengeCard = ({ group, userId }: HomeChallengeCardProps) => {
           <Flame className="h-2.5 w-2.5" />
           <span>{myStreak.current} dias seguidos</span>
         </div>
-        {daysRemaining !== null && (
+        {isFinished ? (
+          <span className="bg-secondary text-muted-foreground text-[10px] font-bold rounded-full px-2 py-0.5">
+            Concluído
+          </span>
+        ) : daysRemaining !== null && (
           <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
             <Clock className="h-2.5 w-2.5" />
             <span>{daysRemaining} dias restantes</span>

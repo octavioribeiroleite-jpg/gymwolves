@@ -42,7 +42,8 @@ const WeeklySummary = ({ checkins, weeklyGoal, onGoalChange }: WeeklySummaryProp
 
   return (
     <div className="bg-card rounded-2xl p-4 shadow-sm border border-border/50">
-      <div className="flex items-center justify-between mb-4">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-3">
         <h3 className="font-bold text-base text-foreground">Sua semana</h3>
         <Popover open={goalOpen} onOpenChange={setGoalOpen}>
           <PopoverTrigger asChild>
@@ -70,8 +71,9 @@ const WeeklySummary = ({ checkins, weeklyGoal, onGoalChange }: WeeklySummaryProp
         </Popover>
       </div>
 
-      <div className="flex items-center gap-3 mb-4">
-        {/* Anel menor (52px) */}
+      {/* Ring + Stats */}
+      <div className="flex items-center gap-4 mb-4">
+        {/* Progress Ring */}
         <div className="relative shrink-0">
           <svg width="52" height="52" viewBox="0 0 52 52">
             <circle
@@ -89,35 +91,40 @@ const WeeklySummary = ({ checkins, weeklyGoal, onGoalChange }: WeeklySummaryProp
               strokeDashoffset={circumference * (1 - progress)}
               strokeLinecap="round"
               transform="rotate(-90 26 26)"
-              className="transition-all duration-700"
+              style={{ transition: "stroke-dashoffset 0.7s ease" }}
             />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             {goalReached ? (
               <CheckCircle2 className="w-4 h-4 text-primary" />
             ) : (
-              <span className="text-[11px] font-bold leading-none">
-                {stats.count}<span className="text-muted-foreground font-medium">/{goal}</span>
-              </span>
+              <>
+                <span className="text-xs font-bold leading-none">{stats.count}</span>
+                <span className="text-[9px] text-muted-foreground">/{goal}</span>
+              </>
             )}
           </div>
         </div>
 
-        {/* Stats em linha horizontal */}
-        <div className="flex flex-1 items-center gap-2 min-w-0">
-          <div className="flex flex-1 items-center gap-1.5 rounded-xl bg-primary/5 px-2 py-1.5 min-w-0">
-            <div className="w-6 h-6 rounded-lg bg-primary/15 flex items-center justify-center shrink-0">
+        {/* Stats row - sem background */}
+        <div className="flex flex-row gap-4 flex-1 flex-wrap">
+          {/* Treinos */}
+          <div className="flex items-center gap-1.5">
+            <div className="w-6 h-6 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
               <Dumbbell className="w-3 h-3 text-primary" />
             </div>
-            <div className="flex flex-col leading-tight min-w-0">
-              <span className="text-[12px] font-bold truncate">{stats.count}</span>
-              <span className="text-[9px] text-muted-foreground truncate">treinos</span>
+            <div>
+              <p className="text-xs font-semibold leading-none">
+                {stats.count} treino{stats.count !== 1 ? "s" : ""}
+              </p>
+              <p className="text-[10px] text-muted-foreground">esta semana</p>
             </div>
           </div>
 
+          {/* Minutos */}
           {stats.totalMin > 0 && (
-            <div className="flex flex-1 items-center gap-1.5 rounded-xl bg-blue-500/5 px-2 py-1.5 min-w-0">
-              <div className="w-6 h-6 rounded-lg bg-blue-500/15 flex items-center justify-center shrink-0">
+            <div className="flex items-center gap-1.5">
+              <div className="w-6 h-6 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
                 <svg
                   className="w-3 h-3 text-blue-500"
                   fill="none"
@@ -129,27 +136,29 @@ const WeeklySummary = ({ checkins, weeklyGoal, onGoalChange }: WeeklySummaryProp
                   <polyline points="12 6 12 12 16 14" />
                 </svg>
               </div>
-              <div className="flex flex-col leading-tight min-w-0">
-                <span className="text-[12px] font-bold truncate">{stats.totalMin}</span>
-                <span className="text-[9px] text-muted-foreground truncate">min</span>
+              <div>
+                <p className="text-xs font-semibold leading-none">{stats.totalMin} min</p>
+                <p className="text-[10px] text-muted-foreground">tempo</p>
               </div>
             </div>
           )}
 
+          {/* Calorias */}
           {stats.totalCal > 0 && (
-            <div className="flex flex-1 items-center gap-1.5 rounded-xl bg-orange-500/5 px-2 py-1.5 min-w-0">
-              <div className="w-6 h-6 rounded-lg bg-orange-500/15 flex items-center justify-center shrink-0">
+            <div className="flex items-center gap-1.5">
+              <div className="w-6 h-6 rounded-lg bg-orange-500/10 flex items-center justify-center shrink-0">
                 <Flame className="w-3 h-3 text-orange-500" />
               </div>
-              <div className="flex flex-col leading-tight min-w-0">
-                <span className="text-[12px] font-bold truncate">{stats.totalCal}</span>
-                <span className="text-[9px] text-muted-foreground truncate">kcal</span>
+              <div>
+                <p className="text-xs font-semibold leading-none">{stats.totalCal} kcal</p>
+                <p className="text-[10px] text-muted-foreground">queimadas</p>
               </div>
             </div>
           )}
         </div>
       </div>
 
+      {/* Week dots */}
       <WeekDots checkins={checkins} />
     </div>
   );

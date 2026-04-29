@@ -1,4 +1,4 @@
-import { CheckCircle2, Dumbbell, Trash2, Zap } from "lucide-react";
+import { CheckCircle2, Dumbbell, Trash2, Zap, Camera } from "lucide-react";
 import { format, formatDistanceToNow, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useState } from "react";
@@ -52,36 +52,40 @@ const WorkoutStatusCard = ({ todayDone, onCheckin, onDelete, isDeleting, todayCh
 
     return (
       <>
-        <div className="rounded-2xl surface-1 border border-subtle overflow-hidden card-shadow">
+        <div className="rounded-2xl overflow-hidden shadow-sm border border-border/50">
           {/* Green success banner */}
-          <div className="gradient-primary px-3 py-2 flex items-center gap-2">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/20">
-              <CheckCircle2 className="h-3.5 w-3.5 text-primary-foreground" />
+          <div className="bg-gradient-to-r from-green-500 to-emerald-500 px-4 py-3 flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+              <CheckCircle2 className="w-5 h-5 text-white" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[13px] font-bold text-primary-foreground leading-tight">Treino concluído! 💪</p>
-              <p className="text-[10px] text-primary-foreground/70 leading-tight mt-0.5">{typeLabel} · {timeAgo}</p>
+              <p className="text-white font-bold text-sm leading-tight">Treino concluído! 💪</p>
+              <p className="text-white/80 text-xs mt-0.5">{typeLabel} · {timeAgo}</p>
             </div>
             {signedUrl && (
-              <div className="h-8 w-8 shrink-0 rounded-lg overflow-hidden border-2 border-white/30">
-                <img src={signedUrl} alt="" className="h-full w-full object-cover" />
-              </div>
+              <img
+                src={signedUrl}
+                alt="Foto do treino"
+                className="w-10 h-10 rounded-xl object-cover border-2 border-white/30 shrink-0"
+              />
             )}
           </div>
+
           {/* Actions */}
-          <div className="flex items-center border-t border-subtle divide-x divide-subtle">
+          <div className="flex divide-x divide-border bg-card">
             <button
               onClick={onCheckin}
-              className="flex-1 text-center py-1.5 text-[11px] font-medium text-primary hover:bg-muted/30 transition-colors"
+              className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-semibold text-primary hover:bg-primary/5 transition-colors"
             >
+              <Camera className="w-3.5 h-3.5" />
               Ver check-in
             </button>
             <button
               onClick={() => setConfirmOpen(true)}
               disabled={isDeleting}
-              className="flex items-center justify-center gap-1 px-3 py-1.5 text-[11px] font-medium text-destructive hover:bg-destructive/5 transition-colors"
+              className="flex items-center justify-center gap-1.5 px-4 py-2.5 text-xs font-semibold text-destructive hover:bg-destructive/5 transition-colors"
             >
-              <Trash2 className="h-3 w-3" />
+              <Trash2 className="w-3.5 h-3.5" />
               Desfazer
             </button>
           </div>
@@ -112,34 +116,25 @@ const WorkoutStatusCard = ({ todayDone, onCheckin, onDelete, isDeleting, todayCh
 
   // Not trained today
   return (
-    <div className="rounded-2xl surface-1 border border-subtle p-4 card-shadow">
-      <div className="flex items-center gap-3 mb-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10">
-          <Dumbbell className="h-5 w-5 text-primary" />
+    <div className="rounded-2xl bg-card border border-border/50 shadow-sm px-4 py-4 flex items-center justify-between gap-3">
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center shrink-0">
+          <Dumbbell className="w-5 h-5 text-muted-foreground" />
         </div>
         <div>
-          <p className="text-[15px] font-bold leading-tight">Você ainda não treinou hoje</p>
-          <p className="text-[12px] text-muted-foreground mt-0.5 leading-tight">
+          <p className="text-sm font-semibold text-foreground">Você ainda não treinou hoje</p>
+          <p className="text-xs text-muted-foreground mt-0.5">
             {format(new Date(), "EEEE, d 'de' MMMM", { locale: ptBR })}
           </p>
         </div>
       </div>
-      <div className="flex gap-2">
-        <button
-          onClick={onCheckin}
-          className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-primary text-primary-foreground font-bold text-[13px] h-10 glow-primary-sm transition-all active:scale-[0.97]"
-        >
-          <Dumbbell className="h-4 w-4" strokeWidth={2.5} />
-          Fazer check-in
-        </button>
-        <button
-          onClick={onCheckin}
-          className="flex items-center justify-center gap-1.5 rounded-xl border border-subtle px-3.5 h-10 text-[12px] font-medium text-muted-foreground hover:text-foreground hover:border-primary/20 transition-all"
-        >
-          <Zap className="h-3.5 w-3.5" />
-          Rápido
-        </button>
-      </div>
+      <button
+        onClick={onCheckin}
+        className="flex items-center gap-1.5 bg-primary text-primary-foreground text-xs font-bold px-4 py-2.5 rounded-xl shadow-sm hover:bg-primary/90 active:scale-95 transition-all shrink-0"
+      >
+        <Zap className="w-3.5 h-3.5" />
+        Check-in
+      </button>
     </div>
   );
 };

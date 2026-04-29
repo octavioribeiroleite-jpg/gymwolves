@@ -282,7 +282,7 @@ const MonthlyHeatmap = ({ checkins, compact = false }: MonthlyHeatmapProps) => {
                 {cell.done && cell.hasPhoto && cell.firstPhoto && (
                   <PhotoThumbnail proofUrl={cell.firstPhoto} />
                 )}
-                <span className="relative z-10 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+                <span className="relative z-10 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] pointer-events-none">
                   {format(cell.date, "d")}
                 </span>
               </button>

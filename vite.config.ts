@@ -23,8 +23,8 @@ export default defineConfig(({ mode }) => ({
         navigateFallbackDenylist: [/^\/~oauth/],
       },
       manifest: {
-        name: "GymWoves",
-        short_name: "GymWoves",
+        name: "GymWolves",
+        short_name: "GymWolves",
         description: "Treine. Evolua. Repita. Desafio fitness em grupo.",
         theme_color: "#F3F4F6",
         background_color: "#F3F4F6",

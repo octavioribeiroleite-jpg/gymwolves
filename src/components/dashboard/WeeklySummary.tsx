@@ -42,6 +42,7 @@ const WeeklySummary = ({ checkins, weeklyGoal, onGoalChange }: WeeklySummaryProp
   const goal = weeklyGoal;
   const progress = Math.min(stats.count / goal, 1);
   const circumference = 2 * Math.PI * 28;
+  const goalReached = stats.count >= goal;
 
   return (
     <div className="rounded-2xl surface-1 border border-subtle p-3 card-shadow">

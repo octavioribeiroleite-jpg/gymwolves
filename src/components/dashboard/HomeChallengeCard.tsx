@@ -11,6 +11,7 @@ import { useActiveGroup } from "@/contexts/ActiveGroupContext";
 interface HomeChallengeCardProps {
   group: any;
   userId: string;
+  showActiveBadge?: boolean;
 }
 
 const medals = ["🥇", "🥈", "🥉"];

@@ -1,4 +1,3 @@
-import { useState, useCallback } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,7 +6,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ActiveGroupProvider } from "@/contexts/ActiveGroupContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import SplashScreen from "./components/SplashScreen";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import GroupList from "./pages/GroupList";
@@ -28,21 +26,13 @@ import PwaReinstallBanner from "./components/PwaReinstallBanner";
 const queryClient = new QueryClient();
 
 const App = () => {
-  const alreadyShown = sessionStorage.getItem("splash_shown") === "1";
-  const [splashDone, setSplashDone] = useState(alreadyShown);
-  const handleSplashFinish = useCallback(() => {
-    sessionStorage.setItem("splash_shown", "1");
-    setSplashDone(true);
-  }, []);
-
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        {!splashDone && <SplashScreen onFinish={handleSplashFinish} />}
-        {splashDone && <PwaInstallPrompt />}
-        {splashDone && <PwaReinstallBanner />}
+        <PwaInstallPrompt />
+        <PwaReinstallBanner />
         <BrowserRouter>
           <AuthProvider>
             <ActiveGroupProvider>

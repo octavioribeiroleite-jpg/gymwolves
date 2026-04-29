@@ -84,7 +84,11 @@ const Profile = () => {
 
       {/* Stats */}
       {myStats && (
-        <StatCard streak={myStats.streak} daysActive={myStats.days} record={myStats.record} />
+        <div className="grid grid-cols-3 gap-2">
+          <StatCard icon={Trophy} value={myStats.current} label="Sequência" />
+          <StatCard icon={CheckCircle} value={myStats.days} label="Dias ativos" />
+          <StatCard icon={Trophy} value={myStats.best} label="Recorde" />
+        </div>
       )}
 
       {/* Share app */}

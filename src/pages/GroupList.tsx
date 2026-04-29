@@ -57,20 +57,28 @@ const GroupCard = ({
         isActive ? "border-primary/30 bg-primary/[0.03]" : "border-subtle"
       }`}
     >
-      {/* Line 1: Name + Members + Active chip */}
-      <div className="flex items-center gap-2">
-        <div className="flex-1 min-w-0 flex items-center gap-2">
+      {/* Line 1: Name + (status chip + members) */}
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
           <Trophy className="h-4 w-4 text-primary shrink-0" />
           <h3 className="text-[14px] font-bold truncate">{group.name}</h3>
-          {isActive && (
-            <span className="shrink-0 bg-primary/10 text-primary text-[10px] font-bold rounded-full px-2 py-0.5">
-              Ativo
+        </div>
+        <div className="flex flex-col items-end gap-1 shrink-0">
+          {(isActive || isFinished) && (
+            <span
+              className={`text-[10px] font-bold rounded-full px-2 py-0.5 ${
+                isFinished
+                  ? "bg-muted text-muted-foreground"
+                  : "bg-primary/10 text-primary"
+              }`}
+            >
+              {isFinished ? "Concluído" : "Ativo"}
             </span>
           )}
-        </div>
-        <div className="flex items-center gap-1 text-[11px] text-muted-foreground shrink-0">
-          <Users className="h-3.5 w-3.5" />
-          <span>{members?.length ?? 0}</span>
+          <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+            <Users className="h-3.5 w-3.5" />
+            <span>{members?.length ?? 0}</span>
+          </div>
         </div>
       </div>
 

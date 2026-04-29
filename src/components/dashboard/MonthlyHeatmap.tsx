@@ -34,19 +34,23 @@ interface DayCheckin {
 const WEEKDAY_LABELS = ["D", "S", "T", "Q", "Q", "S", "S"];
 
 const PhotoThumbnail = ({ proofUrl }: { proofUrl: string }) => {
-  const url = getThumbnailUrl(proofUrl, 80);
+  const url = getPublicImageUrl(proofUrl);
   if (!url) return null;
 
   return (
-    <img
-      src={url}
-      alt=""
-      loading="lazy"
-      decoding="async"
-      className="absolute inset-0 w-full h-full object-cover rounded-md z-0 opacity-0 transition-opacity duration-300"
-      onLoad={(e) => { (e.target as HTMLImageElement).classList.replace("opacity-0", "opacity-100"); }}
-      onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-    />
+    <>
+      <img
+        src={url}
+        alt=""
+        loading="lazy"
+        decoding="async"
+        className="absolute inset-0 w-full h-full object-cover object-center rounded-md z-0 opacity-0 transition-opacity duration-300"
+        onLoad={(e) => { (e.target as HTMLImageElement).classList.replace("opacity-0", "opacity-100"); }}
+        onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+      />
+      {/* Gradient inferior para legibilidade do número */}
+      <div className="absolute inset-x-0 bottom-0 h-1/2 z-[1] rounded-b-md bg-gradient-to-t from-black/75 to-transparent pointer-events-none" />
+    </>
   );
 };
 

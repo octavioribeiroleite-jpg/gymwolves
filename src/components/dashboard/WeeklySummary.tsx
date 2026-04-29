@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Timer, Flame, Dumbbell, Pencil } from "lucide-react";
+import { Timer, Flame, Dumbbell, Pencil, Check } from "lucide-react";
 import { startOfWeek, endOfWeek, isWithinInterval, parseISO, format } from "date-fns";
 import WeekDots from "./WeekDots";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";

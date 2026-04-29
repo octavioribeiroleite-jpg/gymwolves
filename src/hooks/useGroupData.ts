@@ -19,15 +19,14 @@ export const useUserGroups = (groupStatus: "active" | "finished" | "all" = "acti
       if (!memberships.length) return [];
 
       const ids = memberships.map((m) => m.group_id);
-      let q = supabase
+      const baseQuery: any = supabase
         .from("groups")
         .select("*")
-        .in("id", ids)
-        .order("created_at", { ascending: false });
-      if (groupStatus !== "all") {
-        q = q.eq("status" as any, groupStatus);
-      }
-      const { data, error } = await q;
+        .in("id", ids);
+      const filtered = groupStatus === "all"
+        ? baseQuery
+        : baseQuery.eq("status", groupStatus);
+      const { data, error } = await filtered.order("created_at", { ascending: false });
       if (error) throw error;
       return data;
     },

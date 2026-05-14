@@ -135,6 +135,15 @@ const WorkoutStatusCard = ({ todayDone, onCheckin, onDelete, isDeleting, onUpdat
           Check-in
         </button>
       </div>
+      {onUpdatePastCheckins && (
+        <button
+          onClick={onUpdatePastCheckins}
+          className="w-full flex items-center justify-center gap-1.5 py-2.5 text-[12px] font-medium text-muted-foreground border-t border-border/50 hover:text-primary hover:bg-primary/5 transition-colors"
+        >
+          <CalendarClock className="w-3.5 h-3.5" />
+          Esqueceu algum dia? Atualizar check-ins
+        </button>
+      )}
     </div>
   );
 };

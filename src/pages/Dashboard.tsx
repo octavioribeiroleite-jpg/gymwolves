@@ -51,6 +51,24 @@ const Dashboard = () => {
   const { data: todayDone = false } = useHasCheckedInToday();
   const deleteTodayCheckins = useDeleteTodayCheckins();
   const updateGoal = useUpdateWeeklyGoal();
+  const { data: activeChallenges } = useUserActiveChallenges();
+
+  const heatmapRef = useRef<HTMLDivElement>(null);
+  const [pastDay, setPastDay] = useState<Date | null>(null);
+  const [highlightMissing, setHighlightMissing] = useState(false);
+
+  useEffect(() => {
+    if (!highlightMissing) return;
+    const t = setTimeout(() => setHighlightMissing(false), 2500);
+    return () => clearTimeout(t);
+  }, [highlightMissing]);
+
+  const handleUpdatePastCheckins = useCallback(() => {
+    setHighlightMissing(true);
+    setTimeout(() => {
+      heatmapRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 50);
+  }, []);
 
   const allGroupIds = useMemo(() => groups?.map((g: any) => g.id) || [], [groups]);
   const { data: allCheckins } = useAllUserCheckins(allGroupIds.length > 0 ? allGroupIds : undefined);

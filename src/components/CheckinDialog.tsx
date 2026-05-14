@@ -30,11 +30,12 @@ interface CheckinDialogProps {
   groupId?: string;
   alreadyCheckedIn: boolean;
   activeChallenges?: ActiveChallenge[];
+  initialDate?: Date;
 }
 
 type Mode = null | "quick" | "full";
 
-const CheckinDialog = ({ open, onOpenChange, groupId, alreadyCheckedIn, activeChallenges }: CheckinDialogProps) => {
+const CheckinDialog = ({ open, onOpenChange, groupId, alreadyCheckedIn, activeChallenges, initialDate }: CheckinDialogProps) => {
   const resolvedGroupId = groupId || activeChallenges?.[0]?.groupId || "";
   const isMobile = useIsMobile();
   const [mode, setMode] = useState<Mode>(null);
@@ -82,6 +83,7 @@ const CheckinDialog = ({ open, onOpenChange, groupId, alreadyCheckedIn, activeCh
           groupId={resolvedGroupId}
           alreadyCheckedIn={alreadyCheckedIn}
           activeChallenges={activeChallenges}
+          initialDate={initialDate}
           onBack={() => setMode(null)}
           onDone={() => handleClose(false)}
         />
@@ -91,6 +93,7 @@ const CheckinDialog = ({ open, onOpenChange, groupId, alreadyCheckedIn, activeCh
           groupId={resolvedGroupId}
           alreadyCheckedIn={alreadyCheckedIn}
           activeChallenges={activeChallenges}
+          initialDate={initialDate}
           onBack={() => setMode(null)}
           onDone={() => handleClose(false)}
         />

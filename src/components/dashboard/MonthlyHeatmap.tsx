@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   startOfMonth,
   endOfMonth,
@@ -131,6 +131,10 @@ const MonthlyHeatmap = ({ checkins, compact = false, onMarkPastDay, highlightMis
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
   const [expanded, setExpanded] = useState(!compact);
+
+  useEffect(() => {
+    if (highlightMissing) setExpanded(true);
+  }, [highlightMissing]);
 
   const checkinsByDate = useMemo(() => {
     const map: Record<string, DayCheckin[]> = {};

@@ -19,6 +19,8 @@ import { useNavigate } from "react-router-dom";
 interface MonthlyHeatmapProps {
   checkins: any[];
   compact?: boolean;
+  onMarkPastDay?: (date: Date) => void;
+  highlightMissing?: boolean;
 }
 
 interface DayCheckin {
@@ -124,7 +126,7 @@ const DayDetailSheet = ({
   );
 };
 
-const MonthlyHeatmap = ({ checkins, compact = false }: MonthlyHeatmapProps) => {
+const MonthlyHeatmap = ({ checkins, compact = false, onMarkPastDay, highlightMissing = false }: MonthlyHeatmapProps) => {
   const navigate = useNavigate();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState<string | null>(null);

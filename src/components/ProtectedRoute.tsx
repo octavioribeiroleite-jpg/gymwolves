@@ -12,10 +12,14 @@ import { dispatchCheckinOpen } from "@/hooks/useCheckinEvent";
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { session, loading } = useAuth();
   const [checkinOpen, setCheckinOpen] = useState(false);
+  const [initialDate, setInitialDate] = useState<Date | undefined>(undefined);
   const { data: activeChallenges } = useUserActiveChallenges();
   const { data: todayDone = false } = useHasCheckedInToday();
 
-  useCheckinEvent(useCallback(() => setCheckinOpen(true), []));
+  useCheckinEvent(useCallback((detail) => {
+    setInitialDate(detail.date);
+    setCheckinOpen(true);
+  }, []));
 
   if (loading) {
     return (
@@ -33,9 +37,10 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
       <BottomNav onCheckin={dispatchCheckinOpen} />
       <CheckinDialog
         open={checkinOpen}
-        onOpenChange={setCheckinOpen}
+        onOpenChange={(v) => { setCheckinOpen(v); if (!v) setInitialDate(undefined); }}
         alreadyCheckedIn={todayDone}
         activeChallenges={activeChallenges}
+        initialDate={initialDate}
       />
     </>
   );

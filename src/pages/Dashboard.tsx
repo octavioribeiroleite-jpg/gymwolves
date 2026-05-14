@@ -189,6 +189,13 @@ const Dashboard = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <MarkPastDaySheet
+        date={pastDay}
+        onClose={() => setPastDay(null)}
+        groupId={activeGroupId || undefined}
+        activeChallenges={activeChallenges}
+      />
     </div>
     </PullToRefresh>
   );

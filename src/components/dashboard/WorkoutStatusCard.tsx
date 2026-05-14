@@ -1,4 +1,4 @@
-import { CheckCircle2, Dumbbell, Trash2, Zap, Camera } from "lucide-react";
+import { CheckCircle2, Dumbbell, Trash2, Zap, Camera, CalendarClock } from "lucide-react";
 import { formatDistanceToNow, parseISO, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useState } from "react";
@@ -14,6 +14,7 @@ interface WorkoutStatusCardProps {
   onCheckin: () => void;
   onDelete?: () => void;
   isDeleting?: boolean;
+  onUpdatePastCheckins?: () => void;
   todayCheckin?: {
     title?: string;
     workout_type?: string;

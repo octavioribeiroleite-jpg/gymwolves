@@ -29,7 +29,7 @@ const workoutLabels: Record<string, string> = {
   natacao: "Natação", yoga: "Yoga", luta: "Luta", outro: "Treino",
 };
 
-const WorkoutStatusCard = ({ todayDone, onCheckin, onDelete, isDeleting, todayCheckin }: WorkoutStatusCardProps) => {
+const WorkoutStatusCard = ({ todayDone, onCheckin, onDelete, isDeleting, onUpdatePastCheckins, todayCheckin }: WorkoutStatusCardProps) => {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const signedUrl = useSignedUrl(todayCheckin?.proof_url || null);
 

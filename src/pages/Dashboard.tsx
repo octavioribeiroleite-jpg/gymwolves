@@ -22,6 +22,8 @@ import WeeklySummary from "@/components/dashboard/WeeklySummary";
 import PullToRefresh from "@/components/PullToRefresh";
 import RecentHistory from "@/components/dashboard/RecentHistory";
 import MonthlyHeatmap from "@/components/dashboard/MonthlyHeatmap";
+import MarkPastDaySheet from "@/components/checkin/MarkPastDaySheet";
+import { useUserActiveChallenges } from "@/hooks/useUserChallenges";
 import {
   AlertDialog,
   AlertDialogContent,

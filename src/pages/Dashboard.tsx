@@ -1,4 +1,4 @@
-import { useMemo, useCallback } from "react";
+import { useMemo, useCallback, useRef, useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useActiveGroup } from "@/contexts/ActiveGroupContext";
 import { useQueryClient } from "@tanstack/react-query";
@@ -22,6 +22,8 @@ import WeeklySummary from "@/components/dashboard/WeeklySummary";
 import PullToRefresh from "@/components/PullToRefresh";
 import RecentHistory from "@/components/dashboard/RecentHistory";
 import MonthlyHeatmap from "@/components/dashboard/MonthlyHeatmap";
+import MarkPastDaySheet from "@/components/checkin/MarkPastDaySheet";
+import { useUserActiveChallenges } from "@/hooks/useUserChallenges";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -49,6 +51,24 @@ const Dashboard = () => {
   const { data: todayDone = false } = useHasCheckedInToday();
   const deleteTodayCheckins = useDeleteTodayCheckins();
   const updateGoal = useUpdateWeeklyGoal();
+  const { data: activeChallenges } = useUserActiveChallenges();
+
+  const heatmapRef = useRef<HTMLDivElement>(null);
+  const [pastDay, setPastDay] = useState<Date | null>(null);
+  const [highlightMissing, setHighlightMissing] = useState(false);
+
+  useEffect(() => {
+    if (!highlightMissing) return;
+    const t = setTimeout(() => setHighlightMissing(false), 2500);
+    return () => clearTimeout(t);
+  }, [highlightMissing]);
+
+  const handleUpdatePastCheckins = useCallback(() => {
+    setHighlightMissing(true);
+    setTimeout(() => {
+      heatmapRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 50);
+  }, []);
 
   const allGroupIds = useMemo(() => groups?.map((g: any) => g.id) || [], [groups]);
   const { data: allCheckins } = useAllUserCheckins(allGroupIds.length > 0 ? allGroupIds : undefined);
@@ -107,6 +127,7 @@ const Dashboard = () => {
           onCheckin={() => dispatchCheckinOpen()}
           onDelete={() => deleteTodayCheckins.mutate()}
           isDeleting={deleteTodayCheckins.isPending}
+          onUpdatePastCheckins={!todayDone ? handleUpdatePastCheckins : undefined}
           todayCheckin={todayCheckin}
         />
 
@@ -137,7 +158,14 @@ const Dashboard = () => {
 
         {/* 6. Mapa de treinos compacto */}
         {allCheckins && allCheckins.length > 0 && (
-          <MonthlyHeatmap checkins={allCheckins} compact />
+          <div ref={heatmapRef}>
+            <MonthlyHeatmap
+              checkins={allCheckins}
+              compact
+              highlightMissing={highlightMissing}
+              onMarkPastDay={(d) => setPastDay(d)}
+            />
+          </div>
         )}
 
         {/* 7. Últimos check-ins */}
@@ -161,6 +189,13 @@ const Dashboard = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <MarkPastDaySheet
+        date={pastDay}
+        onClose={() => setPastDay(null)}
+        groupId={activeGroupId || undefined}
+        activeChallenges={activeChallenges}
+      />
     </div>
     </PullToRefresh>
   );

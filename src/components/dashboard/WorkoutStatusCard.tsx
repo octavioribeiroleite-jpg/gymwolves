@@ -1,4 +1,4 @@
-import { CheckCircle2, Dumbbell, Trash2, Zap, Camera } from "lucide-react";
+import { CheckCircle2, Dumbbell, Trash2, Zap, Camera, CalendarClock } from "lucide-react";
 import { formatDistanceToNow, parseISO, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useState } from "react";
@@ -14,6 +14,7 @@ interface WorkoutStatusCardProps {
   onCheckin: () => void;
   onDelete?: () => void;
   isDeleting?: boolean;
+  onUpdatePastCheckins?: () => void;
   todayCheckin?: {
     title?: string;
     workout_type?: string;
@@ -28,7 +29,7 @@ const workoutLabels: Record<string, string> = {
   natacao: "Natação", yoga: "Yoga", luta: "Luta", outro: "Treino",
 };
 
-const WorkoutStatusCard = ({ todayDone, onCheckin, onDelete, isDeleting, todayCheckin }: WorkoutStatusCardProps) => {
+const WorkoutStatusCard = ({ todayDone, onCheckin, onDelete, isDeleting, onUpdatePastCheckins, todayCheckin }: WorkoutStatusCardProps) => {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const signedUrl = useSignedUrl(todayCheckin?.proof_url || null);
 
@@ -134,6 +135,15 @@ const WorkoutStatusCard = ({ todayDone, onCheckin, onDelete, isDeleting, todayCh
           Check-in
         </button>
       </div>
+      {onUpdatePastCheckins && (
+        <button
+          onClick={onUpdatePastCheckins}
+          className="w-full flex items-center justify-center gap-1.5 py-2.5 text-[12px] font-medium text-muted-foreground border-t border-border/50 hover:text-primary hover:bg-primary/5 transition-colors"
+        >
+          <CalendarClock className="w-3.5 h-3.5" />
+          Esqueceu algum dia? Atualizar check-ins
+        </button>
+      )}
     </div>
   );
 };

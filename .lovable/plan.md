@@ -1,63 +1,47 @@
-## Mostrar a foto do treino bem encaixada na célula do calendário
+# Check-in retroativo simplificado
 
-### Problema atual
-A foto do dia 8 aparece com um "1" laranja gigante invadindo. Isso acontece porque:
-- A foto é um screenshot grande (~1170px) do iPhone, com status bar no topo.
-- O `getThumbnailUrl` aponta para `/render/image/public/?width=80&resize=cover` — mas a transformação de imagem do Supabase só funciona em planos pagos. No nosso caso, devolve a imagem original e a query é ignorada.
-- O `<img>` com `object-cover` numa célula de ~40px corta a imagem em um ponto qualquer, expondo elementos como horário/Spotify do screenshot original.
+Hoje já existe um seletor de data dentro do diálogo de check-in (`CheckinDatePicker`), mas ele fica "escondido" dentro do fluxo. A proposta é tornar os dias esquecidos **visíveis e clicáveis** direto no calendário do Dashboard.
 
-### Solução: aumentar a célula e renderizar a foto como miniatura real
+## O que muda na experiência
 
-**1. Aumentar o tamanho do calendário** (`src/components/dashboard/MonthlyHeatmap.tsx`)
+1. **Mapa de treinos vira interativo para dias passados sem check-in**
+   - Hoje: só dias com treino são clicáveis (abrem detalhes).
+   - Novo: dias passados **sem** check-in (do mês corrente e meses anteriores) viram clicáveis também, com um leve ícone "+" sobreposto no hover/active, indicando "marcar como feito".
+   - Ao tocar, abre um mini-sheet "Marcar treino em [data]" com:
+     - Botão grande **"Marcar como ido"** (cria check-in rápido — modo rápido, sem foto/IA, com `checkinDate` daquele dia)
+     - Link secundário **"Detalhar treino"** que abre o wizard completo já com a data pré-selecionada
+     - Botão **Cancelar**
 
-Trocar `gap-1` por `gap-1.5` no grid e remover `text-[10px]` exagerado das células — usar `text-xs` para o número ficar proporcional. As células continuam `aspect-square`, mas em telas mobile ficam ~50px (suficiente para reconhecer a foto).
+2. **Atalho "Atualizar check-ins" no card do dia (`WorkoutStatusCard`)**
+   - Adicionar um link discreto abaixo do card: **"Esqueceu algum dia? Atualizar check-ins"**.
+   - Ao clicar, faz scroll suave até o `MonthlyHeatmap` e o expande automaticamente, destacando visualmente (pulse 1x) os dias passados sem check-in do mês.
 
-**2. Reescrever `PhotoThumbnail`** (linhas 36–51)
+3. **Indicação visual dos dias "faltando"**
+   - No grid do calendário, dias passados sem check-in (≠ futuro, ≠ hoje) ganham uma borda tracejada sutil em `border-muted-foreground/30` para sinalizar "disponível para marcar".
+   - Hoje já é mostrado com borda primária; mantém.
 
-```tsx
-const PhotoThumbnail = ({ proofUrl }: { proofUrl: string }) => {
-  const url = getThumbnailUrl(proofUrl, 160); // 2x para retina
-  if (!url) return null;
-  return (
-    <>
-      <img
-        src={url}
-        alt=""
-        loading="lazy"
-        decoding="async"
-        className="absolute inset-0 w-full h-full object-cover object-center rounded-md z-0 opacity-0 transition-opacity duration-300"
-        onLoad={(e) => (e.target as HTMLImageElement).classList.replace("opacity-0", "opacity-100")}
-        onError={(e) => ((e.target as HTMLImageElement).style.display = "none")}
-      />
-      {/* Gradient mais leve só na parte inferior, para o número ficar legível sem esconder a foto */}
-      <div className="absolute inset-x-0 bottom-0 h-1/2 z-[1] rounded-b-md bg-gradient-to-t from-black/70 to-transparent pointer-events-none" />
-    </>
-  );
-};
-```
+## Detalhes técnicos
 
-**3. Mover o número do dia para o canto inferior** (linhas 285–287)
+- **`MonthlyHeatmap.tsx`**
+  - Adicionar prop opcional `onMarkPastDay?: (date: Date) => void`.
+  - Tornar células `past && !done && !future` clicáveis chamando `onMarkPastDay(cell.date)`.
+  - Adicionar estilo tracejado nessas células.
+  - Aceitar prop `highlightMissing?: boolean` para o efeito pulse temporário.
 
-Em vez de centralizado por cima da foto, posicionar no canto inferior-esquerdo, sobre o gradiente — assim a foto aparece inteira no topo e o número fica legível embaixo.
+- **Novo componente `MarkPastDaySheet.tsx`** (drawer/dialog responsivo igual ao `CheckinDialog`)
+  - Recebe `date`, `groupId`/`activeChallenges`, callbacks.
+  - "Marcar como ido" usa `useCreateCheckinAll` (ou `useCreateCheckin`) com `checkinDate` no parâmetro — a lógica já existe e fixa em `12:00:00 UTC`.
+  - "Detalhar" dispara `dispatchCheckinOpen()` com a data, exigindo extensão do evento para aceitar `initialDate` (atualizar `useCheckinEvent.ts` e `CheckinDialog`/`CheckinFullWizard` para consumir).
 
-```tsx
-<span className="absolute bottom-0.5 left-1 z-10 text-[10px] font-bold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] pointer-events-none">
-  {format(cell.date, "d")}
-</span>
-```
+- **`Dashboard.tsx`**
+  - Passar `onMarkPastDay` ao `MonthlyHeatmap` que abre o `MarkPastDaySheet`.
+  - Estado `highlightMissing` ativado pelo botão do `WorkoutStatusCard`.
 
-E para células **sem foto**, manter o número centralizado como antes (renderizar condicionalmente).
+- **`WorkoutStatusCard.tsx`**
+  - Adicionar link "Esqueceu algum dia? Atualizar check-ins" com `onClick` que chama um callback novo `onUpdatePastCheckins`.
 
-**4. Substituir `getThumbnailUrl` por `getPublicImageUrl`** quando o transform não estiver disponível
+- **Sem mudanças de schema/RLS** — `checkins` já permite inserir com `checkin_at` arbitrário.
 
-Como o `render/image` provavelmente devolve a original mesmo, vale só usar `getPublicImageUrl` direto — fica igual em qualidade e mais previsível.
-
-### Resultado
-- A foto do treino aparece visível na célula (como historinho de fotos).
-- Um gradiente sutil só na metade inferior garante leitura do número.
-- Número do dia no canto inferior-esquerdo, com sombra forte.
-- Células sem foto mantêm o visual atual (verde com número centralizado).
-
-### Não vou mexer em
-- Backend / RLS / storage (foto já é pública).
-- DayDetailSheet (modal expandido continua igual).
+## Fora de escopo
+- Editar/excluir check-ins passados (já existe via heatmap details parcialmente).
+- Marcar múltiplos dias de uma vez (multi-select) — pode vir depois se útil.

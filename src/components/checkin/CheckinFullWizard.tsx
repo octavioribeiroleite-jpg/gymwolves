@@ -48,6 +48,7 @@ interface Props {
   groupId: string;
   alreadyCheckedIn: boolean;
   activeChallenges?: ActiveChallenge[];
+  initialDate?: Date;
   onBack: () => void;
   onDone: () => void;
 }
@@ -56,10 +57,10 @@ type Step = "photo" | "type" | "intensity" | "duration" | "analyzing" | "confirm
 
 const MAX_PHOTOS = 5;
 
-const CheckinFullWizard = ({ groupId, alreadyCheckedIn, activeChallenges, onBack, onDone }: Props) => {
+const CheckinFullWizard = ({ groupId, alreadyCheckedIn, activeChallenges, initialDate, onBack, onDone }: Props) => {
   const { user } = useAuth();
   const [step, setStep] = useState<Step>("photo");
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date>(initialDate || new Date());
   const [skippedPhoto, setSkippedPhoto] = useState(false);
   const [workoutType, setWorkoutType] = useState("musculacao");
   const [intensity, setIntensity] = useState("moderado");

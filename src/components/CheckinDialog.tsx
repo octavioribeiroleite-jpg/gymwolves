@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useCreateCheckin, useCreateCheckinAll } from "@/hooks/useCheckins";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -30,14 +30,19 @@ interface CheckinDialogProps {
   groupId?: string;
   alreadyCheckedIn: boolean;
   activeChallenges?: ActiveChallenge[];
+  initialDate?: Date;
 }
 
 type Mode = null | "quick" | "full";
 
-const CheckinDialog = ({ open, onOpenChange, groupId, alreadyCheckedIn, activeChallenges }: CheckinDialogProps) => {
+const CheckinDialog = ({ open, onOpenChange, groupId, alreadyCheckedIn, activeChallenges, initialDate }: CheckinDialogProps) => {
   const resolvedGroupId = groupId || activeChallenges?.[0]?.groupId || "";
   const isMobile = useIsMobile();
   const [mode, setMode] = useState<Mode>(null);
+
+  useEffect(() => {
+    if (open && initialDate) setMode("full");
+  }, [open, initialDate]);
 
   const handleClose = (v: boolean) => {
     if (!v) setMode(null);
@@ -82,6 +87,7 @@ const CheckinDialog = ({ open, onOpenChange, groupId, alreadyCheckedIn, activeCh
           groupId={resolvedGroupId}
           alreadyCheckedIn={alreadyCheckedIn}
           activeChallenges={activeChallenges}
+          initialDate={initialDate}
           onBack={() => setMode(null)}
           onDone={() => handleClose(false)}
         />
@@ -91,6 +97,7 @@ const CheckinDialog = ({ open, onOpenChange, groupId, alreadyCheckedIn, activeCh
           groupId={resolvedGroupId}
           alreadyCheckedIn={alreadyCheckedIn}
           activeChallenges={activeChallenges}
+          initialDate={initialDate}
           onBack={() => setMode(null)}
           onDone={() => handleClose(false)}
         />

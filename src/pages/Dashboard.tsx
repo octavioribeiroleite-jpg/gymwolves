@@ -127,6 +127,7 @@ const Dashboard = () => {
           onCheckin={() => dispatchCheckinOpen()}
           onDelete={() => deleteTodayCheckins.mutate()}
           isDeleting={deleteTodayCheckins.isPending}
+          onUpdatePastCheckins={!todayDone ? handleUpdatePastCheckins : undefined}
           todayCheckin={todayCheckin}
         />
 
@@ -157,7 +158,14 @@ const Dashboard = () => {
 
         {/* 6. Mapa de treinos compacto */}
         {allCheckins && allCheckins.length > 0 && (
-          <MonthlyHeatmap checkins={allCheckins} compact />
+          <div ref={heatmapRef}>
+            <MonthlyHeatmap
+              checkins={allCheckins}
+              compact
+              highlightMissing={highlightMissing}
+              onMarkPastDay={(d) => setPastDay(d)}
+            />
+          </div>
         )}
 
         {/* 7. Últimos check-ins */}

@@ -271,12 +271,17 @@ const MonthlyHeatmap = ({ checkins, compact = false, onMarkPastDay, highlightMis
             }
 
             const hasPhoto = cell.done && cell.hasPhoto && !!cell.firstPhoto;
+            const isMissingPast = !cell.done && !cell.future && !cell.today;
+            const canMarkPast = isMissingPast && !!onMarkPastDay;
 
             return (
               <button
                 key={cell.key}
-                disabled={!cell.done}
-                onClick={() => cell.done && setSelectedDay(cell.key)}
+                disabled={!cell.done && !canMarkPast}
+                onClick={() => {
+                  if (cell.done) setSelectedDay(cell.key);
+                  else if (canMarkPast) onMarkPastDay!(cell.date);
+                }}
                 className={`relative aspect-square rounded-md flex items-center justify-center text-xs font-semibold transition-all duration-200 overflow-hidden isolate ${
                   cell.done
                     ? "bg-primary text-primary-foreground shadow-[0_0_6px_hsl(var(--primary)/0.3)] cursor-pointer active:scale-95"
@@ -284,6 +289,8 @@ const MonthlyHeatmap = ({ checkins, compact = false, onMarkPastDay, highlightMis
                     ? "border border-primary/50 text-foreground cursor-default"
                     : cell.future
                     ? "text-muted-foreground/30 cursor-default"
+                    : canMarkPast
+                    ? `border border-dashed border-muted-foreground/40 text-muted-foreground cursor-pointer hover:border-primary hover:text-primary active:scale-95 ${highlightMissing ? "animate-pulse border-primary/60" : ""}`
                     : "bg-muted/40 text-muted-foreground cursor-default"
                 }`}
               >

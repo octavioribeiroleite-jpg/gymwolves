@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useCreateCheckin, useCreateCheckinAll } from "@/hooks/useCheckins";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -39,6 +39,10 @@ const CheckinDialog = ({ open, onOpenChange, groupId, alreadyCheckedIn, activeCh
   const resolvedGroupId = groupId || activeChallenges?.[0]?.groupId || "";
   const isMobile = useIsMobile();
   const [mode, setMode] = useState<Mode>(null);
+
+  useEffect(() => {
+    if (open && initialDate) setMode("full");
+  }, [open, initialDate]);
 
   const handleClose = (v: boolean) => {
     if (!v) setMode(null);

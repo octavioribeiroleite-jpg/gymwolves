@@ -97,7 +97,8 @@ const UpdateCheckins = () => {
 
     setSubmitting(true);
     let ok = 0;
-    let skipped = 0;
+    let duplicates = 0;
+    let failed = 0;
     for (const date of dates) {
       try {
         await createCheckinAll.mutateAsync({
@@ -105,24 +106,35 @@ const UpdateCheckins = () => {
           title: "Treino",
           workoutType: "musculacao",
           checkinDate: date,
+          silent: true,
         });
         ok++;
       } catch (e: any) {
-        // hook lança quando já existe — contamos como pulado
-        skipped++;
+        const msg = String(e?.message || "");
+        if (msg.includes("já tem check-in") || msg.includes("já fez check-in")) {
+          duplicates++;
+        } else {
+          failed++;
+        }
       }
     }
     setSubmitting(false);
 
-    if (ok > 0) {
-      toast.success(
-        `${ok} dia${ok > 1 ? "s" : ""} marcado${ok > 1 ? "s" : ""}${
-          skipped > 0 ? ` · ${skipped} já existia${skipped > 1 ? "m" : ""}` : ""
-        }`
-      );
+    if (ok > 0 && duplicates === 0 && failed === 0) {
+      toast.success(`${ok} dia${ok > 1 ? "s" : ""} marcado${ok > 1 ? "s" : ""} ✅`);
       navigate("/");
-    } else if (skipped > 0) {
-      toast.error("Esses dias já tinham check-in.");
+    } else if (ok > 0 && (duplicates > 0 || failed > 0)) {
+      const parts: string[] = [`${ok} marcado${ok > 1 ? "s" : ""}`];
+      if (duplicates > 0) parts.push(`${duplicates} já existia${duplicates > 1 ? "m" : ""}`);
+      if (failed > 0) parts.push(`${failed} falhou${failed > 1 ? "ram" : ""}`);
+      toast.success(parts.join(" · "));
+      navigate("/");
+    } else if (failed > 0) {
+      toast.error(
+        `Falha ao marcar ${failed} dia${failed > 1 ? "s" : ""}. Tente novamente.`
+      );
+    } else if (duplicates > 0) {
+      toast.message("Esses dias já tinham check-in.");
     }
   };
 

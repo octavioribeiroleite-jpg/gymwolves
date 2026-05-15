@@ -18,6 +18,7 @@ import WorkoutStatusCard from "@/components/dashboard/WorkoutStatusCard";
 import QuickStats from "@/components/dashboard/QuickStats";
 import HomeChallengesList from "@/components/dashboard/HomeChallengesList";
 import HomeGroupsList from "@/components/dashboard/HomeGroupsList";
+import HomeFeed from "@/components/dashboard/HomeFeed";
 import WeeklySummary from "@/components/dashboard/WeeklySummary";
 import PullToRefresh from "@/components/PullToRefresh";
 import RecentHistory from "@/components/dashboard/RecentHistory";
@@ -153,7 +154,10 @@ const Dashboard = () => {
         {/* 5. Seus grupos */}
         <HomeGroupsList />
 
-        {/* 6. Atividade do grupo ativo */}
+        {/* 6. Feed estilo Instagram */}
+        <HomeFeed />
+
+        {/* 7. Atividade do grupo ativo */}
         {activeGroupId && <ActivityFeed groupId={activeGroupId} compact maxItems={2} />}
 
         {/* 6. Mapa de treinos compacto */}

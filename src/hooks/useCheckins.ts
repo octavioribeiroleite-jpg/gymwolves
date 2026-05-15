@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 // ── Get all checkins for a group ──
 export const useGroupCheckins = (groupId: string | undefined) => {
@@ -41,6 +42,7 @@ export const useCreateCheckin = () => {
       distanceKm?: number;
       steps?: number;
       checkinDate?: Date;
+      silent?: boolean;
     }) => {
       if (!user) throw new Error("Não autenticado");
       const checkinAt = params.checkinDate
@@ -79,10 +81,16 @@ export const useCreateCheckin = () => {
       qc.invalidateQueries({ queryKey: ["checkins", vars.groupId] });
       qc.invalidateQueries({ queryKey: ["checkins-today"] });
       qc.invalidateQueries({ queryKey: ["all-user-checkins"] });
-      toast.success("Treino registrado! 💪");
+      if (vars.silent) return;
+      if (vars.checkinDate) {
+        toast.success(`Check-in marcado em ${format(vars.checkinDate, "dd/MM", { locale: ptBR })} 💪`);
+      } else {
+        toast.success("Treino registrado! 💪");
+      }
     },
-    onError: (e: any) => {
+    onError: (e: any, vars) => {
       console.error("[useCreateCheckin] erro:", e);
+      if (vars?.silent) return;
       toast.error("Erro ao registrar treino: " + (e.message || "tente novamente"));
     },
   });

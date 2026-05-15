@@ -1,4 +1,5 @@
 import { useMemo, useCallback, useRef, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useActiveGroup } from "@/contexts/ActiveGroupContext";
 import { useQueryClient } from "@tanstack/react-query";
@@ -42,6 +43,7 @@ const Dashboard = () => {
   const { showExitDialog, confirmExit, cancelExit } = useBackHandler();
   useCheckinNotifications();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const handleRefresh = useCallback(async () => {
     await queryClient.invalidateQueries();

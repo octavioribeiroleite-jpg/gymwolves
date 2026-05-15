@@ -112,6 +112,7 @@ export const useCreateCheckinAll = () => {
       distanceKm?: number;
       steps?: number;
       checkinDate?: Date;
+      silent?: boolean;
     }) => {
       if (!user) throw new Error("Não autenticado");
       if (!params.challenges.length) throw new Error("Nenhum desafio ativo");
@@ -145,6 +146,11 @@ export const useCreateCheckinAll = () => {
       const groupsToInsert = uniqueGroups.filter((gid) => !alreadyCheckedGroupIds.has(gid));
 
       if (groupsToInsert.length === 0) {
+        if (params.checkinDate) {
+          throw new Error(
+            `Você já tem check-in em ${format(params.checkinDate, "dd/MM", { locale: ptBR })} nesses desafios.`
+          );
+        }
         throw new Error("Você já fez check-in hoje em todos os desafios ativos.");
       }
 
@@ -186,7 +192,7 @@ export const useCreateCheckinAll = () => {
 
       return { groupIds: groupsToInsert, count: groupsToInsert.length };
     },
-    onSuccess: (result) => {
+    onSuccess: (result, vars) => {
       // FIX: invalida TODAS as queries de checkins de uma vez
       result.groupIds.forEach((gid) => {
         qc.invalidateQueries({ queryKey: ["checkins", gid] });
@@ -194,10 +200,16 @@ export const useCreateCheckinAll = () => {
       qc.invalidateQueries({ queryKey: ["checkins-today"] });
       qc.invalidateQueries({ queryKey: ["all-user-checkins"] });
       qc.invalidateQueries({ queryKey: ["workout-logs"] });
-      toast.success(`Treino registrado em ${result.count} desafio${result.count > 1 ? "s" : ""}! 💪`);
+      if (vars.silent) return;
+      if (vars.checkinDate) {
+        toast.success(`Check-in marcado em ${format(vars.checkinDate, "dd/MM", { locale: ptBR })} 💪`);
+      } else {
+        toast.success(`Treino registrado em ${result.count} desafio${result.count > 1 ? "s" : ""}! 💪`);
+      }
     },
-    onError: (e: any) => {
+    onError: (e: any, vars) => {
       console.error("[useCreateCheckinAll] erro:", e);
+      if (vars?.silent) return;
       toast.error(e.message || "Erro ao registrar treino. Tente novamente.");
     },
   });

@@ -12,13 +12,10 @@ import { dispatchCheckinOpen } from "@/hooks/useCheckinEvent";
 import { Loader2 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 
-import ActivityFeed from "@/components/ActivityFeed";
 import Onboarding from "./Onboarding";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import WorkoutStatusCard from "@/components/dashboard/WorkoutStatusCard";
 import QuickStats from "@/components/dashboard/QuickStats";
-import HomeChallengesList from "@/components/dashboard/HomeChallengesList";
-import HomeGroupsList from "@/components/dashboard/HomeGroupsList";
 import HomeFeed from "@/components/dashboard/HomeFeed";
 import WeeklySummary from "@/components/dashboard/WeeklySummary";
 import PullToRefresh from "@/components/PullToRefresh";
@@ -150,19 +147,10 @@ const Dashboard = () => {
           record={globalStats.record}
         />
 
-        {/* 4. Desafio ativo */}
-        <HomeChallengesList />
-
-        {/* 5. Seus grupos */}
-        <HomeGroupsList />
-
-        {/* 6. Feed estilo Instagram */}
+        {/* 4. Feed unificado: posts + check-ins dos seus grupos */}
         <HomeFeed />
 
-        {/* 7. Atividade do grupo ativo */}
-        {activeGroupId && <ActivityFeed groupId={activeGroupId} compact maxItems={2} />}
-
-        {/* 6. Mapa de treinos compacto */}
+        {/* 5. Mapa de treinos compacto */}
         {allCheckins && allCheckins.length > 0 && (
           <div ref={heatmapRef}>
             <MonthlyHeatmap

@@ -128,7 +128,7 @@ const Dashboard = () => {
           onCheckin={() => dispatchCheckinOpen()}
           onDelete={() => deleteTodayCheckins.mutate()}
           isDeleting={deleteTodayCheckins.isPending}
-          onUpdatePastCheckins={!todayDone ? handleUpdatePastCheckins : undefined}
+          onUpdatePastCheckins={!todayDone ? () => navigate("/atualizar-checkins") : undefined}
           todayCheckin={todayCheckin}
         />
 

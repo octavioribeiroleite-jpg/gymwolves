@@ -19,6 +19,7 @@ import Profile from "./pages/Profile";
 import ScoringSelect from "./pages/ScoringSelect";
 import CompletedChallenges from "./pages/CompletedChallenges";
 import Devices from "./pages/Devices";
+import UpdateCheckins from "./pages/UpdateCheckins";
 import NotFound from "./pages/NotFound";
 import PwaInstallPrompt from "./components/PwaInstallPrompt";
 import PwaReinstallBanner from "./components/PwaReinstallBanner";
@@ -50,6 +51,7 @@ const App = () => {
                 <Route path="/pontuacao" element={<ProtectedRoute><ScoringSelect /></ProtectedRoute>} />
                 <Route path="/desafios-concluidos" element={<ProtectedRoute><CompletedChallenges /></ProtectedRoute>} />
                 <Route path="/dispositivos" element={<ProtectedRoute><Devices /></ProtectedRoute>} />
+                <Route path="/atualizar-checkins" element={<ProtectedRoute><UpdateCheckins /></ProtectedRoute>} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </ActiveGroupProvider>

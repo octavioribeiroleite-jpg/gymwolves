@@ -95,11 +95,17 @@ const HomeFeed = () => {
               </div>
             );
           }
+          const isLiked = checkinLikedSet?.has(item.checkin.id) || false;
           return (
             <CheckinFeedItem
               key={item.id}
               checkin={item.checkin}
               groupName={item.groupName}
+              isLiked={isLiked}
+              likesCount={checkinLikesCount?.get(item.checkin.id) || 0}
+              onLike={() =>
+                toggleCheckinLike.mutate({ checkinId: item.checkin.id, isLiked })
+              }
             />
           );
         })}

@@ -302,6 +302,51 @@ export type Database = {
           },
         ]
       }
+      checkin_comments: {
+        Row: {
+          checkin_id: string
+          created_at: string
+          id: string
+          text: string
+          user_id: string
+        }
+        Insert: {
+          checkin_id: string
+          created_at?: string
+          id?: string
+          text: string
+          user_id: string
+        }
+        Update: {
+          checkin_id?: string
+          created_at?: string
+          id?: string
+          text?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      checkin_likes: {
+        Row: {
+          checkin_id: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          checkin_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          checkin_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       checkins: {
         Row: {
           calories: number | null
@@ -522,6 +567,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_access_checkin: {
+        Args: { _checkin_id: string; _user_id: string }
+        Returns: boolean
+      }
       finalize_expired_groups: { Args: never; Returns: undefined }
       find_challenge_by_code: {
         Args: { _code: string }

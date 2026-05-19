@@ -6,6 +6,11 @@ import { useUserLikes, useToggleLike } from "@/hooks/useChallengePosts";
 import PostCard from "@/components/challenge/PostCard";
 import CheckinFeedItem from "@/components/dashboard/CheckinFeedItem";
 import { Button } from "@/components/ui/button";
+import {
+  useCheckinLikeCounts,
+  useUserCheckinLikes,
+  useToggleCheckinLike,
+} from "@/hooks/useCheckinInteractions";
 
 const HomeFeed = () => {
   const { user } = useAuth();

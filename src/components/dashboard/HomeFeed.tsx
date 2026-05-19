@@ -31,6 +31,17 @@ const HomeFeed = () => {
   const { data: likedSet } = useUserLikes(firstChallengeId, postIds);
   const toggleLike = useToggleLike();
 
+  const checkinIds = useMemo(
+    () =>
+      items
+        .filter((i): i is Extract<FeedItem, { type: "checkin" }> => i.type === "checkin")
+        .map((i) => i.checkin.id as string),
+    [items]
+  );
+  const { data: checkinLikesCount } = useCheckinLikeCounts(checkinIds);
+  const { data: checkinLikedSet } = useUserCheckinLikes(checkinIds);
+  const toggleCheckinLike = useToggleCheckinLike();
+
   if (isLoading) {
     return (
       <div className="flex justify-center py-6">

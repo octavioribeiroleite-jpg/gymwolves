@@ -6,6 +6,11 @@ import { useUserLikes, useToggleLike } from "@/hooks/useChallengePosts";
 import PostCard from "@/components/challenge/PostCard";
 import CheckinFeedItem from "@/components/dashboard/CheckinFeedItem";
 import { Button } from "@/components/ui/button";
+import {
+  useCheckinLikeCounts,
+  useUserCheckinLikes,
+  useToggleCheckinLike,
+} from "@/hooks/useCheckinInteractions";
 
 const HomeFeed = () => {
   const { user } = useAuth();
@@ -25,6 +30,17 @@ const HomeFeed = () => {
   const firstChallengeId = postItems[0]?.post.challenge_id;
   const { data: likedSet } = useUserLikes(firstChallengeId, postIds);
   const toggleLike = useToggleLike();
+
+  const checkinIds = useMemo(
+    () =>
+      items
+        .filter((i): i is Extract<FeedItem, { type: "checkin" }> => i.type === "checkin")
+        .map((i) => i.checkin.id as string),
+    [items]
+  );
+  const { data: checkinLikesCount } = useCheckinLikeCounts(checkinIds);
+  const { data: checkinLikedSet } = useUserCheckinLikes(checkinIds);
+  const toggleCheckinLike = useToggleCheckinLike();
 
   if (isLoading) {
     return (
@@ -79,11 +95,17 @@ const HomeFeed = () => {
               </div>
             );
           }
+          const isLiked = checkinLikedSet?.has(item.checkin.id) || false;
           return (
             <CheckinFeedItem
               key={item.id}
               checkin={item.checkin}
               groupName={item.groupName}
+              isLiked={isLiked}
+              likesCount={checkinLikesCount?.get(item.checkin.id) || 0}
+              onLike={() =>
+                toggleCheckinLike.mutate({ checkinId: item.checkin.id, isLiked })
+              }
             />
           );
         })}

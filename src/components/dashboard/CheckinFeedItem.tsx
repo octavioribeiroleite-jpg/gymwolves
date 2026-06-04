@@ -14,13 +14,13 @@ const getInitials = (name: string) =>
 
 interface CheckinFeedItemProps {
   checkin: any;
-  groupName: string;
+  groupNames: string[];
   isLiked: boolean;
   likesCount: number;
   onLike: () => void;
 }
 
-const CheckinFeedItem = ({ checkin, groupName, isLiked, likesCount, onLike }: CheckinFeedItemProps) => {
+const CheckinFeedItem = ({ checkin, groupNames, isLiked, likesCount, onLike }: CheckinFeedItemProps) => {
   const profile = checkin.profiles as any;
   const name = profile?.display_name || "Sem nome";
   const imageUrl = useSignedUrl(checkin.proof_url);
@@ -45,10 +45,17 @@ const CheckinFeedItem = ({ checkin, groupName, isLiked, likesCount, onLike }: Ch
 
   return (
     <div className="space-y-1.5">
-      {groupName && (
-        <div className="flex items-center gap-1.5 px-1 text-[11px] font-semibold text-muted-foreground">
-          <Trophy className="h-3 w-3 text-primary" />
-          <span className="truncate">{groupName}</span>
+      {groupNames.length > 0 && (
+        <div className="flex items-center gap-1.5 px-1 flex-wrap">
+          <Trophy className="h-3 w-3 text-primary shrink-0" />
+          {groupNames.map((g) => (
+            <span
+              key={g}
+              className="text-[11px] font-semibold text-primary bg-primary/10 rounded-full px-2 py-0.5"
+            >
+              {g}
+            </span>
+          ))}
         </div>
       )}
 

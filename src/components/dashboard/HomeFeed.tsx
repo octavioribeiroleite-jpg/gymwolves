@@ -31,12 +31,44 @@ const HomeFeed = () => {
   const { data: likedSet } = useUserLikes(firstChallengeId, postIds);
   const toggleLike = useToggleLike();
 
-  const checkinIds = useMemo(
+  // Agrupa check-ins do mesmo usuário no mesmo instante (mesmo treino postado
+  // em vários grupos) em um único card com badges de todos os grupos.
+  const checkinItems = useMemo(
     () =>
-      items
-        .filter((i): i is Extract<FeedItem, { type: "checkin" }> => i.type === "checkin")
-        .map((i) => i.checkin.id as string),
+      items.filter(
+        (i): i is Extract<FeedItem, { type: "checkin" }> => i.type === "checkin"
+      ),
     [items]
+  );
+
+  const checkinGroupKey = (ci: Extract<FeedItem, { type: "checkin" }>) => {
+    const minute = new Date(ci.checkin.checkin_at).toISOString().slice(0, 16);
+    return `${ci.checkin.user_id}|${minute}`;
+  };
+
+  const checkinGroups = useMemo(() => {
+    const map = new Map<
+      string,
+      { primary: Extract<FeedItem, { type: "checkin" }>; groupNames: string[] }
+    >();
+    for (const ci of checkinItems) {
+      const key = checkinGroupKey(ci);
+      const existing = map.get(key);
+      if (!existing) {
+        map.set(key, {
+          primary: ci,
+          groupNames: ci.groupName ? [ci.groupName] : [],
+        });
+      } else if (ci.groupName && !existing.groupNames.includes(ci.groupName)) {
+        existing.groupNames.push(ci.groupName);
+      }
+    }
+    return map;
+  }, [checkinItems]);
+
+  const checkinIds = useMemo(
+    () => Array.from(checkinGroups.values()).map((g) => g.primary.checkin.id),
+    [checkinGroups]
   );
   const { data: checkinLikesCount } = useCheckinLikeCounts(checkinIds);
   const { data: checkinLikedSet } = useUserCheckinLikes(checkinIds);

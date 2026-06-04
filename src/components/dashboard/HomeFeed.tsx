@@ -31,12 +31,44 @@ const HomeFeed = () => {
   const { data: likedSet } = useUserLikes(firstChallengeId, postIds);
   const toggleLike = useToggleLike();
 
-  const checkinIds = useMemo(
+  // Agrupa check-ins do mesmo usuário no mesmo instante (mesmo treino postado
+  // em vários grupos) em um único card com badges de todos os grupos.
+  const checkinItems = useMemo(
     () =>
-      items
-        .filter((i): i is Extract<FeedItem, { type: "checkin" }> => i.type === "checkin")
-        .map((i) => i.checkin.id as string),
+      items.filter(
+        (i): i is Extract<FeedItem, { type: "checkin" }> => i.type === "checkin"
+      ),
     [items]
+  );
+
+  const checkinGroupKey = (ci: Extract<FeedItem, { type: "checkin" }>) => {
+    const minute = new Date(ci.checkin.checkin_at).toISOString().slice(0, 16);
+    return `${ci.checkin.user_id}|${minute}`;
+  };
+
+  const checkinGroups = useMemo(() => {
+    const map = new Map<
+      string,
+      { primary: Extract<FeedItem, { type: "checkin" }>; groupNames: string[] }
+    >();
+    for (const ci of checkinItems) {
+      const key = checkinGroupKey(ci);
+      const existing = map.get(key);
+      if (!existing) {
+        map.set(key, {
+          primary: ci,
+          groupNames: ci.groupName ? [ci.groupName] : [],
+        });
+      } else if (ci.groupName && !existing.groupNames.includes(ci.groupName)) {
+        existing.groupNames.push(ci.groupName);
+      }
+    }
+    return map;
+  }, [checkinItems]);
+
+  const checkinIds = useMemo(
+    () => Array.from(checkinGroups.values()).map((g) => g.primary.checkin.id),
+    [checkinGroups]
   );
   const { data: checkinLikesCount } = useCheckinLikeCounts(checkinIds);
   const { data: checkinLikedSet } = useUserCheckinLikes(checkinIds);
@@ -68,47 +100,59 @@ const HomeFeed = () => {
     <div>
       <h2 className="text-[13px] font-bold mb-2">Feed da matilha</h2>
       <div className="space-y-3">
-        {items.map((item) => {
-          if (item.type === "post") {
-            const post = item.post;
+        {(() => {
+          const renderedCheckinKeys = new Set<string>();
+          return items.map((item) => {
+            if (item.type === "post") {
+              const post = item.post;
+              return (
+                <div key={item.id} className="space-y-1.5">
+                  {item.groupName && (
+                    <div className="flex items-center gap-1.5 px-1 text-[11px] font-semibold text-muted-foreground">
+                      <Trophy className="h-3 w-3 text-primary" />
+                      <span className="truncate">{item.groupName}</span>
+                    </div>
+                  )}
+                  <PostCard
+                    post={post}
+                    isLiked={likedSet?.has(post.id) || false}
+                    onLike={() =>
+                      toggleLike.mutate({
+                        postId: post.id,
+                        isLiked: likedSet?.has(post.id) || false,
+                        challengeId: post.challenge_id,
+                      })
+                    }
+                    currentUserId={user?.id}
+                    challengeId={post.challenge_id}
+                  />
+                </div>
+              );
+            }
+
+            const key = checkinGroupKey(item);
+            if (renderedCheckinKeys.has(key)) return null;
+            renderedCheckinKeys.add(key);
+
+            const group = checkinGroups.get(key);
+            const primary = group?.primary.checkin || item.checkin;
+            const groupNames = group?.groupNames || (item.groupName ? [item.groupName] : []);
+            const isLiked = checkinLikedSet?.has(primary.id) || false;
+
             return (
-              <div key={item.id} className="space-y-1.5">
-                {item.groupName && (
-                  <div className="flex items-center gap-1.5 px-1 text-[11px] font-semibold text-muted-foreground">
-                    <Trophy className="h-3 w-3 text-primary" />
-                    <span className="truncate">{item.groupName}</span>
-                  </div>
-                )}
-                <PostCard
-                  post={post}
-                  isLiked={likedSet?.has(post.id) || false}
-                  onLike={() =>
-                    toggleLike.mutate({
-                      postId: post.id,
-                      isLiked: likedSet?.has(post.id) || false,
-                      challengeId: post.challenge_id,
-                    })
-                  }
-                  currentUserId={user?.id}
-                  challengeId={post.challenge_id}
-                />
-              </div>
+              <CheckinFeedItem
+                key={item.id}
+                checkin={primary}
+                groupNames={groupNames}
+                isLiked={isLiked}
+                likesCount={checkinLikesCount?.get(primary.id) || 0}
+                onLike={() =>
+                  toggleCheckinLike.mutate({ checkinId: primary.id, isLiked })
+                }
+              />
             );
-          }
-          const isLiked = checkinLikedSet?.has(item.checkin.id) || false;
-          return (
-            <CheckinFeedItem
-              key={item.id}
-              checkin={item.checkin}
-              groupName={item.groupName}
-              isLiked={isLiked}
-              likesCount={checkinLikesCount?.get(item.checkin.id) || 0}
-              onLike={() =>
-                toggleCheckinLike.mutate({ checkinId: item.checkin.id, isLiked })
-              }
-            />
-          );
-        })}
+          });
+        })()}
 
         {hasNextPage && (
           <Button
